@@ -1,0 +1,526 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>Supper Cash Dashboard</title>  
+  <style>  
+    :root {
+      --primary: #FF6B35;
+      --primary-dark: #E55A2B;
+      --secondary: #004E89;
+      --secondary-dark: #003366;
+      --accent: #FFD166;
+      --light: #F8F9FA;
+      --dark: #212529;
+      --success: #06D6A0;
+      --gray: #6C757D;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {  
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+    }  
+  
+    header {  
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
+      color: white;  
+      padding: 25px 0;  
+      text-align: center;  
+      position: relative;  
+      box-shadow: var(--shadow);
+    }  
+  
+    .header-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 24px;
+      color: var(--primary-dark);
+      box-shadow: var(--shadow);
+    }
+    
+    .logo-text {
+      font-size: 2.2em;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 1px;
+    }
+  
+    .ads-message {  
+      color: var(--accent);  
+      font-size: 1.2em;  
+      margin-top: 10px;  
+      font-weight: 600;  
+      animation: slideUp 2s ease-out;
+    }  
+
+    @keyframes slideUp {  
+      0% {  
+        transform: translateY(20px);  
+        opacity: 0;  
+      }  
+      100% {  
+        transform: translateY(0);  
+        opacity: 1;  
+      }  
+    }  
+  
+    .container {  
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }  
+  
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    
+    .balance-card {  
+      background: linear-gradient(135deg, var(--secondary), var(--secondary-dark));  
+      color: white;  
+      border-radius: 16px;  
+      padding: 30px;  
+      box-shadow: var(--shadow);  
+      text-align: center;
+      grid-column: 1 / -1;
+      max-width: 400px;
+      margin: 0 auto;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease-in-out;
+    }  
+  
+    .balance-card:hover {  
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }  
+  
+    .balance-card .name {  
+      font-size: 1.4em;  
+      font-weight: 600;  
+      margin-top: 15px;  
+      color: var(--light);  
+    }  
+  
+    .balance-card .balance {  
+      font-size: 2.5em;  
+      font-weight: 800;  
+      margin: 20px 0;  
+      color: var(--accent);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }  
+  
+    .balance-card .label {  
+      font-size: 1em;  
+      color: var(--light);  
+      opacity: 0.9;
+    }  
+  
+    .action-card {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      transition: all 0.3s ease;
+      border-top: 4px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .action-card:hover {  
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    
+    .action-icon {
+      width: 70px;
+      height: 70px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      color: white;
+      font-size: 28px;
+    }
+    
+    .action-card h3 {
+      margin-bottom: 10px;
+      color: var(--secondary);
+      font-size: 1.3em;
+    }
+    
+    .action-card p {
+      color: var(--gray);
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+    
+    .btn {  
+      display: inline-block;  
+      padding: 14px 28px;  
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));  
+      color: white;  
+      text-decoration: none;  
+      border-radius: 10px;  
+      font-size: 1.1em;  
+      font-weight: 600;  
+      transition: all 0.3s ease;  
+      box-shadow: var(--shadow);
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }  
+  
+    .btn:hover {  
+      transform: translateY(-3px);  
+      box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+    }
+    
+    .btn-secondary {
+      background: white;
+      color: var(--secondary);
+      border: 2px solid var(--secondary);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--secondary);
+      color: white;
+    }
+  
+    #contact-icon {  
+      position: fixed;  
+      bottom: 30px;  
+      right: 30px;  
+      background: var(--primary);  
+      color: white;  
+      border-radius: 50%;  
+      width: 65px;  
+      height: 65px;  
+      text-align: center;  
+      line-height: 65px;  
+      font-size: 28px;  
+      cursor: pointer;  
+      z-index: 999;  
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);  
+      transition: all 0.3s ease;  
+    }  
+  
+    #contact-icon:hover {  
+      transform: translateY(-5px) scale(1.05);  
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);  
+      background: var(--primary-dark);
+    }  
+  
+    #contact-form {  
+      display: none;  
+      position: fixed;  
+      bottom: 110px;  
+      right: 30px;  
+      background: white;  
+      border-radius: 12px;  
+      padding: 25px;  
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);  
+      z-index: 1000;  
+      width: 320px;  
+      border-top: 5px solid var(--primary);
+    }  
+  
+    #contact-form h4 {  
+      margin-bottom: 20px;  
+      color: var(--secondary);  
+      font-size: 1.4em;
+      text-align: center;
+    }  
+  
+    #contact-form input,  
+    #contact-form textarea {  
+      width: 100%;  
+      margin: 8px 0;  
+      padding: 12px;  
+      border-radius: 8px;  
+      border: 1px solid #ddd;  
+      font-family: inherit;
+      transition: border 0.3s ease;
+    }  
+    
+    #contact-form input:focus,  
+    #contact-form textarea:focus {  
+      border-color: var(--primary);
+      outline: none;
+    }
+  
+    #contact-form button {  
+      background: var(--success);  
+      color: white;  
+      border: none;  
+      padding: 12px;  
+      width: 100%;  
+      border-radius: 8px;  
+      font-size: 1em;  
+      font-weight: 600;  
+      margin-top: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }  
+  
+    #contact-form button:hover {  
+      background: #05b787;  
+    }  
+  
+    footer {
+      background: var(--dark);
+      color: white;
+      padding: 30px 0;
+      text-align: center;
+      margin-top: 50px;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .footer-links a {
+      color: #ddd;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+    
+    .copyright {
+      margin-top: 20px;
+      color: #aaa;
+      font-size: 0.9em;
+    }
+    
+    @media (max-width: 768px) {  
+      .header-content {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .logo-text {
+        font-size: 1.8em;
+      }
+      
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .balance-card {
+        max-width: 100%;
+      }
+      
+      #contact-form {  
+        width: 90%;  
+        right: 5%;  
+      }  
+      
+      #contact-icon {  
+        bottom: 20px;  
+        right: 20px;  
+      }  
+      
+      #contact-form {  
+        bottom: 90px;  
+        right: 5%;  
+      }
+    }  
+    
+    @media (max-width: 480px) {
+      .logo-text {
+        font-size: 1.6em;
+      }
+      
+      .balance-card .balance {
+        font-size: 2em;
+      }
+      
+      .action-card {
+        padding: 20px;
+      }
+      
+      .footer-links {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>  
+</head>  
+<body>  
+  <header>  
+    <div class="header-content">
+      <div class="logo-icon">$</div>
+      <div class="logo-text">Supper Cash</div>
+    </div>
+    <div class="ads-message" id="adsText">Welcome to Supper Cash Dashboard!</div>  
+  </header>  
+  
+  <div class="container">  
+    <div class="balance-card">  
+      <div class="label">Account Balance</div>  
+      <div class="balance"><span class="symbol">$</span><span id="balValue">Loading...</span></div>  
+      <div class="label">Account Holder</div>  
+      <div class="name" id="user-info">Loading...</div>  
+    </div>
+    
+    <div class="dashboard-grid">
+      <div class="action-card">
+        <div class="action-icon">💳</div>
+        <h3>Deposit Funds</h3>
+        <p>Add money to your account securely</p>
+        <a href="/deposit.html" class="btn">Deposit</a>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">📤</div>
+        <h3>Withdraw Funds</h3>
+        <p>Transfer money to your bank account</p>
+        <a href="/withdraw.html" class="btn">Withdraw</a>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">📊</div>
+        <h3>Transaction History</h3>
+        <p>View your transaction records</p>
+        <a href="/transaction-history.html" class="btn">View History</a>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">📈</div>
+        <h3>Invest</h3>
+        <p>Grow your money with investments</p>
+        <a href="/invest.html" class="btn">Invest Now</a>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">💰</div>
+        <h3>Earn</h3>
+        <p>Complete tasks to earn money</p>
+        <a href="/earn.html" class="btn">Start Earning</a>
+      </div>
+      
+      <div class="action-card">
+        <div class="action-icon">🏦</div>
+        <h3>My Investments</h3>
+        <p>Manage your investment portfolio</p>
+        <a href="/investments.html" class="btn">View Investments</a>
+      </div>
+      
+      <!-- New Loan Button Added Here -->
+      <div class="action-card">
+        <div class="action-icon">🤑</div>
+        <h3>Get a Loan</h3>
+        <p>Apply for a personal loan with low rates</p>
+        <a href="/loan.html" class="btn">Apply for Loan</a>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+      <a href="/logout" class="btn btn-secondary">Logout</a>
+    </div>
+  </div>
+  
+  <footer>
+    <div class="container">
+      <p>Start your earning journey with Supper Cash today!</p>
+      <div class="footer-links">
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Service</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div class="copyright">
+        &copy; 2023 Supper Cash. All rights reserved.
+      </div>
+    </div>
+  </footer>
+  
+  <div id="contact-icon">?</div>  
+  
+  <div id="contact-form">  
+    <h4>Contact Support</h4>  
+    <input type="text" id="name" placeholder="Your Name" required>  
+    <input type="email" id="email" placeholder="Your Email" required>  
+    <textarea id="message" placeholder="Your Message" required></textarea>  
+    <button onclick="sendMessage()">Send Message</button>  
+  </div>  
+  
+  <script>  
+    // Fetch user info  
+    fetch('/user-info')  
+      .then(response => response.json())  
+      .then(data => {  
+        document.getElementById('user-info').textContent = data.fullName;  
+        document.getElementById('balValue').textContent = data.balance;  
+      });  
+  
+    // Toggle contact form  
+    document.getElementById('contact-icon').addEventListener('click', () => {  
+      const form = document.getElementById('contact-form');  
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';  
+    });  
+  
+    // Send message  
+    function sendMessage() {  
+      const name = document.getElementById('name').value;  
+      const email = document.getElementById('email').value;  
+      const message = document.getElementById('message').value;  
+      const fullMessage = `Name: ${name}%0AEmail: ${email}%0AMessage: ${message}`;  
+      const telegramURL = `https://wa.me/share/url?url=&text=${encodeURIComponent(fullMessage)}&to=+12568212395`;  
+      window.open(telegramURL, '_blank');  
+    }  
+  
+    // Animated welcome/ads message  
+    const adsMessages = [  
+      "Welcome to Supper Cash Dashboard!",  
+      "Invest with confidence!",  
+      "Earn daily rewards!",  
+      "Your future is secure here!"  
+    ];  
+    let index = 0;  
+    setInterval(() => {  
+      document.getElementById('adsText').textContent = adsMessages[index];  
+      index = (index + 1) % adsMessages.length;  
+    }, 4000);  
+  </script>  
+</body>  
+</html>

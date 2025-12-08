@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - Supper Cash</title>
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E55A2B;
+            --secondary: #004E89;
+            --accent: #FFD166;
+            --light: #F8F9FA;
+            --dark: #212529;
+            --success: #06D6A0;
+            --gray: #6C757D;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: var(--primary-dark);
+            box-shadow: var(--shadow);
+        }
+        
+        .logo-text {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--secondary);
+            letter-spacing: 1px;
+        }
+        
+        .page-title {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+        
+        .transactions-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e1e5ee;
+        }
+        
+        .transactions-title {
+            font-size: 1.5em;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        .transactions-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: var(--gray);
+        }
+        
+        #transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .transaction-item {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .transaction-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+        
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .transaction-type {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .transaction-date {
+            font-size: 0.9em;
+            color: var(--gray);
+        }
+        
+        .transaction-amount {
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+        
+        .deposit {
+            color: var(--success);
+        }
+        
+        .withdrawal {
+            color: var(--primary);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+        
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 50px;
+            border-radius: 16px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.8em;
+            }
+            
+            .transactions-container {
+                padding: 20px;
+            }
+            
+            .logo-text {
+                font-size: 1.8em;
+            }
+            
+            .transactions-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .transactions-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .transaction-item {
+                padding: 15px;
+            }
+            
+            .transaction-amount {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">$</div>
+                <div class="logo-text">Supper Cash</div>
+            </div>
+            <h1 class="page-title">Transaction History</h1>
+            <p class="subtitle">View your complete transaction records</p>
+        </div>
+
+        <div class="transactions-container">
+            <div class="transactions-header">
+                <div class="transactions-title">Your Transactions</div>
+                <div class="transactions-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalTransactions">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalDeposits">$0</div>
+                        <div class="stat-label">Deposits</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalWithdrawals">$0</div>
+                        <div class="stat-label">Withdrawals</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="transaction-list">
+                <!-- Transaction list will be populated here via JavaScript -->
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <h3>No transactions yet</h3>
+                    <p>Your transaction history will appear here once you start using your account.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="/dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+        <footer>
+            <div class="container">
+                <p>Track your finances with Supper Cash</p>
+                <div class="footer-links">
+                    <a href="/privacy.html">Privacy Policy</a>
+                    <a href="/terms.html">Terms of Service</a>
+                    <a href="/faq.html">FAQ</a>
+                    <a href="/contact.html">Contact</a>
+                </div>
+                <div class="copyright">
+                    &copy; 2023 Supper Cash. All rights reserved.
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Fetch transaction history from the server
+        fetch('/transaction-history')
+            .then(response => response.json())
+            .then(data => {
+                const transactions = data.transactions;
+                const transactionList = document.getElementById('transaction-list');
+                
+                // Clear the empty state
+                transactionList.innerHTML = '';
+
+                if (transactions.length === 0) {
+                    transactionList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📊</div>
+                            <h3>No transactions found</h3>
+                            <p>Your transaction history will appear here once you start using your account.</p>
+                        </div>
+                    `;
+                } else {
+                    let totalDeposits = 0;
+                    let totalWithdrawals = 0;
+                    
+                    transactions.forEach(transaction => {
+                        const transactionItem = document.createElement('div');
+                        transactionItem.classList.add('transaction-item');
+                        
+                        // Determine transaction type and update totals
+                        const isDeposit = transaction.type.toLowerCase().includes('deposit');
+                        const amount = parseFloat(transaction.amount);
+                        
+                        if (isDeposit) {
+                            totalDeposits += amount;
+                        } else {
+                            totalWithdrawals += amount;
+                        }
+                        
+                        transactionItem.innerHTML = `
+                            <div class="transaction-info">
+                                <div class="transaction-type">${transaction.type}</div>
+                                <div class="transaction-date">${transaction.date}</div>
+                            </div>
+                            <div class="transaction-amount ${isDeposit ? 'deposit' : 'withdrawal'}">
+                                ${isDeposit ? '+' : '-'}$${amount.toFixed(2)}
+                            </div>
+                        `;
+                        transactionList.appendChild(transactionItem);
+                    });
+                    
+                    // Update statistics
+                    document.getElementById('totalTransactions').textContent = transactions.length;
+                    document.getElementById('totalDeposits').textContent = `$${totalDeposits.toFixed(2)}`;
+                    document.getElementById('totalWithdrawals').textContent = `$${totalWithdrawals.toFixed(2)}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching transaction history:', error);
+                const transactionList = document.getElementById('transaction-list');
+                transactionList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Unable to load transactions</h3>
+                        <p>Please try again later or contact support if the problem persists.</p>
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>

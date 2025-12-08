@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Supper Cash</title>
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E55A2B;
+            --secondary: #004E89;
+            --accent: #FFD166;
+            --light: #F8F9FA;
+            --dark: #212529;
+            --success: #06D6A0;
+            --gray: #6C757D;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: var(--primary-dark);
+            box-shadow: var(--shadow);
+        }
+        
+        .logo-text {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: var(--secondary);
+            letter-spacing: 1px;
+        }
+        
+        .page-title {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+        
+        .welcome-message {
+            font-size: 1.2em;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e1e5ee;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .btn {
+            padding: 16px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: var(--shadow);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+            margin-top: 15px;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 25px;
+        }
+        
+        .links p {
+            margin-bottom: 15px;
+            color: var(--gray);
+        }
+        
+        .links a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .links a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        .benefits {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .benefit {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+            color: var(--gray);
+        }
+        
+        .benefit-icon {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        @media (max-width: 600px) {
+            .page-title {
+                font-size: 1.8em;
+            }
+            
+            .form-container {
+                padding: 30px 20px;
+            }
+            
+            .logo-text {
+                font-size: 1.8em;
+            }
+            
+            .benefits {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">$</div>
+                <div class="logo-text">Supper Cash</div>
+            </div>
+            <h1 class="page-title">Welcome Back</h1>
+            <p class="subtitle">Login to access your USD earnings</p>
+            <div class="welcome-message" id="welcomeMessage">Welcome, please login to continue!</div>
+        </div>
+
+        <div class="form-container">
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <label for="email">Email or Phone Number</label>
+                    <input type="text" id="email" name="email" required placeholder="Enter your email or phone number">
+                </div>
+
+                <div class="form-group">
+                    <label for="pin">6-Digit PIN</label>
+                    <input type="password" id="pin" name="pin" required placeholder="Enter your 6-digit PIN" maxlength="6" minlength="6">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Login to Your Account</button>
+            </form>
+        </div>
+
+        <div class="links">
+            <p>Don't have an account? <a href="/register.html">Sign up now</a></p>
+            <button class="btn btn-secondary" onclick="window.location.href='index.html'">Back to Homepage</button>
+        </div>
+
+        <div class="benefits">
+            <div class="benefit">
+                <span class="benefit-icon">✓</span>
+                <span>Instant USD Withdrawals</span>
+            </div>
+            <div class="benefit">
+                <span class="benefit-icon">✓</span>
+                <span>Secure & Protected</span>
+            </div>
+            <div class="benefit">
+                <span class="benefit-icon">✓</span>
+                <span>24/7 Customer Support</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dynamic Welcome Message based on Time of Day
+        function updateWelcomeMessage() {
+            const currentHour = new Date().getHours();
+            let message = "Welcome, please login to continue!";
+            
+            if (currentHour < 12) {
+                message = "Good Morning! Please login to continue.";
+            } else if (currentHour < 18) {
+                message = "Good Afternoon! Please login to continue.";
+            } else {
+                message = "Good Evening! Please login to continue.";
+            }
+
+            document.getElementById("welcomeMessage").textContent = message;
+        }
+
+        // Update the welcome message when the page loads
+        window.onload = updateWelcomeMessage;
+    </script>
+</body>
+</html>
