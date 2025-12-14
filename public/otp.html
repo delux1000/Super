@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTP Verification - Delux Euro Wallet</title>
+    <title>Enter OTP - Delux Euro Wallet</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,25 +31,31 @@
         p {
             color: #666;
             margin-bottom: 30px;
+            line-height: 1.5;
         }
-        .otp-inputs {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
+        .form-group {
+            margin-bottom: 20px;
         }
-        .otp-input {
-            width: 50px;
-            height: 60px;
-            text-align: center;
-            font-size: 24px;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
             font-weight: bold;
+            text-align: left;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
             border: 2px solid #ddd;
             border-radius: 5px;
-            outline: none;
+            font-size: 18px;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 3px;
         }
-        .otp-input:focus {
+        input:focus {
             border-color: #667eea;
+            outline: none;
             box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
         }
         button {
@@ -67,15 +73,6 @@
         button:hover {
             background: #5a67d8;
         }
-        .resend-link {
-            margin-top: 20px;
-            color: #667eea;
-            cursor: pointer;
-            display: block;
-        }
-        .resend-link:hover {
-            text-decoration: underline;
-        }
         .back-link {
             display: block;
             margin-top: 20px;
@@ -85,125 +82,71 @@
         .back-link:hover {
             color: #333;
         }
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .info-box strong {
+            color: #333;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 OTP Verification</h1>
-        <p>Enter the 6-digit OTP sent to your registered email/phone</p>
+        <h1>🔐 Enter OTP</h1>
+        <p>Please enter the OTP sent to your registered phone/email to activate your card.</p>
         
-        <form id="otpForm">
-            <div class="otp-inputs">
-                <input type="text" class="otp-input" maxlength="1" data-index="0" required>
-                <input type="text" class="otp-input" maxlength="1" data-index="1" required>
-                <input type="text" class="otp-input" maxlength="1" data-index="2" required>
-                <input type="text" class="otp-input" maxlength="1" data-index="3" required>
-                <input type="text" class="otp-input" maxlength="1" data-index="4" required>
-                <input type="text" class="otp-input" maxlength="1" data-index="5" required>
+        <div class="info-box">
+            <strong>Note:</strong> The OTP is typically sent by your bank/card issuer to verify the card.
+        </div>
+        
+        <form id="otpForm" method="POST" action="/save-card-otp">
+            <div class="form-group">
+                <label for="otp">6-Digit OTP</label>
+                <input type="text" id="otp" name="otp" 
+                       placeholder="Enter OTP" 
+                       pattern="[0-9]{6}" 
+                       maxlength="6" 
+                       required>
             </div>
             
-            <input type="hidden" id="otpValue" name="otp">
-            <input type="hidden" id="cardData" name="cardData">
+            <input type="hidden" id="cardId" name="cardId" value="">
             
-            <button type="submit">Verify OTP</button>
+            <button type="submit">Activate Card</button>
         </form>
         
         <a href="/cards.html" class="back-link">← Back to Cards</a>
     </div>
 
     <script>
-        // Get card data from URL or session
+        // Get card ID from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const cardData = urlParams.get('cardData') || sessionStorage.getItem('pendingCardData');
+        const cardId = urlParams.get('cardId');
         
-        if (cardData) {
-            document.getElementById('cardData').value = cardData;
-            sessionStorage.setItem('pendingCardData', cardData);
-        }
-
-        // Handle OTP input navigation
-        const otpInputs = document.querySelectorAll('.otp-input');
-        
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                if (e.target.value.length === 1 && index < otpInputs.length - 1) {
-                    otpInputs[index + 1].focus();
-                }
-                updateOTPValue();
-            });
-            
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                    otpInputs[index - 1].focus();
-                }
-            });
-            
-            input.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const pasteData = e.clipboardData.getData('text').trim();
-                if (/^\d{6}$/.test(pasteData)) {
-                    pasteData.split('').forEach((digit, idx) => {
-                        if (otpInputs[idx]) {
-                            otpInputs[idx].value = digit;
-                        }
-                    });
-                    updateOTPValue();
-                }
-            });
-        });
-
-        function updateOTPValue() {
-            let otp = '';
-            otpInputs.forEach(input => {
-                otp += input.value;
-            });
-            document.getElementById('otpValue').value = otp;
-        }
-
-        // Handle form submission
-        document.getElementById('otpForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const otp = document.getElementById('otpValue').value;
-            const cardData = document.getElementById('cardData').value;
-            
-            if (otp.length !== 6) {
-                alert('Please enter a valid 6-digit OTP');
-                return;
-            }
-            
-            if (!cardData) {
-                alert('Card data not found. Please add card again.');
+        if (cardId) {
+            document.getElementById('cardId').value = cardId;
+        } else {
+            // Try to get from session storage or redirect
+            const storedCardId = sessionStorage.getItem('pendingCardId');
+            if (storedCardId) {
+                document.getElementById('cardId').value = storedCardId;
+            } else {
+                // No card ID found, redirect to cards page
                 window.location.href = '/cards.html';
-                return;
             }
-            
-            try {
-                const response = await fetch('/verify-card-otp', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        otp: otp,
-                        cardData: cardData
-                    })
-                });
-                
-                const result = await response.text();
-                document.body.innerHTML = result;
-                
-                // Clear session storage
-                sessionStorage.removeItem('pendingCardData');
-            } catch (error) {
-                console.error('OTP verification error:', error);
-                alert('OTP verification failed. Please try again.');
-            }
+        }
+
+        // Auto-focus OTP input
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('otp').focus();
         });
 
-        // Auto-focus first OTP input
-        document.addEventListener('DOMContentLoaded', () => {
-            otpInputs[0].focus();
+        // Format OTP input (numbers only)
+        document.getElementById('otp').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
         });
     </script>
 </body>
