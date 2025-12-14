@@ -1,0 +1,415 @@
+= document.getElementById('verifyOtpBtn');
+            const verifyBtnText = document.getElementById('verifyBtnText');
+            const verifyBtnLoader = document.getElementById('verifyBtnLoader');
+            
+            if (otp.<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cards - Delux Euro Wallet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .nav-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .card-list {
+            margin-bottom: 40px;
+        }
+        .card-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-info h3 {
+            margin: 0 0 10px 0;
+        }
+        .card-number {
+            font-family: monospace;
+            font-size: 1.2em;
+            letter-spacing: 2px;
+        }
+        .card-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        .no-cards {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+        .default-badge {
+            background: #48bb78;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+        .logout-btn {
+            background: #f56565;
+        }
+        .logout-btn:hover {
+            background: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-bar">
+            <h1>💳 My Cards</h1>
+            <div class="nav-links">
+                <a href="/dashboard.html">Dashboard</a>
+                <a href="/profile.html">Profile</a>
+                <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+            </div>
+        </div>
+
+        <div class="card-list">
+            <h2>Your Cards</h2>
+            <div id="cards-container">
+                <!-- Cards will be loaded here -->
+                <div class="no-cards">Loading your cards...</div>
+            </div>
+        </div>
+
+        <div class="card-form">
+            <h2>Add New Card</h2>
+            <form id="addCardForm">
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" name="cardNumber" 
+                           placeholder="1234 5678 9012 3456" required 
+                           pattern="[0-9\s]{16,19}" maxlength="19">
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardHolderName">Card Holder Name</label>
+                    <input type="text" id="cardHolderName" name="cardHolderName" 
+                           placeholder="John Doe" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expiryDate">Expiry Date</label>
+                    <input type="month" id="expiryDate" name="expiryDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cvv">CVV</label>
+                    <input type="text" id="cvv" name="cvv" 
+                           placeholder="123" required 
+                           pattern="[0-9]{3,4}" maxlength="4">
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardType">Card Type</label>
+                    <select id="cardType" name="cardType" required>
+                        <option value="">Select card type</option>
+                        <option value="Visa">Visa</option>
+                        <option value="Mastercard">Mastercard</option>
+                        <option value="American Express">American Express</option>
+                        <option value="Discover">Discover</option>
+                    </select>
+                </div>
+                
+                <button type="submit">Add Card</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        async function checkSession() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.loggedIn) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                // Load user cards
+                loadUserCards();
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
+
+        // Load user cards
+        async function loadUserCards() {
+            try {
+                const response = await fetch('/user-cards');
+                const data = await response.json();
+                
+                const container = document.getElementById('cards-container');
+                
+                if (data.cards && data.cards.length > 0) {
+                    container.innerHTML = '';
+                    
+                    data.cards.forEach(card => {
+                        const cardElement = document.createElement('div');
+                        cardElement.className = 'card-item';
+                        
+                        const expiryDate = new Date(card.expiryDate);
+                        const formattedDate = expiryDate.toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short' 
+                        });
+                        
+                        cardElement.innerHTML = `
+                            <div class="card-info">
+                                <h3>${card.cardType} ${card.cardHolderName}</h3>
+                                <div class="card-number">${card.maskedNumber || '**** **** **** ' + card.cardNumber.slice(-4)}</div>
+                                <p>Expires: ${formattedDate}</p>
+                                ${card.status === 'active' ? '<span class="default-badge">Active</span>' : 
+                                  '<span style="color: #f56565;">Pending</span>'}
+                            </div>
+                            <div class="card-actions">
+                                <small>Added: ${new Date(card.addedDate).toLocaleDateString()}</small>
+                            </div>
+                        `;
+                        
+                        container.appendChild(cardElement);
+                    });
+                } else {
+                    container.innerHTML = '<div class="no-cards">No cards added yet. Add your first card above.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading cards:', error);
+                document.getElementById('cards-container').innerHTML = 
+                    '<div class="no-cards">Error loading cards. Please try again.</div>';
+            }
+        }
+
+        // Handle card form submission
+        document.getElementById('addCardForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const cardData = {
+                cardNumber: formData.get('cardNumber'),
+                expiryDate: formData.get('expiryDate'),
+                cvv: formData.get('cvv'),
+                cardHolderName: formData.get('cardHolderName'),
+                cardType: formData.get('cardType')
+            };
+            
+            try {
+                const response = await fetch('/add-card', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(cardData)
+                });
+                
+                const result = await response.text();
+                document.body.innerHTML = result;
+            } catch (error) {
+                console.error('Error adding card:', error);
+                alert('Failed to add card. Please try again.');
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/logout');
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Format card number input
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{4})/g, '$1 ').trim();
+            e.target.value = value.substring(0, 19);
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', checkSession);
+    </script>
+</body>
+</html> !== 6) {
+                alert('Please enter a valid 6-digit OTP');
+                return;
+            }
+            
+            // Show loading state
+            verifyBtn.disabled = true;
+            verifyBtnText.style.display = 'none';
+            verifyBtnLoader.style.display = 'inline-block';
+            
+            try {
+                // Simulate API call to verify OTP
+                console.log('Verifying OTP:', { otp, cardId });
+                
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // In a real application, you would make an API call here:
+                // const response = await fetch('/api/cards/verify-otp', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ otp, cardId })
+                // });
+                
+                // For demo purposes, simulate a successful verification
+                const mockResponse = {
+                    success: true,
+                    message: 'Card verified successfully'
+                };
+                
+                if (mockResponse.success) {
+                    // Hide OTP modal
+                    document.getElementById('otpModal').style.display = 'none';
+                    
+                    // Show success message
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.style.display = 'block';
+                    
+                    // Reset form
+                    document.getElementById('cardForm').reset();
+                    
+                    // Auto-hide success message after 5 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000);
+                } else {
+                    alert('Invalid OTP. Please try again.');
+                    // Clear OTP inputs on failure
+                    otpInputs.forEach(input => {
+                        input.value = '';
+                        input.classList.remove('filled');
+                    });
+                    document.getElementById('otpCode').value = '';
+                    otpInputs[0].focus();
+                }
+                
+            } catch (error) {
+                console.error('Error verifying OTP:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                // Reset button state
+                verifyBtn.disabled = false;
+                verifyBtnText.style.display = 'inline';
+                verifyBtnLoader.style.display = 'none';
+            }
+        });
+
+        // Modal close functionality
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('otpModal').style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('otpModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+        // Resend OTP functionality
+        document.getElementById('resendOtp').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const cardId = document.getElementById('cardId').value;
+            
+            // Simulate resend OTP API call
+            console.log('Resending OTP for card:', cardId);
+            
+            // Show message
+            const otpMessage = document.getElementById('otpMessage');
+            otpMessage.textContent = 'New OTP has been sent to your registered mobile number.';
+            
+            // Clear OTP inputs
+            otpInputs.forEach(input => {
+                input.value = '';
+                input.classList.remove('filled');
+            });
+            document.getElementById('otpCode').value = '';
+            
+            // Focus first OTP input
+            otpInputs[0].focus();
+            
+            // Reset message after 3 seconds
+            setTimeout(() => {
+                otpMessage.textContent = 'A 6-digit verification code has been sent to your registered mobile number ending with ******1234. Please enter it below to verify your card.';
+            }, 3000);
+        });
+
+        // Demo user data
+        document.getElementById('userName').textContent = 'John Doe';
+        document.getElementById('userEmail').textContent = 'john.doe@example.com';
+    </script>
+</body>
+</html>
