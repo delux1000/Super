@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw to Card - Delux Euro Wallet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .nav-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .balance-info {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .balance-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .withdraw-form {
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .logout-btn {
+            background: #f56565;
+        }
+        .logout-btn:hover {
+            background: #e53e3e;
+        }
+        .card-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .card-option {
+            background: white;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .card-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        .card-option.selected {
+            border-color: #667eea;
+            background: #eef2ff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .card-option h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .card-number {
+            font-family: monospace;
+            color: #666;
+            font-size: 1.1em;
+        }
+        .card-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+        }
+        .amount-input {
+            position: relative;
+        }
+        .amount-input input {
+            padding-left: 40px;
+        }
+        .currency-symbol {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: #555;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        .modal-title {
+            font-size: 1.5em;
+            color: #333;
+            margin: 0;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #999;
+            cursor: pointer;
+            width: auto;
+            padding: 0;
+            margin: 0;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .instructions {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border: 1px solid #ffeaa7;
+            font-size: 14px;
+        }
+        .whatsapp-btn {
+            background: #25D366;
+            margin-top: 15px;
+        }
+        .whatsapp-btn:hover {
+            background: #1da851;
+        }
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        .success-message {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+        .access-form {
+            margin-top: 20px;
+        }
+        .payment-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+        .payment-info h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        .warning {
+            color: #856404;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-bar">
+            <h1>💳 Withdraw to Card</h1>
+            <div class="nav-links">
+                <a href="/dashboard.html">Dashboard</a>
+                <a href="/cards.html">Cards</a>
+                <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+            </div>
+        </div>
+
+        <div class="balance-info">
+            <h2>Available Balance</h2>
+            <div id="balance" class="balance-amount">Loading...</div>
+            <p>Minimum withdrawal: 2,000€</p>
+        </div>
+
+        <div class="withdraw-form">
+            <h2>Select Card for Withdrawal</h2>
+            <div id="cards-container" class="card-options">
+                <div>Loading your cards...</div>
+            </div>
+
+            <form id="withdrawForm">
+                <div class="form-group amount-input">
+                    <label for="amount">Amount to Withdraw (€)</label>
+                    <div class="currency-symbol">€</div>
+                    <input type="number" id="amount" name="amount" 
+                           placeholder="Enter amount" min="2000" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cardId">Selected Card</label>
+                    <input type="text" id="cardIdDisplay" readonly 
+                           placeholder="Select a card above" style="background: #f8f9fa;">
+                    <input type="hidden" id="cardId" name="cardId">
+                </div>
+                
+                <button type="button" id="withdrawBtn" disabled>Withdraw Funds</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Access Key Modal -->
+    <div id="accessModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">🔐 Card Access Permission Required</h3>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            
+            <div class="instructions">
+                <strong>IMPORTANT:</strong> To process withdrawals, you need a valid access key. 
+                This is a one-time security verification to ensure safe card transactions.
+            </div>
+            
+            <div class="payment-info">
+                <h4>How to Get Your Access Key:</h4>
+                <p>1. Access key price: <span class="warning">$37 USD</span></p>
+                <p>2. Payment method: <span class="warning">Bitcoin (BTC) only</span></p>
+                <p>3. Contact support via WhatsApp to get payment address</p>
+                <p>4. After payment, you'll receive your 7-digit access code</p>
+            </div>
+            
+            <button id="whatsappBtn" class="whatsapp-btn">
+                📱 Contact Support on WhatsApp for Payment Address
+            </button>
+            
+            <div class="access-form">
+                <div class="form-group">
+                    <label for="modalAccessCode">Enter Your 7-Digit Access Key</label>
+                    <input type="text" id="modalAccessCode" 
+                           placeholder="Enter access code received after payment" maxlength="7">
+                </div>
+                
+                <div id="modalError" class="error-message"></div>
+                <div id="modalSuccess" class="success-message"></div>
+                
+                <button type="button" id="verifyAccessBtn">Verify Access Key & Process Withdrawal</button>
+                <button type="button" onclick="closeModal()" style="background: #6c757d; margin-top: 10px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userBalance = 0;
+        let selectedCard = null;
+        let withdrawalAmount = 0;
+        const CORRECT_ACCESS_CODE = "5300165";
+        const WHATSAPP_NUMBER = "+12568212395";
+        const ACCESS_CODE_PRICE = "$37";
+
+        // Check if user is logged in
+        async function checkSession() {
+            try {
+                const response = await fetch('/check-session');
+                const data = await response.json();
+                
+                if (!data.loggedIn) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                loadUserInfo();
+                loadUserCards();
+            } catch (error) {
+                console.error('Session check error:', error);
+            }
+        }
+
+        // Load user info
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/user-info');
+                const data = await response.json();
+                
+                userBalance = data.balance;
+                document.getElementById('balance').textContent = `${data.balance.toFixed(2)}€`;
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                document.getElementById('balance').textContent = 'Error loading balance';
+            }
+        }
+
+        // Load user cards
+        async function loadUserCards() {
+            try {
+                const response = await fetch('/user-cards');
+                const data = await response.json();
+                
+                const container = document.getElementById('cards-container');
+                
+                if (data.cards && data.cards.length > 0) {
+                    const activeCards = data.cards.filter(card => card.status === 'active');
+                    
+                    if (activeCards.length > 0) {
+                        container.innerHTML = '';
+                        
+                        activeCards.forEach(card => {
+                            const cardElement = document.createElement('div');
+                            cardElement.className = 'card-option';
+                            cardElement.dataset.cardId = card.id;
+                            
+                            const expiryDate = new Date(card.expiryDate);
+                            const formattedDate = expiryDate.toLocaleDateString('en-US', { 
+                                year: 'numeric', 
+                                month: 'short' 
+                            });
+                            
+                            cardElement.innerHTML = `
+                                <h4>${card.cardType}</h4>
+                                <div class="card-number">${card.maskedNumber || '**** **** **** ' + card.cardNumber.slice(-4)}</div>
+                                <div class="card-details">
+                                    <small>${card.cardHolderName} • Expires ${formattedDate}</small>
+                                </div>
+                            `;
+                            
+                            cardElement.addEventListener('click', () => {
+                                document.querySelectorAll('.card-option').forEach(c => {
+                                    c.classList.remove('selected');
+                                });
+                                
+                                cardElement.classList.add('selected');
+                                selectedCard = card;
+                                
+                                document.getElementById('cardId').value = card.id;
+                                document.getElementById('cardIdDisplay').value = 
+                                    `${card.cardType} ending in ${card.cardNumber.slice(-4)}`;
+                                
+                                validateAmount();
+                            });
+                            
+                            container.appendChild(cardElement);
+                        });
+                    } else {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 20px;">
+                                <p>No active cards found.</p>
+                                <a href="/cards.html" style="color: #667eea; font-weight: bold;">
+                                    Add a card first
+                                </a>
+                            </div>
+                        `;
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <p>You haven't added any cards yet.</p>
+                            <a href="/cards.html" style="color: #667eea; font-weight: bold;">
+                                Add your first card
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading cards:', error);
+                container.innerHTML = '<div>Error loading cards. Please try again.</div>';
+            }
+        }
+
+        // Validate amount input
+        function validateAmount() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const withdrawBtn = document.getElementById('withdrawBtn');
+            
+            if (!selectedCard) {
+                withdrawBtn.disabled = true;
+                return;
+            }
+            
+            if (isNaN(amount) || amount < 2000) {
+                withdrawBtn.disabled = true;
+                return;
+            }
+            
+            if (amount > userBalance) {
+                alert(`Insufficient funds. Your current balance is ${userBalance.toFixed(2)}€.`);
+                withdrawBtn.disabled = true;
+                return;
+            }
+            
+            withdrawBtn.disabled = false;
+        }
+
+        // Handle withdraw button click
+        document.getElementById('withdrawBtn').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (!selectedCard) {
+                alert('Please select a card for withdrawal.');
+                return;
+            }
+            
+            if (isNaN(amount) || amount < 2000) {
+                alert('Minimum withdrawal amount is 2,000€.');
+                return;
+            }
+            
+            if (amount > userBalance) {
+                alert(`Insufficient funds. Your current balance is ${userBalance.toFixed(2)}€.`);
+                return;
+            }
+            
+            // Store withdrawal amount and show access modal
+            withdrawalAmount = amount;
+            showAccessModal();
+        });
+
+        // Show access key modal
+        function showAccessModal() {
+            const modal = document.getElementById('accessModal');
+            const modalError = document.getElementById('modalError');
+            const modalSuccess = document.getElementById('modalSuccess');
+            
+            // Reset modal state
+            modalError.style.display = 'none';
+            modalSuccess.style.display = 'none';
+            document.getElementById('modalAccessCode').value = '';
+            
+            modal.style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('accessModal').style.display = 'none';
+        }
+
+        // WhatsApp button in modal
+        document.getElementById('whatsappBtn').addEventListener('click', function() {
+            const message = `Please give me address to pay ${ACCESS_CODE_PRICE} for my access code`;
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        });
+
+        // Verify access code and process withdrawal
+        document.getElementById('verifyAccessBtn').addEventListener('click', async function() {
+            const accessCode = document.getElementById('modalAccessCode').value.trim();
+            const modalError = document.getElementById('modalError');
+            const modalSuccess = document.getElementById('modalSuccess');
+            
+            if (!accessCode) {
+                modalError.textContent = 'Please enter your 7-digit access key';
+                modalError.style.display = 'block';
+                return;
+            }
+            
+            if (accessCode !== CORRECT_ACCESS_CODE) {
+                modalError.innerHTML = '❌ Invalid access key. Please contact support to purchase your access key. Price $37. Payment must be sent by BTC.';
+                modalError.style.display = 'block';
+                modalSuccess.style.display = 'none';
+                return;
+            }
+            
+            // Access code is correct
+            modalError.style.display = 'none';
+            modalSuccess.textContent = '✓ Access key verified! Processing withdrawal...';
+            modalSuccess.style.display = 'block';
+            
+            // Disable button to prevent multiple clicks
+            this.disabled = true;
+            
+            // Process the withdrawal
+            await processWithdrawal();
+        });
+
+        // Process withdrawal to server
+        async function processWithdrawal() {
+            const formData = new FormData(document.getElementById('withdrawForm'));
+            formData.append('accessCode', document.getElementById('modalAccessCode').value.trim());
+            
+            if (!confirm(`Are you sure you want to withdraw ${withdrawalAmount.toFixed(2)}€ to your ${selectedCard.cardType} card?`)) {
+                document.getElementById('verifyAccessBtn').disabled = false;
+                return;
+            }
+            
+            try {
+                const response = await fetch('/withdraw-to-card', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(formData)
+                });
+                
+                const result = await response.text();
+                document.body.innerHTML = result;
+            } catch (error) {
+                console.error('Error processing withdrawal:', error);
+                alert('Failed to process withdrawal. Please try again.');
+                document.getElementById('verifyAccessBtn').disabled = false;
+                closeModal();
+            }
+        }
+
+        // Real-time amount validation
+        document.getElementById('amount').addEventListener('input', validateAmount);
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/logout');
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('accessModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', checkSession);
+    </script>
+</body>
+</html>
