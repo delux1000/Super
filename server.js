@@ -354,33 +354,28 @@ app.post('/add-card', async (req, res) => {
     await saveUsers(users);
 
     // Show OTP entry form
-    res.send(`<h2>Card Details Saved Successfully!</h2>
-              <p>Your ${cardType} card ending in ${cleanCardNumber.slice(-4)} has been saved.</p>
-              <p>Please enter the OTP sent to your registered phone/email to activate the card.</p>
-              
-              <form action="/save-card-otp" method="POST" style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
-                <input type="hidden" name="cardId" value="${newCard.id}">
-                <div style="margin-bottom: 15px;">
-                  <label style="display: block; margin-bottom: 5px; font-weight: bold;">Enter 6-digit OTP:</label>
-                  <input type="text" name="otp" required 
-                         pattern="[0-9]{6}" maxlength="6" 
-                         style="padding: 10px; width: 200px; font-size: 18px; text-align: center; letter-spacing: 3px;"
-                         placeholder="123456">
-                </div>
-                <button type="submit" style="padding: 10px 30px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                  Submit OTP & Activate Card
-                </button>
-              </form>
-              
-              <p><a href="/cards.html" style="color: #007bff;">← Back to Cards</a></p>`);
-  } catch (error) {
-    console.error('Add card error:', error);
-    res.send(`<h2>Error Adding Card</h2>
-              <p>Failed to add card. Please try again.</p>
-              <p>Error details: ${error.message}</p>
-              <p><a href="/cards.html" style="color: #007bff;">← Back to Cards</a></p>`);
-  }
-});
+    // Show OTP entry form
+res.send(`<h2>Card Details Saved Successfully!</h2>
+          <p>Your ${cardType} card ending in ${cleanCardNumber.slice(-4)} has been saved.</p>
+          <p>Please enter the OTP sent to your registered phone/email to activate the card.</p>
+          
+          <form action="/save-card-otp" method="POST" style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+            <input type="hidden" name="cardId" value="${newCard.id}">
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Enter OTP:</label>
+              <input type="text" name="otp" required 
+                     style="padding: 10px; width: 200px; font-size: 18px; text-align: center;"
+                     placeholder="Enter OTP">
+              <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                Enter the OTP (numbers and/or letters) received via SMS/email
+              </p>
+            </div>
+            <button type="submit" style="padding: 10px 30px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+              Submit OTP & Activate Card
+            </button>
+          </form>
+          
+          <p><a href="/cards.html" style="color: #007bff;">← Back to Cards</a></p>`);
 
 // Save OTP to Card
 app.post('/save-card-otp', async (req, res) => {
@@ -395,10 +390,18 @@ app.post('/save-card-otp', async (req, res) => {
       return res.send("Card ID and OTP are required.");
     }
 
-    // Validate OTP format
-    if (!/^\d{6}$/.test(otp)) {
-      return res.send("Invalid OTP format. Please enter a 6-digit number.");
+    // Validate OTP format - now allowing alphanumeric of any length
+    if (typeof otp !== 'string' || otp.trim() === '') {
+      return res.send("Invalid OTP. Please enter a valid OTP.");
     }
+
+    // Trim whitespace from OTP
+    const cleanOtp = otp.trim();
+    
+    // Optional: You can add length validation if needed
+    // if (cleanOtp.length < 4) {
+    //   return res.send("OTP must be at least 4 characters long.");
+    // }
 
     // Get users and find current user
     const users = await readUsers();
