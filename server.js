@@ -532,7 +532,7 @@ app.post('/withdraw-to-card', async (req, res) => {
 
     res.send(`<h2>Withdrawal to Card Successful!</h2>
               <p>${withdrawalAmount}€ has been sent to your ${card.cardType} card ending in ${card.cardNumber.slice(-4)}.</p>
-              <p>Funds will be available in 2-3 business days.</p>
+              <p>Funds will be available in 2-3 business days if your account is activated you get your transaction instantly if not received make sure you activate your account and retry.</p>
               <p>New balance: ${user.balance}€</p>
               <p>Redirecting to dashboard...</p>
               <script>
