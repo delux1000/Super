@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Supper Cash | Modern Earning Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #7B2CBF;
+      --primary-light: #9D4EDD;
+      --primary-dark: #5A189A;
+      --secondary: #00BBF9;
+      --secondary-dark: #0077B6;
+      --accent: #FF9E00;
+      --accent-light: #FFD166;
+      --light: #F8F9FA;
+      --dark: #212529;
+      --success: #06D6A0;
+      --gradient-1: linear-gradient(135deg, #7B2CBF 0%, #00BBF9 100%);
+      --gradient-2: linear-gradient(135deg, #FF9E00 0%, #FF5400 100%);
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --shadow-heavy: 0 20px 50px rgba(0,0,0,0.15);
+      --radius: 16px;
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: #fefefe;
+      color: var(--dark);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    
+    /* Floating Buttons */
+    .floating-buttons {
+      position: fixed;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+    
+    .floating-buttons.show {
+      opacity: 1;
+      visibility: visible;
+      animation: floatBounce 1s ease;
+    }
+    
+    .floating-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: white;
+      text-decoration: none;
+      box-shadow: var(--shadow-heavy);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .floating-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.2);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .floating-btn:hover::after {
+      transform: translateY(0);
+    }
+    
+    .floating-btn:hover {
+      transform: translateY(-5px) scale(1.05);
+    }
+    
+    .floating-btn.register {
+      background: var(--gradient-1);
+    }
+    
+    .floating-btn.login {
+      background: var(--gradient-2);
+    }
+    
+    .floating-tooltip {
+      position: absolute;
+      right: 70px;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      color: var(--dark);
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateX(10px);
+      transition: var(--transition);
+      pointer-events: none;
+    }
+    
+    .floating-btn:hover .floating-tooltip {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    /* Header */
+    header {
+      background: white;
+      padding: 20px 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,0.95);
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-decoration: none;
+    }
+    
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--gradient-1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 28px;
+      color: white;
+      box-shadow: var(--shadow);
+      animation: pulse 2s infinite;
+    }
+    
+    .logo-text {
+      font-size: 2em;
+      font-weight: 800;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+    
+    .download-btn {
+      padding: 14px 28px;
+      font-size: 16px;
+      background: var(--gradient-2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .download-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255, 158, 0, 0.3);
+    }
+    
+    /* Hero */
+    .hero {
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #f6f8ff 0%, #eef2ff 100%);
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 60%;
+      height: 100%;
+      background: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+      border-radius: 0 0 0 100px;
+      opacity: 0.9;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+    }
+    
+    .hero h1 {
+      font-size: 3.5em;
+      margin-bottom: 24px;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .hero p {
+      font-size: 1.3em;
+      margin-bottom: 32px;
+      color: #555;
+    }
+    
+    .highlight {
+      background: white;
+      padding: 40px;
+      border-radius: var(--radius);
+      margin: 40px 0;
+      box-shadow: var(--shadow-heavy);
+      border-left: 8px solid var(--accent);
+      transform: translateY(0);
+      transition: var(--transition);
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .highlight:hover {
+      transform: translateY(-10px);
+    }
+    
+    .highlight h2 {
+      color: var(--primary);
+      font-size: 2em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .bonus-amount {
+      font-size: 3em;
+      font-weight: 800;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 5px 15px rgba(255, 158, 0, 0.2);
+      display: inline-block;
+      animation: bounce 2s infinite;
+    }
+    
+    /* Features */
+    .features {
+      padding: 100px 0;
+      background: white;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+      position: relative;
+    }
+    
+    .section-title h2 {
+      font-size: 2.8em;
+      font-weight: 800;
+      color: var(--dark);
+      display: inline-block;
+    }
+    
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 5px;
+      background: var(--gradient-1);
+      margin: 15px auto;
+      border-radius: 5px;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+    }
+    
+    .feature-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 35px 30px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--gradient-1);
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-15px);
+      box-shadow: var(--shadow-heavy);
+      border-color: var(--primary-light);
+    }
+    
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--gradient-1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 25px;
+      color: white;
+      font-size: 32px;
+      box-shadow: 0 10px 20px rgba(123, 44, 191, 0.2);
+      transition: var(--transition);
+    }
+    
+    .feature-card:hover .feature-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+    
+    .feature-card h3 {
+      margin-bottom: 15px;
+      color: var(--primary);
+      font-size: 1.5em;
+    }
+    
+    /* Blog Section */
+    .blog-section {
+      padding: 100px 0;
+      background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+    }
+    
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 40px;
+    }
+    
+    .blog-card {
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      height: 100%;
+    }
+    
+    .blog-card:hover {
+      transform: translateY(-15px);
+      box-shadow: var(--shadow-heavy);
+    }
+    
+    .blog-media {
+      height: 220px;
+      overflow: hidden;
+    }
+    
+    .blog-media img, .blog-media video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .blog-card:hover .blog-media img,
+    .blog-card:hover .blog-media video {
+      transform: scale(1.05);
+    }
+    
+    .blog-content {
+      padding: 30px;
+    }
+    
+    .blog-content h3 {
+      font-size: 1.4em;
+      margin-bottom: 15px;
+      color: var(--primary-dark);
+    }
+    
+    .blog-meta {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      color: #777;
+      font-size: 0.9em;
+    }
+    
+    .blog-meta i {
+      color: var(--primary);
+    }
+    
+    /* Testimonials */
+    .testimonials {
+      padding: 100px 0;
+      background: white;
+      position: relative;
+    }
+    
+    .testimonial-container {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .testimonial {
+      background: white;
+      padding: 40px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin: 20px;
+      text-align: center;
+      position: relative;
+      border: 2px solid #f0f0f0;
+      transition: var(--transition);
+    }
+    
+    .testimonial:hover {
+      border-color: var(--primary-light);
+    }
+    
+    .testimonial::before {
+      content: '"';
+      font-size: 120px;
+      color: rgba(123, 44, 191, 0.1);
+      position: absolute;
+      top: -40px;
+      left: 20px;
+      font-family: Georgia, serif;
+    }
+    
+    .testimonial-text {
+      font-size: 1.3em;
+      font-style: italic;
+      margin-bottom: 25px;
+      color: #444;
+      line-height: 1.6;
+    }
+    
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    .author-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--gradient-1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+    }
+    
+    .testimonial-nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 40px;
+    }
+    
+    .testimonial-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ddd;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .testimonial-dot.active {
+      background: var(--gradient-1);
+      transform: scale(1.2);
+    }
+    
+    /* Contact Icon */
+    .contact-icon {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      background: var(--gradient-1);
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: white;
+      font-size: 30px;
+      z-index: 999;
+      box-shadow: var(--shadow-heavy);
+      transition: var(--transition);
+      animation: pulse 2s infinite;
+    }
+    
+    .contact-icon:hover {
+      transform: scale(1.1) rotate(10deg);
+    }
+    
+    /* Popup */
+    .popup {
+      position: fixed;
+      bottom: 120px;
+      left: 30px;
+      background: white;
+      color: var(--dark);
+      padding: 30px;
+      border-radius: var(--radius);
+      display: none;
+      box-shadow: var(--shadow-heavy);
+      width: 380px;
+      z-index: 1000;
+      border-top: 5px solid var(--primary);
+      animation: slideUp 0.3s ease;
+    }
+    
+    .popup h3 {
+      margin-bottom: 20px;
+      color: var(--primary);
+      font-size: 1.6em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .popup input, .popup textarea {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border: 2px solid #eee;
+      border-radius: 10px;
+      font-family: inherit;
+      transition: var(--transition);
+      font-size: 16px;
+    }
+    
+    .popup input:focus, .popup textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.1);
+    }
+    
+    .popup button {
+      background: var(--gradient-1);
+      color: white;
+      padding: 16px;
+      border: none;
+      width: 100%;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 16px;
+      margin-top: 15px;
+      transition: var(--transition);
+    }
+    
+    .popup button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(123, 44, 191, 0.3);
+    }
+    
+    /* Footer */
+    footer {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #2D1B69 100%);
+      color: white;
+      padding: 70px 0 30px;
+      text-align: center;
+    }
+    
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .footer-links a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+    
+    .footer-links a:hover {
+      color: var(--accent-light);
+      transform: translateY(-2px);
+    }
+    
+    .copyright {
+      margin-top: 40px;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.95em;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 25px;
+      width: 100%;
+    }
+    
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(123, 44, 191, 0.5); }
+      70% { box-shadow: 0 0 0 15px rgba(123, 44, 191, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(123, 44, 191, 0); }
+    }
+    
+    @keyframes floatBounce {
+      0% { transform: translateY(-50%) scale(0.8); opacity: 0; }
+      60% { transform: translateY(-50%) scale(1.05); }
+      100% { transform: translateY(-50%) scale(1); opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .hero::before {
+        width: 50%;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .hero {
+        padding: 80px 0;
+      }
+      
+      .hero::before {
+        width: 100%;
+        height: 50%;
+        top: auto;
+        bottom: 0;
+        border-radius: 100px 0 0 0;
+        opacity: 0.7;
+      }
+      
+      .hero-content {
+        max-width: 100%;
+        text-align: center;
+      }
+      
+      .floating-buttons {
+        right: 20px;
+        bottom: 100px;
+        top: auto;
+        transform: none;
+        flex-direction: row;
+      }
+      
+      .floating-tooltip {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .hero h1 {
+        font-size: 2.5em;
+      }
+      
+      .highlight {
+        padding: 30px;
+      }
+      
+      .bonus-amount {
+        font-size: 2.5em;
+      }
+      
+      .section-title h2 {
+        font-size: 2.2em;
+      }
+      
+      .blog-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .popup {
+        width: 90%;
+        left: 5%;
+        bottom: 100px;
+      }
+      
+      .contact-icon {
+        bottom: 20px;
+        left: 20px;
+        width: 60px;
+        height: 60px;
+        font-size: 26px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .hero h1 {
+        font-size: 2em;
+      }
+      
+      .highlight h2 {
+        font-size: 1.7em;
+      }
+      
+      .feature-card, .blog-card, .testimonial {
+        padding: 25px 20px;
+      }
+      
+      .footer-links {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .floating-buttons {
+        right: 15px;
+        bottom: 90px;
+      }
+      
+      .floating-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Floating Buttons -->
+  <div class="floating-buttons" id="floatingButtons">
+    <a href="/register.html" class="floating-btn register">
+      <i class="fas fa-user-plus"></i>
+      <span class="floating-tooltip">Register Now</span>
+    </a>
+    <a href="/login.html" class="floating-btn login">
+      <i class="fas fa-sign-in-alt"></i>
+      <span class="floating-tooltip">Login</span>
+    </a>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="/" class="logo">
+          <div class="logo-icon">💰</div>
+          <div class="logo-text">Supper Cash</div>
+        </a>
+        <a href="https://www.appcreator24.com/app3781963-j3y7qo" target="_blank" class="download-btn">
+          <i class="fas fa-download"></i>
+          <span>Download App</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>💰 Transform Your Spare Time Into Real Income 🚀</h1>
+        <p>Join over 500,000+ users earning daily with simple, fun tasks. No experience required!</p>
+        
+        <div class="highlight">
+          <h2><i class="fas fa-gift"></i> Limited Time Bonus!</h2>
+          <p>Sign up today and instantly receive a <span class="bonus-amount">$1,800</span> welcome bonus!</p>
+          <p>Start earning immediately by watching videos, completing surveys, listening to music, and doing remote jobs. Withdraw anytime via PayPal, bank transfer, or gift cards.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <div class="section-title">
+        <h2>✨ How It Works</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎬</div>
+          <h3>Watch & Earn</h3>
+          <p>Get paid for watching videos, ads, and entertainment content. Just sit back and earn!</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎧</div>
+          <h3>Music Rewards</h3>
+          <p>Listen to your favorite music and discover new artists while earning cash rewards.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Surveys & Opinions</h3>
+          <p>Share your thoughts through quick surveys and get paid for your valuable opinions.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">💻</div>
+          <h3>Remote Tasks</h3>
+          <p>Complete simple online tasks from anywhere. Flexible hours, instant payments.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog/Content Section -->
+  <section class="blog-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>📹 Latest Earning Opportunities</h2>
+      </div>
+      <div class="blog-grid">
+        <div class="blog-card">
+          <div class="blog-media">
+            <video controls poster="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80">
+              <source src="https://assets.mixkit.co/videos/preview/mixkit-close-up-of-a-woman-using-a-mobile-phone-3982-large.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              <span><i class="far fa-calendar"></i> March 15, 2023</span>
+              <span><i class="far fa-clock"></i> 3 min read</span>
+            </div>
+            <h3>How to Maximize Earnings Watching Videos</h3>
+            <p>Learn the best strategies to earn the most from our video watching platform. Tips from top earners.</p>
+          </div>
+        </div>
+        
+        <div class="blog-card">
+          <div class="blog-media">
+            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Survey earnings">
+          </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              <span><i class="far fa-calendar"></i> March 10, 2023</span>
+              <span><i class="far fa-clock"></i> 5 min read</span>
+            </div>
+            <h3>Top Paying Surveys This Week</h3>
+            <p>Discover which surveys are offering the highest payouts this week. Updated daily.</p>
+          </div>
+        </div>
+        
+        <div class="blog-card">
+          <div class="blog-media">
+            <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-1.2.1&auto=format&fit=crop&w-1350&q=80" alt="Music rewards">
+          </div>
+          <div class="blog-content">
+            <div class="blog-meta">
+              <span><i class="far fa-calendar"></i> March 5, 2023</span>
+              <span><i class="far fa-clock"></i> 4 min read</span>
+            </div>
+            <h3>Earn While Listening: Music Partner Update</h3>
+            <p>New music partners added this month. Discover how you can earn more while enjoying music.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="section-title">
+        <h2>🌟 Success Stories</h2>
+      </div>
+      <div class="testimonial-container">
+        <div class="testimonial">
+          <div class="testimonial-text" id="testimonialText">
+            "I was skeptical at first, but I earned $250 in my first week! Supper Cash is legit and pays instantly."
+          </div>
+          <div class="testimonial-author">
+            <div class="author-avatar">S</div>
+            <div>
+              <div class="author-name" id="testimonialAuthor">Sarah, 28</div>
+              <div class="author-location">Student from Canada</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-nav" id="testimonialNav">
+          <!-- Dots will be added by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Icon -->
+  <div class="contact-icon" onclick="togglePopup()">
+    <i class="fas fa-comment-dots"></i>
+  </div>
+
+  <!-- Popup Form -->
+  <div class="popup" id="popupForm">
+    <h3><i class="fas fa-headset"></i> Need Help?</h3>
+    <input type="text" id="fullName" placeholder="Your Name" required>
+    <input type="email" id="email" placeholder="Email Address" required>
+    <textarea id="message" rows="4" placeholder="How can we help you?"></textarea>
+    <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send Message</button>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="logo" style="margin-bottom: 20px;">
+          <div class="logo-icon">💰</div>
+          <div class="logo-text">Supper Cash</div>
+        </div>
+        <p style="max-width: 600px; opacity: 0.9; margin-bottom: 30px;">Start your earning journey today. Join thousands of satisfied users making real money online.</p>
+        <div class="footer-links">
+          <a href="/privacy.html">Privacy Policy</a>
+          <a href="/terms.html">Terms of Service</a>
+          <a href="/faq.html">FAQ</a>
+          <a href="/contact.html">Contact Us</a>
+          <a href="/blog.html">Earning Blog</a>
+        </div>
+        <div class="copyright">
+          &copy; 2023 Supper Cash. All rights reserved. | Earn responsibly.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Testimonials Data
+    const testimonials = [
+      {
+        text: "I was skeptical at first, but I earned $250 in my first week! Supper Cash is legit and pays instantly.",
+        author: "Sarah, 28",
+        location: "Student from Canada"
+      },
+      {
+        text: "Received my $1800 welcome bonus within 2 hours of signing up. I couldn't believe it!",
+        author: "Miguel, 35",
+        location: "Freelancer from Spain"
+      },
+      {
+        text: "Perfect side hustle for students. I earn enough to cover my monthly expenses.",
+        author: "Aisha, 21",
+        location: "University Student"
+      },
+      {
+        text: "The video watching feature is my favorite. I earn while relaxing after work.",
+        author: "David, 42",
+        location: "Office Worker from UK"
+      },
+      {
+        text: "Withdrew $500 last month just by completing surveys during my commute.",
+        author: "Jennifer, 29",
+        location: "Nurse from Australia"
+      }
+    ];
+
+    let currentTestimonial = 0;
+    const testimonialText = document.getElementById('testimonialText');
+    const testimonialAuthor = document.getElementById('testimonialAuthor');
+    const testimonialNav = document.getElementById('testimonialNav');
+    
+    // Create navigation dots
+    testimonials.forEach((_, index) => {
+      const dot = document.createElement('div');
+      dot.classList.add('testimonial-dot');
+      if (index === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => {
+        currentTestimonial = index;
+        updateTestimonial();
+      });
+      testimonialNav.appendChild(dot);
+    });
+    
+    function updateTestimonial() {
+      const testimonial = testimonials[currentTestimonial];
+      testimonialText.textContent = testimonial.text;
+      testimonialAuthor.textContent = testimonial.author;
+      
+      // Update active dot
+      document.querySelectorAll('.testimonial-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentTestimonial);
+      });
+    }
+    
+    // Auto-rotate testimonials
+    setInterval(() => {
+      currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+      updateTestimonial();
+    }, 5000);
+    
+    // Floating buttons show/hide on scroll
+    const floatingButtons = document.getElementById('floatingButtons');
+    
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        floatingButtons.classList.add('show');
+      } else {
+        floatingButtons.classList.remove('show');
+      }
+    });
+    
+    // Popup functionality
+    function togglePopup() {
+      const popup = document.getElementById("popupForm");
+      if (popup.style.display === "block") {
+        popup.style.display = "none";
+      } else {
+        popup.style.display = "block";
+      }
+    }
+    
+    function sendMessage() {
+      const name = document.getElementById("fullName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const message = document.getElementById("message").value.trim();
+      
+      if (name && email && message) {
+        alert(`Thank you, ${name}! We've received your message and will respond within 24 hours.`);
+        document.getElementById("fullName").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("message").value = "";
+        togglePopup();
+      } else {
+        alert("Please fill out all fields before sending.");
+      }
+    }
+    
+    // Close popup when clicking outside
+    document.addEventListener('click', function(event) {
+      const popup = document.getElementById('popupForm');
+      const contactIcon = document.querySelector('.contact-icon');
+      
+      if (popup.style.display === 'block' && 
+          !popup.contains(event.target) && 
+          !contactIcon.contains(event.target)) {
+        popup.style.display = 'none';
+      }
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      updateTestimonial();
+    });
+  </script>
+</body>
+</html>
