@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Supper Cash • Convert earnings to GBP (UK)</title>
-  <!-- Font Awesome & Google Fonts -->
+  <title>Supper Cash • Convert earnings to real assets</title>
+  <!-- Font Awesome & Google Fonts (same family) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
   <style>
-    /* ----- consistent design system ----- */
+    /* ----- consistent design system (same as dashboard) ----- */
     * {
       margin: 0;
       padding: 0;
@@ -51,7 +51,7 @@
     ::-webkit-scrollbar-track { background: #E2E8F0; }
     ::-webkit-scrollbar-thumb { background: var(--gray-500); border-radius: 10px; }
 
-    /* header */
+    /* header (same as dashboard, with professional indicator) */
     .main-header {
       background: var(--white);
       border-bottom: 1px solid var(--gray-100);
@@ -349,7 +349,7 @@
       color: var(--accent);
     }
 
-    /* right panel – UK bank details */
+    /* right panel – real world asset settlement */
     .exchange-info-panel {
       background: linear-gradient(145deg, var(--primary), #102B44);
       color: white;
@@ -383,8 +383,8 @@
     }
 
     .real-asset-tag {
-      background: rgba(0,180,179,0.15);
-      border: 1px solid rgba(0,180,179,0.3);
+      background: rgba(255,215,0,0.15);
+      border: 1px solid rgba(255,215,0,0.3);
       border-radius: 40px;
       padding: 10px 20px;
       display: inline-flex;
@@ -395,36 +395,36 @@
     }
 
     .real-asset-tag i {
-      color: var(--accent);
+      color: gold;
       font-size: 20px;
     }
 
-    .bank-details-container {
+    .wallet-address-container {
       background: rgba(0,0,0,0.25);
       border-radius: 24px;
-      padding: 24px;
+      padding: 20px;
       border: 1px solid rgba(255,255,255,0.15);
       margin: 10px 0 28px;
+      word-break: break-all;
     }
 
-    .detail-row {
-      display: flex;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px dashed rgba(255,255,255,0.15);
-    }
-
-    .detail-label {
-      width: 110px;
+    .address-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       opacity: 0.7;
-      font-size: 14px;
+      margin-bottom: 8px;
     }
 
-    .detail-value {
-      flex: 1;
-      font-weight: 600;
+    .address-value {
       font-family: 'Inter', monospace;
-      word-break: break-word;
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      background: rgba(255,255,255,0.05);
+      padding: 14px;
+      border-radius: 14px;
     }
 
     .copy-btn {
@@ -442,7 +442,6 @@
       transition: var(--transition);
       font-size: 14px;
       backdrop-filter: blur(5px);
-      margin-top: 8px;
     }
 
     .copy-btn:hover {
@@ -547,7 +546,7 @@
 
     @media (max-width: 600px) {
       .exchange-form-panel, .exchange-info-panel { padding: 30px 20px; }
-      .detail-value { font-size: 14px; }
+      .address-value { font-size: 15px; }
     }
   </style>
 </head>
@@ -562,8 +561,8 @@
     </div>
     <div class="user-area">
       <div class="user-badge">
-        <i class="fas fa-pound-sign"></i>
-        <span>UK Sterling Exchange</span>
+        <i class="fas fa-globe"></i>
+        <span>Real Asset Exchange</span>
       </div>
       <a href="/dashboard.html" class="professional-btn" style="background:transparent; color:var(--primary); border:1px solid var(--gray-300);"><i class="fas fa-home"></i> Dashboard</a>
       <a href="/logout" class="professional-btn logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -571,14 +570,14 @@
   </div>
 </header>
 
-<!-- ========== PROFESSIONAL EXCHANGE (UK RECIPIENT) ========== -->
+<!-- ========== PROFESSIONAL EXCHANGE ========== -->
 <div class="exchange-container">
   <div class="page-title">
     <i class="fas fa-arrow-right-arrow-left"></i> 
-    Convert earnings → GBP (UK Bank)
+    Convert earnings → Real World Assets
   </div>
   <div class="page-sub">
-    Your platform credits are digital. Exchange them for real British Pounds deposited to a UK bank account. <br>15% transaction fee • 8% processing fee
+    Your platform earnings are not USD – they are digital credits. Exchange them for real crypto assets (ETH). <br>15% transaction fee • 8% network validation
   </div>
 
   <!-- main card -->
@@ -601,32 +600,32 @@
         </div>
         <div class="earnings-note">
           <i class="fas fa-info-circle"></i>
-          <span>1 credit = £1.00 GBP · minimum 50 credits</span>
+          <span>1 credit = 1 USD value in real asset settlement · minimum 50 credits</span>
         </div>
       </div>
 
-      <!-- dynamic fee breakdown (GBP) -->
+      <!-- dynamic fee breakdown (values update) -->
       <div class="fee-breakdown" id="feeBreakdown">
         <div class="fee-row">
-          <span>Exchange value</span>
-          <span id="exchangeAmount">1,000 credits (£1,000.00)</span>
+          <span>Exchange value (credits)</span>
+          <span id="exchangeAmount">1,000 credits</span>
         </div>
         <div class="fee-row">
           <span>Transaction fee (15%)</span>
-          <span class="highlight" id="transactionFee">-150 credits (£150.00)</span>
+          <span class="highlight" id="transactionFee">-150 credits</span>
         </div>
         <div class="fee-row">
-          <span>Processing fee (8%)</span>
-          <span class="highlight" id="networkFee">-80 credits (£80.00)</span>
+          <span>Network validation (8%)</span>
+          <span class="highlight" id="networkFee">-80 credits</span>
         </div>
         <div class="fee-row">
-          <span>Net GBP you receive</span>
-          <span class="total-value" id="netAmount">£770.00</span>
+          <span>Net real asset value <i class="far fa-question-circle" style="opacity:0.6;"></i></span>
+          <span class="total-value" id="netAmount">770 credits</span>
         </div>
       </div>
 
       <div class="disclaimer">
-        <i class="fas fa-shield-alt"></i> After fees, the remaining amount is deposited to your UK bank account in GBP.
+        <i class="fas fa-shield-alt"></i> After fees, the remaining credits represent the real asset value you will receive in ETH.
       </div>
 
       <!-- conversion hint -->
@@ -634,83 +633,61 @@
         <div style="display:flex; gap:12px; align-items:center;">
           <i class="fas fa-bolt" style="color: var(--warning); font-size: 22px;"></i>
           <div><strong style="color: var(--primary);">Instant settlement required</strong><br>
-          <span style="font-size:14px; color: var(--gray-500);">Send the net GBP amount via Faster Payment or bank transfer to the UK account below.</span></div>
+          <span style="font-size:14px; color: var(--gray-500);">Send the equivalent ETH value (based on net credits) to the address below.</span></div>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT: UK bank details & instructions -->
+    <!-- RIGHT: wallet & real asset instructions -->
     <div class="exchange-info-panel">
       <div class="info-badge">
-        <i class="fas fa-check-circle"></i> Real currency (GBP) settlement · UK recipient
+        <i class="fas fa-check-circle"></i> Real asset (ETH) settlement
       </div>
 
-      <!-- fiat asset badge -->
+      <!-- real asset badge -->
       <div class="real-asset-tag">
-        <i class="fas fa-pound-sign"></i>
-        <span>Currency: British Pound (GBP) · UK bank transfer</span>
+        <i class="fas fa-gem"></i>
+        <span>Asset: Ethereum (ETH) · real world value</span>
       </div>
 
       <div class="wallet-title">
-        <i class="fas fa-university" style="margin-right: 8px;"></i>Send payment to this UK account
+        <i class="fas fa-wallet" style="margin-right: 8px;"></i>Send ETH to this address
       </div>
 
-      <!-- UK bank details (realistic) -->
-      <div class="bank-details-container">
-        <div class="detail-row">
-          <span class="detail-label">Bank</span>
-          <span class="detail-value">Barclays Bank UK PLC</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Account name</span>
-          <span class="detail-value">Supper Cash Holdings Ltd</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Sort code</span>
-          <span class="detail-value" id="sortCode">20-45-32</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Account number</span>
-          <span class="detail-value" id="accountNumber">83746621</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">IBAN</span>
-          <span class="detail-value" id="iban">GB24 BARC 2045 3283 7466 21</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">SWIFT</span>
-          <span class="detail-value" id="swift">BARCGB22</span>
-        </div>
-        <button class="copy-btn" id="copyBankBtn">
-          <i class="far fa-copy"></i> Copy all details
+      <!-- wallet box (fixed address) -->
+      <div class="wallet-address-container">
+        <div class="address-label">Ethereum mainnet (ERC20)</div>
+        <div class="address-value" id="walletAddress">0xcC614Ea4534a4239f9dcfe197383658B87b4171B</div>
+        <button class="copy-btn" id="copyAddressBtn">
+          <i class="far fa-copy"></i> Copy address
         </button>
       </div>
 
-      <!-- transfer info -->
+      <!-- network info -->
       <div class="network-badge">
         <div class="network-icon">
-          <i class="fas fa-bolt"></i>
+          <i class="fab fa-ethereum"></i>
         </div>
         <div class="network-detail">
-          <div class="network-name">Faster Payments / BACS</div>
-          <div class="network-desc">Usually arrives within 2 hours</div>
+          <div class="network-name">Ethereum Network</div>
+          <div class="network-desc">Use ETH · Gas fee not included</div>
         </div>
       </div>
 
-      <!-- instructions specific to UK transfer -->
+      <!-- instructions specific to real assets -->
       <ul class="instruction-list">
-        <li><i class="fas fa-circle-check"></i> <strong>Pay the net GBP amount shown</strong> (e.g. £770.00) via Faster Payment or CHAPS.</li>
-        <li><i class="fas fa-circle-check"></i> Use the UK bank details above. Include your Supper Cash user ID as reference.</li>
-        <li><i class="fas fa-circle-check"></i> Payment is automatically detected. Your GBP will be credited to your external UK account.</li>
-        <li><i class="fas fa-circle-check"></i> Minimum exchange: 50 credits (£50 GBP).</li>
+        <li><i class="fas fa-circle-check"></i> <strong>Pay instantly with ETH</strong> — the net credit amount (after fees) determines the ETH value at current rate ~1 credit = $1 USD worth of ETH.</li>
+        <li><i class="fas fa-circle-check"></i> Send exact ETH equivalent to the address. Your payment will be detected automatically (usually 1-3 min).</li>
+        <li><i class="fas fa-circle-check"></i> After detection, your real asset (ETH) will be credited to your Supper Cash wallet or external address (configurable).</li>
+        <li><i class="fas fa-circle-check"></i> Minimum exchange: 50 credits.</li>
       </ul>
 
-      <!-- urgent / fee note -->
+      <!-- urgent / gas fee note -->
       <div class="urgent-note">
-        <i class="fas fa-exclamation-triangle"></i>
+        <i class="fas fa-gas-pump"></i>
         <div>
-          <strong style="color:white;">Your bank may charge transfer fees</strong><br>
-          <span style="opacity:0.8; font-size:14px;">Ensure you send the exact net amount. We do not deduct additional fees.</span>
+          <strong style="color:white;">Gas fee (network cost)</strong><br>
+          <span style="opacity:0.8; font-size:14px;">The gas fee is separate and must be covered by you. We recommend a fast gas setting for quicker detection.</span>
         </div>
       </div>
     </div>
@@ -719,8 +696,8 @@
   <!-- extra reassurance row -->
   <div style="display: flex; justify-content: space-between; margin-top: 30px; flex-wrap: wrap; gap: 15px; background: white; padding: 20px 28px; border-radius: 60px; box-shadow: var(--shadow-card);">
     <div style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-bolt" style="color: var(--warning);"></i> <span>Auto-detection</span></div>
-    <div style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-clock" style="color: var(--accent);"></i> <span>≈ 2 hours</span></div>
-    <div style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-lock" style="color: var(--success);"></i> <span>GBP settlement</span></div>
+    <div style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-clock" style="color: var(--accent);"></i> <span>≈ 2 min</span></div>
+    <div style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-lock" style="color: var(--success);"></i> <span>Real asset settlement</span></div>
     <div style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-headset"></i> <span>Support 24/7</span></div>
   </div>
 </div>
@@ -733,16 +710,13 @@
     const transactionFeeSpan = document.getElementById('transactionFee');
     const networkFeeSpan = document.getElementById('networkFee');
     const netAmountSpan = document.getElementById('netAmount');
-    const copyBankBtn = document.getElementById('copyBankBtn');
+    const copyBtn = document.getElementById('copyAddressBtn');
+    const walletAddr = document.getElementById('walletAddress').innerText.trim();
 
     const MAX_CREDITS = 2500; // available earnings
 
     function formatCredits(value) {
-      return value.toFixed(0) + ' credits (£' + value.toFixed(2) + ')';
-    }
-
-    function formatGBP(value) {
-      return '£' + value.toFixed(2);
+      return value.toFixed(0) + ' credits';
     }
 
     function updateFees() {
@@ -750,7 +724,7 @@
       if (isNaN(rawValue) || rawValue < 0) rawValue = 0;
       if (rawValue > MAX_CREDITS) rawValue = MAX_CREDITS;
       if (rawValue < 0) rawValue = 0;
-      const amount = Math.floor(rawValue); // integer credits
+      const amount = Math.floor(rawValue); // use integer credits
 
       const transactionFee = amount * 0.15;
       const networkFee = amount * 0.08;
@@ -759,7 +733,7 @@
       exchangeSpan.textContent = formatCredits(amount);
       transactionFeeSpan.textContent = '- ' + formatCredits(transactionFee);
       networkFeeSpan.textContent = '- ' + formatCredits(networkFee);
-      netAmountSpan.textContent = formatGBP(netAmount);
+      netAmountSpan.textContent = formatCredits(netAmount);
     }
 
     amountInput.addEventListener('input', function(e) {
@@ -780,25 +754,19 @@
     amountInput.value = 1000;
     updateFees();
 
-    // copy all UK bank details
-    function copyBankDetails() {
-      const sortCode = document.getElementById('sortCode').innerText;
-      const account = document.getElementById('accountNumber').innerText;
-      const iban = document.getElementById('iban').innerText;
-      const swift = document.getElementById('swift').innerText;
-      const bankText = `Bank: Barclays Bank UK PLC\nAccount name: Supper Cash Holdings Ltd\nSort code: ${sortCode}\nAccount number: ${account}\nIBAN: ${iban}\nSWIFT: ${swift}`;
-      
-      navigator.clipboard.writeText(bankText).then(() => {
+    // copy address
+    function copyAddress() {
+      navigator.clipboard.writeText(walletAddr).then(() => {
         const toast = document.createElement('div');
         toast.className = 'copy-toast';
-        toast.innerHTML = '<i class="fas fa-check-circle" style="margin-right:8px;"></i> UK bank details copied';
+        toast.innerHTML = '<i class="fas fa-check-circle" style="margin-right:8px;"></i> Address copied (real asset settlement)';
         document.body.appendChild(toast);
         setTimeout(() => {
           if (toast.parentNode) toast.parentNode.removeChild(toast);
         }, 2000);
       }).catch(() => alert('Please copy manually'));
     }
-    copyBankBtn.addEventListener('click', copyBankDetails);
+    copyBtn.addEventListener('click', copyAddress);
 
     // click on available earnings to set max
     const availableSpan = document.querySelector('.earnings-note strong');
@@ -811,13 +779,13 @@
   })();
 </script>
 
-<!-- footer -->
+<!-- footer minimal -->
 <footer style="background: var(--primary-dark); margin-top: 60px; padding: 32px 0 20px;">
   <div style="max-width:1400px; margin:0 auto; padding:0 32px; color:rgba(255,255,255,0.6); display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px;">
-    <div>© 2024 Supper Cash Professional · UK Sterling Exchange</div>
+    <div>© 2024 Supper Cash Professional · real asset exchange</div>
     <div style="display:flex; gap:28px;">
       <a href="#" style="color:white; text-decoration:none;">Security</a>
-      <a href="#" style="color:white; text-decoration:none;">FCA</a>
+      <a href="#" style="color:white; text-decoration:none;">Audit</a>
       <a href="#" style="color:white; text-decoration:none;">Support</a>
     </div>
   </div>
