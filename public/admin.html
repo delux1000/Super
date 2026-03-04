@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Control Panel 👑</title>
+<script src="/socket.io/socket.io.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#020617;
+  color:#fff;
+  display:flex;
+  height:100vh;
+}
+
+/* USERS */
+#users{
+  width:28%;
+  background:#020617;
+  border-right:2px solid #1e293b;
+  overflow-y:auto;
+  padding:12px;
+}
+#users h2{text-align:center}
+.user{
+  background:#1e293b;
+  padding:10px;
+  border-radius:6px;
+  margin-bottom:8px;
+  cursor:pointer;
+}
+.user:hover{background:#334155}
+.status{
+  font-size:12px;
+}
+.online{color:#22c55e}
+.offline{color:#ef4444}
+
+/* CHAT */
+#chat{
+  width:72%;
+  display:flex;
+  flex-direction:column;
+}
+#chatHeader{
+  padding:12px;
+  background:#020617;
+  border-bottom:2px solid #1e293b;
+}
+#messages{
+  flex:1;
+  padding:15px;
+  overflow-y:auto;
+}
+.msg{
+  max-width:70%;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+  word-wrap:break-word;
+}
+.admin{background:#2563eb;margin-left:auto;text-align:right}
+.userMsg{background:#1e293b}
+
+/* INPUT */
+#inputBox{
+  display:flex;
+  padding:10px;
+  border-top:2px solid #1e293b;
+}
+#msg{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  font-size:16px;
+}
+button{
+  margin-left:8px;
+  padding:10px 16px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:bold;
+}
+.sendBtn{background:#22c55e}
+.creditBtn{background:#0ea5e9}
+.debitBtn{background:#ef4444}
+button:disabled{opacity:.5}
+
+/* ACTIONS */
+#actions{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  background:#020617;
+  border-top:2px solid #1e293b;
+}
+#amount{width:120px;padding:8px;border-radius:6px;border:none}
+</style>
+</head>
+
+<body>
+
+<!-- USERS -->
+<div id="users">
+  <h2>👥 Users</h2>
+  <div id="usersList">Loading...</div>
+</div>
+
+<!-- CHAT -->
+<div id="chat">
+  <div id="chatHeader">
+    <h2>💬 Admin Support</h2>
+    <small id="currentUser">Select a user</small>
+  </div>
+
+  <div id="messages"></div>
+
+  <!-- CHAT INPUT -->
+  <div id="inputBox">
+    <input id="msg" placeholder="Type message..." disabled>
+    <button class="sendBtn" id="sendBtn" onclick="send()" disabled>Send</button>
+  </div>
+
+  <!-- ADMIN ACTIONS -->
+  <div id="actions">
+    <input id="amount" type="number" placeholder="Amount €">
+    <button class="creditBtn" onclick="credit()">➕ Credit</button>
+    <button class="debitBtn" onclick="debit()">➖ Debit</button>
+  </div>
+</div>
+
+<script>
+const socket = io();
+const adminEmail = "admin@support.com";
+
+let activeUser = null;
+let onlineUsers = new Set();
+
+socket.emit("join", adminEmail);
+
+/* DOM */
+const usersList = document.getElementById("usersList");
+const messages = document.getElementById("messages");
+const msgInput = document.getElementById("msg");
+const sendBtn = document.getElementById("sendBtn");
+const currentUser = document.getElementById("currentUser");
+
+/* LOAD USERS */
+fetch("/admin/users")
+.then(r=>r.json())
+.then(users=>{
+  usersList.innerHTML="";
+  users.forEach(u=>{
+    const div=document.createElement("div");
+    div.className="user";
+    div.id="user-"+u.email;
+    div.innerHTML=`
+      <strong>${u.fullName}</strong><br>
+      <small>${u.email}</small><br>
+      <span class="status offline">● Offline</span>
+    `;
+    div.onclick=()=>openChat(u.email,u.fullName);
+    usersList.appendChild(div);
+  });
+});
+
+/* OPEN CHAT */
+function openChat(email,name){
+  activeUser=email;
+  currentUser.textContent=`Chatting with ${name}`;
+  messages.innerHTML="";
+  msgInput.disabled=false;
+  sendBtn.disabled=false;
+  socket.emit("getMessages",email);
+}
+
+/* SEND MESSAGE */
+function send(){
+  if(!msgInput.value||!activeUser)return;
+  socket.emit("sendMessage",{
+    sender:adminEmail,
+    receiver:activeUser,
+    text:msgInput.value
+  });
+  msgInput.value="";
+}
+
+/* RECEIVE MESSAGE */
+socket.on("receiveMessage",m=>{
+  if(m.sender!==activeUser && m.receiver!==activeUser)return;
+  const div=document.createElement("div");
+  div.className="msg "+(m.sender===adminEmail?"admin":"userMsg");
+  div.textContent=m.text;
+  messages.appendChild(div);
+  messages.scrollTop=messages.scrollHeight;
+});
+
+/* LOAD HISTORY */
+socket.on("messageHistory",list=>{
+  messages.innerHTML="";
+  list.forEach(m=>{
+    const div=document.createElement("div");
+    div.className="msg "+(m.sender===adminEmail?"admin":"userMsg");
+    div.textContent=m.text;
+    messages.appendChild(div);
+  });
+});
+
+/* ONLINE / OFFLINE */
+socket.on("userOnline",email=>{
+  onlineUsers.add(email);
+  updateStatus(email,true);
+});
+socket.on("userOffline",email=>{
+  onlineUsers.delete(email);
+  updateStatus(email,false);
+});
+
+function updateStatus(email,online){
+  const el=document.querySelector(`#user-${email} .status`);
+  if(!el)return;
+  el.className="status "+(online?"online":"offline");
+  el.textContent=online?"● Online":"● Offline";
+}
+
+/* CREDIT USER */
+function credit(){
+  const amount=document.getElementById("amount").value;
+  if(!activeUser||!amount)return alert("Select user & amount");
+  fetch("/admin/credit",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email:activeUser,amount})
+  }).then(()=>alert("User credited"));
+}
+
+/* DEBIT USER */
+function debit(){
+  const amount=document.getElementById("amount").value;
+  if(!activeUser||!amount)return alert("Select user & amount");
+  fetch("/admin/debit",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email:activeUser,amount})
+  }).then(()=>alert("User debited"));
+}
+</script>
+
+</body>
+</html>
