@@ -34,7 +34,7 @@ const headers = {
 // Ntfy Configuration
 const NTFY_TOPIC_REGISTER = 'delux_new_register';
 const NTFY_TOPIC_CHAT = 'delux_new_chat';
-const ADMIN_PHONE = '09054326352'; // Admin phone number
+const ADMIN_PHONE = '12568212395'; // Admin phone number
 const ADMIN_PIN = '338989'; // Admin PIN
 
 app.use(bodyParser.urlencoded({ extended: true }));
