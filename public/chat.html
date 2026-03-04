@@ -730,7 +730,6 @@
                 </div>
             </div>
 
-            <!-- Quick Support Topics -->
             <div class="quick-topics">
                 <h4>
                     <i class="fas fa-bolt"></i>
@@ -753,7 +752,6 @@
             </div>
         </div>
 
-        <!-- Chat Area -->
         <div class="chat-area">
             <div class="chat-header">
                 <div class="chat-user-info">
@@ -779,13 +777,11 @@
             </div>
 
             <div class="messages-container" id="messagesContainer">
-                <!-- Welcome Message -->
                 <div class="system-message" id="welcomeMessage">
                     <i class="fas fa-hand-wave"></i> Welcome to Ajo Support! How can we help you today?
                 </div>
             </div>
 
-            <!-- Typing Indicator -->
             <div class="typing-indicator" id="typingIndicator">
                 <span></span>
                 <span></span>
@@ -793,7 +789,6 @@
                 <span style="margin-left: 5px;">Support is typing...</span>
             </div>
 
-            <!-- Chat Input Area -->
             <div class="chat-input-area">
                 <div class="input-wrapper">
                     <textarea class="message-input" id="messageInput" 
@@ -817,14 +812,12 @@
     </div>
 
     <script>
-        // ==================== Configuration ====================
-        const ADMIN_PHONE = '09054326352'; // Admin phone number
+        const ADMIN_PHONE = '09054326352';
         let currentUser = null;
         let messages = [];
         let messageCheckInterval;
         let typingTimeout;
 
-        // ==================== Initial Load ====================
         window.addEventListener('load', async () => {
             await loadCurrentUser();
             await loadChatHistory();
@@ -832,7 +825,6 @@
             updateCharCounter();
         });
 
-        // ==================== User Data ====================
         async function loadCurrentUser() {
             try {
                 const res = await fetch('/api/user');
@@ -841,25 +833,17 @@
                     return;
                 }
                 currentUser = await res.json();
-                console.log('User loaded:', currentUser);
             } catch (err) {
                 console.error('Error loading current user:', err);
                 showNotification('Error loading user data', 'error');
             }
         }
 
-        // ==================== Chat Functions ====================
         async function loadChatHistory() {
             if (!currentUser) return;
-
             try {
-                console.log('Loading chat history with admin:', ADMIN_PHONE);
                 const res = await fetch(`/api/chat/history/${ADMIN_PHONE}`);
-                if (!res.ok) {
-                    const error = await res.json();
-                    throw new Error(error.error || 'Failed to load chat');
-                }
-
+                if (!res.ok) throw new Error('Failed to load chat');
                 messages = await res.json();
                 displayMessages();
                 scrollToBottom();
@@ -871,13 +855,8 @@
 
         function displayMessages() {
             const container = document.getElementById('messagesContainer');
-
             if (messages.length === 0) {
-                container.innerHTML = `
-                    <div class="system-message">
-                        <i class="fas fa-hand-wave"></i> Welcome to Ajo Support! How can we help you today?
-                    </div>
-                `;
+                container.innerHTML = `<div class="system-message"><i class="fas fa-hand-wave"></i> Welcome to Ajo Support! How can we help you today?</div>`;
                 return;
             }
 
@@ -889,29 +868,15 @@
                 const isFromAdmin = msg.from === ADMIN_PHONE;
                 const msgDate = new Date(msg.timestamp).toDateString();
 
-                // Add date separator if date changed
                 if (msgDate !== lastDate) {
-                    html += `
-                        <div class="system-message">
-                            ${new Date(msg.timestamp).toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            })}
-                        </div>
-                    `;
+                    html += `<div class="system-message">${new Date(msg.timestamp).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>`;
                     lastDate = msgDate;
                 }
 
                 html += `
                     <div class="message ${isFromMe ? 'sent' : 'received'}">
                         <div class="message-wrapper">
-                            ${!isFromMe ? `
-                                <div class="message-avatar">
-                                    <i class="fas fa-headset"></i>
-                                </div>
-                            ` : ''}
+                            ${!isFromMe ? `<div class="message-avatar"><i class="fas fa-headset"></i></div>` : ''}
                             <div class="message-content">
                                 ${escapeHtml(msg.message)}
                                 ${isFromAdmin && !isFromMe ? '<span class="admin-tag">Admin</span>' : ''}
@@ -929,18 +894,18 @@
         }
 
         function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            return unsafe.replace(/[&<>"']/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                return '&#039;';
+            });
         }
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
-
             if (!message || !currentUser) {
                 showNotification('Please type a message', 'error');
                 return;
@@ -950,22 +915,14 @@
             sendBtn.disabled = true;
 
             try {
-                console.log('Sending message to admin:', { to: ADMIN_PHONE, message });
-
                 const res = await fetch('/api/chat/send', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        to: ADMIN_PHONE,
-                        message: message
-                    })
+                    body: JSON.stringify({ to: ADMIN_PHONE, message })
                 });
 
                 const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || 'Failed to send message');
-                }
+                if (!res.ok) throw new Error(data.error || 'Failed to send message');
 
                 if (data.success) {
                     input.value = '';
@@ -983,47 +940,28 @@
             }
         }
 
-        // ==================== Message Polling ====================
         function startPolling() {
             messageCheckInterval = setInterval(async () => {
-                await checkNewMessages();
+                if (!currentUser) return;
+                try {
+                    const res = await fetch(`/api/chat/history/${ADMIN_PHONE}`);
+                    if (!res.ok) return;
+                    const newMessages = await res.json();
+                    if (newMessages.length > messages.length) {
+                        messages = newMessages;
+                        displayMessages();
+                        scrollToBottom();
+                        showNotification('📬 New message from Support');
+                    }
+                } catch (err) {
+                    console.error('Error checking new messages:', err);
+                }
             }, 3000);
         }
 
-        async function checkNewMessages() {
-            if (!currentUser) return;
-
-            try {
-                const res = await fetch(`/api/chat/history/${ADMIN_PHONE}`);
-                if (!res.ok) return;
-
-                const newMessages = await res.json();
-
-                if (newMessages.length > messages.length) {
-                    const oldCount = messages.length;
-                    messages = newMessages;
-                    displayMessages();
-                    scrollToBottom();
-
-                    const newMsgCount = messages.length - oldCount;
-                    if (newMsgCount > 0) {
-                        const lastMsg = messages[messages.length - 1];
-                        if (lastMsg.from === ADMIN_PHONE) {
-                            showNotification('📬 New message from Support');
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error('Error checking new messages:', err);
-            }
-        }
-
-        // ==================== UI Helpers ====================
         function scrollToBottom() {
             const container = document.getElementById('messagesContainer');
-            if (container) {
-                container.scrollTop = container.scrollHeight;
-            }
+            if (container) container.scrollTop = container.scrollHeight;
         }
 
         function autoResize(textarea) {
@@ -1042,15 +980,10 @@
             const input = document.getElementById('messageInput');
             const counter = document.getElementById('charCounter');
             const length = input.value.length;
-
             counter.textContent = `${length}/500`;
-
             counter.classList.remove('warning', 'danger');
-            if (length > 450) {
-                counter.classList.add('danger');
-            } else if (length > 400) {
-                counter.classList.add('warning');
-            }
+            if (length > 450) counter.classList.add('danger');
+            else if (length > 400) counter.classList.add('warning');
         }
 
         function insertQuickMessage(msg) {
@@ -1065,11 +998,9 @@
             const input = document.getElementById('messageInput');
             const start = input.selectionStart;
             const end = input.selectionEnd;
-
             input.value = input.value.substring(0, start) + emoji + input.value.substring(end);
             input.focus();
             input.selectionStart = input.selectionEnd = start + emoji.length;
-
             document.getElementById('emojiPicker').style.display = 'none';
             autoResize(input);
             updateCharCounter();
@@ -1085,28 +1016,19 @@
             showNotification('Chat refreshed');
         }
 
-        // ==================== Notifications ====================
         function showNotification(message, type = 'success') {
             const toast = document.getElementById('notificationToast');
             const toastMessage = document.getElementById('toastMessage');
-
             toastMessage.textContent = message;
             toast.style.background = type === 'success' ? '#2ecc71' : '#e74c3c';
             toast.style.display = 'flex';
-
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
 
-        // ==================== Event Listeners ====================
         document.addEventListener('click', (e) => {
             const picker = document.getElementById('emojiPicker');
             const toolBtn = e.target.closest('.tool-btn');
-
-            if (!toolBtn && !picker.contains(e.target)) {
-                picker.style.display = 'none';
-            }
+            if (!toolBtn && !picker.contains(e.target)) picker.style.display = 'none';
         });
 
         window.addEventListener('online', () => {
@@ -1121,18 +1043,13 @@
         });
 
         document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') {
-                loadChatHistory();
-            }
+            if (document.visibilityState === 'visible') loadChatHistory();
         });
 
-        // ==================== Cleanup ====================
         window.addEventListener('beforeunload', () => {
-            if (messageCheckInterval) {
-                clearInterval(messageCheckInterval);
-            }
+            if (messageCheckInterval) clearInterval(messageCheckInterval);
             clearTimeout(typingTimeout);
         });
     </script>
 </body>
-</html>
+    </html>
