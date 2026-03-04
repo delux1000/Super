@@ -21,6 +21,7 @@
             --gray: #8C98A9;
             --gray-light: #F0F2F5;
             --success: #00C853;
+            --danger: #FF5252;
             --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
         }
@@ -241,6 +242,20 @@
             text-align: center;
         }
 
+        /* Error Message */
+        .error-message {
+            align-self: center;
+            background: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            margin: 10px 0;
+            max-width: 80%;
+            text-align: center;
+            display: none;
+        }
+
         /* Chat Input */
         .chat-input-area {
             padding: 25px 30px;
@@ -311,7 +326,7 @@
         }
 
         .char-counter.danger {
-            color: #FF5252;
+            color: var(--danger);
         }
 
         /* Loading Spinner */
@@ -390,6 +405,15 @@
             opacity: 0.3;
         }
 
+        /* Connection Status */
+        .connection-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            background: var(--gray-light);
+            color: var(--gray);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .message {
@@ -447,10 +471,15 @@
             </div>
             <div class="logo-text">Support Chat</div>
         </div>
-        <a href="/dashboard.html" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Back to Dashboard
-        </a>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span class="connection-status" id="connectionStatus">
+                <i class="fas fa-circle" style="color: var(--success); font-size: 8px;"></i> Connected
+            </span>
+            <a href="/dashboard.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back
+            </a>
+        </div>
     </div>
 
     <!-- Main Chat Container -->
@@ -476,9 +505,15 @@
         <div class="chat-area">
             <div class="messages-container" id="messagesContainer">
                 <!-- Welcome Message -->
-                <div class="system-message">
+                <div class="system-message" id="welcomeMessage">
                     👋 Welcome! How can we help you today?
                 </div>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText"></span>
             </div>
 
             <!-- Chat Input -->
@@ -499,7 +534,7 @@
 
                 <!-- Quick Replies -->
                 <div class="quick-replies">
-                    <button class="quick-reply" onclick="insertQuickMessage('Hello, I need help')">
+                    <button class="quick-reply" onclick="insertQuickMessage('Hello, I need help with my account')">
                         👋 Hello
                     </button>
                     <button class="quick-reply" onclick="insertQuickMessage('I have a question about my balance')">
@@ -522,6 +557,8 @@
         let currentUser = null;
         let messages = [];
         let messageCheckInterval;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
 
         // ==================== Initial Load ====================
         window.addEventListener('load', async () => {
@@ -529,6 +566,7 @@
             await loadChatHistory();
             startPolling();
             updateCharCounter();
+            updateConnectionStatus(true);
         });
 
         // ==================== User Data ====================
@@ -536,17 +574,21 @@
             try {
                 const res = await fetch('/user-info');
                 if (!res.ok) {
-                    window.location.href = '/login.html';
-                    return;
+                    if (res.status === 401) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${res.status}`);
                 }
                 const data = await res.json();
                 currentUser = {
                     email: data.email,
                     fullName: data.fullName
                 };
+                console.log('User loaded:', currentUser);
             } catch (err) {
                 console.error('Error loading user:', err);
-                showNotification('Error loading user data', 'error');
+                showError('Failed to load user data. Please refresh the page.');
             }
         }
 
@@ -556,13 +598,24 @@
 
             try {
                 const res = await fetch(`/api/chat/history/${ADMIN_PHONE}`);
-                if (!res.ok) return;
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP error! status: ${res.status}`);
+                }
                 
                 messages = await res.json();
                 displayMessages();
                 scrollToBottom();
+                hideError();
+                retryCount = 0; // Reset retry count on success
             } catch (err) {
                 console.error('Error loading chat history:', err);
+                retryCount++;
+                if (retryCount <= MAX_RETRIES) {
+                    showError(`Failed to load messages. Retrying... (${retryCount}/${MAX_RETRIES})`);
+                } else {
+                    showError('Unable to connect to chat. Please refresh the page.');
+                }
             }
         }
 
@@ -571,7 +624,7 @@
             
             if (messages.length === 0) {
                 container.innerHTML = `
-                    <div class="system-message">
+                    <div class="system-message" id="welcomeMessage">
                         👋 Welcome! How can we help you today?
                     </div>
                 `;
@@ -629,32 +682,46 @@
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
-            if (!message || !currentUser) return;
+            if (!message || !currentUser) {
+                showError('Please type a message');
+                return;
+            }
 
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
 
             try {
+                console.log('Sending message:', { to: ADMIN_PHONE, message });
+                
                 const res = await fetch('/api/chat/send', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
                         to: ADMIN_PHONE,
                         message: message
                     })
                 });
 
-                if (res.ok) {
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || `HTTP error! status: ${res.status}`);
+                }
+
+                if (data.success) {
                     input.value = '';
                     autoResize(input);
                     updateCharCounter();
                     await loadChatHistory();
+                    hideError();
                 } else {
-                    showNotification('Failed to send message', 'error');
+                    throw new Error('Failed to send message');
                 }
             } catch (err) {
                 console.error('Error sending message:', err);
-                showNotification('Error sending message', 'error');
+                showError(err.message || 'Failed to send message. Please try again.');
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
@@ -687,7 +754,7 @@
                     if (newMsgCount > 0) {
                         const lastMsg = messages[messages.length - 1];
                         if (lastMsg.from === ADMIN_PHONE) {
-                            showNotification(`New message from Support`);
+                            showNotification('New message from Support');
                         }
                     }
                 }
@@ -739,13 +806,31 @@
             input.focus();
         }
 
+        // ==================== Error Handling ====================
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideError();
+            }, 5000);
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.style.display = 'none';
+        }
+
         // ==================== Notification ====================
         function showNotification(message, type = 'success') {
             const toast = document.getElementById('notificationToast');
             const toastMessage = document.getElementById('toastMessage');
             
             toastMessage.textContent = message;
-            toast.style.background = type === 'success' ? 'var(--primary)' : '#FF5252';
+            toast.style.background = type === 'success' ? 'var(--primary)' : 'var(--danger)';
             toast.style.display = 'flex';
             
             setTimeout(() => {
@@ -753,13 +838,25 @@
             }, 3000);
         }
 
+        // ==================== Connection Status ====================
+        function updateConnectionStatus(isOnline) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (isOnline) {
+                statusEl.innerHTML = '<i class="fas fa-circle" style="color: var(--success); font-size: 8px;"></i> Connected';
+            } else {
+                statusEl.innerHTML = '<i class="fas fa-circle" style="color: var(--danger); font-size: 8px;"></i> Offline';
+            }
+        }
+
         // ==================== Event Listeners ====================
         window.addEventListener('online', () => {
+            updateConnectionStatus(true);
             showNotification('🟢 Back online');
             loadChatHistory();
         });
 
         window.addEventListener('offline', () => {
+            updateConnectionStatus(false);
             showNotification('🔴 You are offline', 'error');
         });
 
