@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Support Chat 💬</title>
+  <script src="/socket.io/socket.io.js"></script>
+  < style>
+    body { font-family: Arial; background:#f4f6fb }
+    #chat { max-width:600px; margin:auto }
+    #messages { height:300px; overflow-y:auto; background:#fff; padding:10px }
+    .me { color:green }
+    .admin { color:blue }
+  </style>
+</head>
+<body>
+
+<div id="chat">
+  <h2>Contact Support 💬</h2>
+  <div id="messages"></div>
+
+  <input id="msg" placeholder="Type message..." />
+  <button onclick="send()">Send 🚀</button>
+</div>
+
+<script>
+  const socket = io();
+  const userEmail = prompt("Enter your email");
+  const adminEmail = "admin@support.com";
+
+  socket.emit("join", userEmail);
+  socket.emit("getMessages", userEmail);
+
+  function send() {
+    const text = msg.value;
+    socket.emit("sendMessage", {
+      sender: userEmail,
+      receiver: adminEmail,
+      text
+    });
+    msg.value = "";
+  }
+
+  socket.on("receiveMessage", m => {
+    const div = document.createElement("div");
+    div.className = m.sender === userEmail ? "me" : "admin";
+    div.textContent = `${m.sender}: ${m.text}`;
+    messages.appendChild(div);
+  });
+
+  socket.on("messageHistory", list => {
+    list.forEach(m => {
+      const div = document.createElement("div");
+      div.textContent = `${m.sender}: ${m.text}`;
+      messages.appendChild(div);
+    });
+  });
+</script>
+
+</body>
+</html>
