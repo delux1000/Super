@@ -644,10 +644,15 @@
     </div>
 
     <script>
-        // Configuration
+        // Configuration - Using EMAIL instead of phone number
+        const ADMIN_EMAIL = 'admin@delux.com'; // Admin email from your backend
+        
+        // Also keep the phone for backward compatibility, but prioritize email
         const ADMIN_PHONE = '09054326352';
+        
         let currentUser = null;
         let userName = null;
+        let userEmail = null;
         let chatHistory = [];
         let lastMessageCount = 0;
         let typingTimeout = null;
@@ -666,6 +671,7 @@
                 
                 currentUser = data.user;
                 userName = data.userName;
+                userEmail = data.user; // The session user is the email
                 isAdmin = data.isAdmin || false;
                 
                 // Update UI with user info
@@ -676,6 +682,7 @@
                     document.getElementById('quickReplies').style.display = 'flex';
                 }
                 
+                console.log('Logged in as:', currentUser, 'Email:', userEmail);
                 return true;
             } catch (error) {
                 console.error('Session check failed:', error);
@@ -689,14 +696,16 @@
             try {
                 showLoading(true);
                 
-                // For non-admin users, chat with admin
-                const otherUser = isAdmin ? await getFirstUser() : ADMIN_PHONE;
+                // For non-admin users, chat with admin (using email)
+                const otherUser = isAdmin ? await getFirstUserEmail() : ADMIN_EMAIL;
                 
                 if (!otherUser) {
                     showEmptyState();
                     return;
                 }
 
+                console.log('Loading messages with:', otherUser);
+                
                 const response = await fetch(`/api/chat/history/${encodeURIComponent(otherUser)}`);
                 
                 if (!response.ok) {
@@ -717,16 +726,16 @@
             }
         }
 
-        // Get first user for admin (for demo, you might want a user selector)
-        async function getFirstUser() {
-            if (!isAdmin) return ADMIN_PHONE;
+        // Get first user email for admin
+        async function getFirstUserEmail() {
+            if (!isAdmin) return ADMIN_EMAIL;
             
             try {
                 const response = await fetch('/api/admin/users');
                 const users = await response.json();
                 
                 if (users.length > 0) {
-                    return users[0].email;
+                    return users[0].email; // Return email instead of phone
                 }
             } catch (error) {
                 console.error('Get users error:', error);
@@ -761,7 +770,7 @@
                     lastDate = dateStr;
                 }
 
-                const isSent = msg.from === currentUser;
+                const isSent = msg.from === currentUser || msg.from === userEmail;
                 const timeStr = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 
                 html += `
@@ -777,6 +786,7 @@
                                         ${msg.read ? '✓✓' : '✓'}
                                     </span>
                                 ` : ''}
+                                ${!isSent && msg.from === ADMIN_EMAIL ? '<span class="admin-badge" style="font-size: 0.6rem;">Admin</span>' : ''}
                             </div>
                         </div>
                     </div>
@@ -802,7 +812,19 @@
             sendButton.disabled = true;
 
             try {
-                const otherUser = isAdmin ? await getFirstUser() : ADMIN_PHONE;
+                // For non-admin users, send to admin email
+                // For admin, send to first user's email
+                let recipientEmail = ADMIN_EMAIL;
+                
+                if (isAdmin) {
+                    recipientEmail = await getFirstUserEmail();
+                    if (!recipientEmail) {
+                        alert('No users available to message');
+                        return;
+                    }
+                }
+                
+                console.log('Sending message to:', recipientEmail);
                 
                 const response = await fetch('/api/chat/send', {
                     method: 'POST',
@@ -810,13 +832,14 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        to: otherUser,
+                        to: recipientEmail, // Send to email
                         message: message
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to send message');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to send message');
                 }
 
                 // Clear input and reset height
@@ -828,7 +851,7 @@
                 
             } catch (error) {
                 console.error('Send message error:', error);
-                alert('Failed to send message. Please try again.');
+                alert('Failed to send message: ' + error.message);
             } finally {
                 sendButton.disabled = false;
                 input.focus();
@@ -864,7 +887,10 @@
             
             refreshInterval = setInterval(async () => {
                 try {
-                    const otherUser = isAdmin ? await getFirstUser() : ADMIN_PHONE;
+                    const otherUser = isAdmin ? await getFirstUserEmail() : ADMIN_EMAIL;
+                    
+                    if (!otherUser) return;
+                    
                     const response = await fetch(`/api/chat/history/${encodeURIComponent(otherUser)}`);
                     const messages = await response.json();
                     
@@ -891,12 +917,6 @@
         function autoResize(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
-        }
-
-        // Show typing indicator
-        function showTyping() {
-            // This would be implemented with WebSocket for real typing indicators
-            // For now, we'll just show a local typing indicator
         }
 
         // Toggle emoji picker
@@ -949,7 +969,7 @@
             
             if (show) {
                 loading.style.display = 'block';
-                messagesArea.innerHTML = '';
+                if (messagesArea) messagesArea.innerHTML = '';
             } else {
                 loading.style.display = 'none';
             }
@@ -963,7 +983,10 @@
                     <div class="empty-chat-icon">💬</div>
                     <h3>No messages yet</h3>
                     <p>Send a message to start the conversation</p>
-                    <p style="font-size: 0.8rem; color: #999; margin-top: 10px;">
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">
+                        Admin: admin@delux.com
+                    </p>
+                    <p style="font-size: 0.8rem; color: #999;">
                         Admin is usually online and will respond shortly
                     </p>
                 </div>
@@ -999,10 +1022,30 @@
             }
         }
 
+        // Test connection to verify admin email works
+        async function testAdminConnection() {
+            try {
+                const response = await fetch('/api/chat/history/' + encodeURIComponent(ADMIN_EMAIL));
+                if (response.ok) {
+                    console.log('✅ Admin email connection successful');
+                } else {
+                    console.log('⚠️ Admin email may not work, trying phone...');
+                    // Try phone as fallback
+                    const phoneResponse = await fetch('/api/chat/history/' + encodeURIComponent(ADMIN_PHONE));
+                    if (phoneResponse.ok) {
+                        console.log('✅ Admin phone connection successful');
+                    }
+                }
+            } catch (error) {
+                console.error('Connection test failed:', error);
+            }
+        }
+
         // Initialize
         async function init() {
             const sessionValid = await checkSession();
             if (sessionValid) {
+                await testAdminConnection();
                 await loadMessages();
                 
                 // Add scroll listener
@@ -1023,4 +1066,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
