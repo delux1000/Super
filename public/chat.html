@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Delux Euro - Messages</title>
+    <title>Delux Euro - Live Support Chat</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(145deg, #2b3a67 0%, #3f2e5f 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 12px;
         }
 
         .chat-container {
             width: 100%;
-            max-width: 500px;
-            height: 90vh;
-            background: white;
-            border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 420px;
+            height: 85vh;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -36,17 +36,15 @@
 
         /* Header */
         .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
+            background: #2b3a67;
+            padding: 20px 16px;
             color: white;
             display: flex;
             align-items: center;
-            gap: 15px;
-            position: relative;
+            gap: 12px;
         }
-
-        .back-button {
-            background: rgba(255,255,255,0.2);
+        .back-btn {
+            background: rgba(255,255,255,0.15);
             border: none;
             color: white;
             font-size: 24px;
@@ -57,688 +55,552 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
         }
-
-        .back-button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.05);
+        .back-btn:hover {
+            background: rgba(255,255,255,0.25);
         }
-
         .header-info {
             flex: 1;
         }
-
         .header-info h2 {
             font-size: 1.2rem;
+            font-weight: 600;
             margin-bottom: 4px;
         }
-
-        .header-info p {
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             font-size: 0.8rem;
             opacity: 0.9;
         }
-
-        .admin-badge {
-            background: #ffd700;
-            color: #333;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        .online-status {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.8rem;
-        }
-
         .online-dot {
             width: 8px;
             height: 8px;
             background: #4caf50;
             border-radius: 50%;
-            animation: pulse 2s infinite;
+            animation: pulse 1.5s infinite;
         }
-
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.2); opacity: 0.7; }
             100% { transform: scale(1); opacity: 1; }
         }
+        .admin-badge {
+            background: #ffd966;
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        .connection-status {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+        }
+        .dashboard-link {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
 
-        /* Messages Area */
-        .messages-area {
+        /* Messages Container */
+        .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            background: #f5f7fb;
+            padding: 16px;
+            background: #f5f7fa;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
-        /* Message Bubbles */
-        .message-wrapper {
+        .date-separator {
+            text-align: center;
+            margin: 8px 0;
+        }
+        .date-separator span {
+            background: rgba(0,0,0,0.05);
+            color: #555;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+        }
+
+        .message-row {
             display: flex;
-            margin-bottom: 5px;
-            animation: fadeIn 0.3s ease;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message-wrapper.sent {
+        .message-row.sent {
             justify-content: flex-end;
         }
-
-        .message-wrapper.received {
+        .message-row.received {
             justify-content: flex-start;
         }
-
-        .message-bubble {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 20px;
-            position: relative;
-            word-wrap: break-word;
+        .message-row.system {
+            justify-content: center;
         }
-
+        .message-content {
+            max-width: 75%;
+        }
+        .message-bubble {
+            padding: 10px 14px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            position: relative;
+        }
         .message-bubble.sent {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2b3a67;
             color: white;
             border-bottom-right-radius: 4px;
         }
-
         .message-bubble.received {
             background: white;
-            color: #333;
+            color: #1e1e1e;
             border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
         }
-
-        .message-info {
+        .message-bubble.system {
+            background: #e5e7eb;
+            color: #4b5563;
+            font-size: 0.85rem;
+            border-radius: 30px;
+            max-width: 90%;
+            text-align: center;
+        }
+        .message-meta {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             margin-top: 4px;
             font-size: 0.7rem;
+            color: #777;
+            padding: 0 4px;
         }
-
-        .message-info.sent {
+        .message-meta.sent {
             justify-content: flex-end;
         }
-
-        .message-info.received {
-            justify-content: flex-start;
-        }
-
-        .message-time {
-            color: #999;
-        }
-
-        .message-status {
-            color: #4caf50;
-        }
-
-        .message-status.sent {
+        .read-receipt {
             color: #81c784;
-        }
-
-        /* System Message */
-        .system-message {
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .system-message span {
-            background: rgba(0,0,0,0.05);
-            color: #666;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            display: inline-block;
         }
 
         /* Typing Indicator */
         .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 12px 16px;
-            background: white;
+            background: #e5e7eb;
+            color: #4b5563;
+            padding: 10px 16px;
             border-radius: 20px;
             border-bottom-left-radius: 4px;
             width: fit-content;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
         }
-
         .typing-indicator span {
             width: 6px;
             height: 6px;
-            background: #999;
+            background: #6b7280;
             border-radius: 50%;
-            animation: typing 1.4s infinite;
+            animation: typingBounce 1.4s infinite;
         }
-
-        .typing-indicator span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-indicator span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-            30% { transform: translateY(-6px); opacity: 1; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
         }
 
         /* Input Area */
         .input-area {
             background: white;
-            padding: 15px 20px;
-            border-top: 1px solid #e0e0e0;
+            padding: 12px 16px;
+            border-top: 1px solid #ddd;
             display: flex;
             gap: 10px;
             align-items: flex-end;
         }
-
-        .message-input-wrapper {
+        .input-wrapper {
             flex: 1;
-            background: #f5f7fb;
-            border-radius: 25px;
-            padding: 8px 15px;
+            background: #f0f2f5;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+            padding: 8px 14px;
             display: flex;
-            align-items: flex-end;
-            gap: 10px;
+            align-items: center;
         }
-
-        .message-input {
-            flex: 1;
+        .input-wrapper textarea {
+            width: 100%;
             border: none;
             background: transparent;
-            padding: 8px 0;
+            padding: 6px 0;
             font-size: 0.95rem;
             outline: none;
             resize: none;
-            max-height: 100px;
+            max-height: 80px;
             line-height: 1.4;
             font-family: inherit;
         }
-
-        .message-input::placeholder {
-            color: #999;
-        }
-
-        .emoji-button, .attach-button {
-            background: none;
-            border: none;
-            font-size: 1.4rem;
-            cursor: pointer;
-            padding: 5px;
-            color: #666;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-        }
-
-        .emoji-button:hover, .attach-button:hover {
-            background: rgba(0,0,0,0.05);
-            transform: scale(1.1);
-        }
-
-        .send-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .send-btn {
+            background: #2b3a67;
             border: none;
             color: white;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
         }
-
-        .send-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        .send-btn:hover {
+            transform: scale(1.05);
+            background: #1f2a4a;
         }
-
-        .send-button:disabled {
-            background: #ccc;
+        .send-btn:disabled {
+            background: #aaa;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
 
-        .send-icon {
-            font-size: 1.4rem;
-            transform: rotate(45deg);
-            display: inline-block;
-        }
-
-        /* Emoji Picker */
-        .emoji-picker {
-            position: absolute;
-            bottom: 90px;
-            left: 20px;
-            right: 20px;
-            max-width: 350px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 15px;
-            display: none;
-            z-index: 1000;
-            margin: 0 auto;
-        }
-
-        .emoji-picker.show {
-            display: block;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .emoji-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .emoji-item {
-            font-size: 1.8rem;
-            text-align: center;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 10px;
-            transition: all 0.2s ease;
-        }
-
-        .emoji-item:hover {
-            background: #f0f0f0;
-            transform: scale(1.2);
-        }
-
-        /* Loading */
-        .loading-messages {
-            text-align: center;
-            padding: 40px 20px;
-            color: #999;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* New Message Indicator */
-        .new-message-indicator {
-            position: sticky;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #667eea;
-            color: white;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
-            cursor: pointer;
-            animation: bounce 2s infinite;
-            z-index: 100;
-            border: none;
-            width: fit-content;
-            margin: 0 auto;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-5px); }
-        }
-
-        /* Quick Replies */
-        .quick-replies {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 10px 20px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            scrollbar-width: thin;
-        }
-
-        .quick-reply {
-            background: #f5f7fb;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: #333;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        .quick-reply:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: #667eea;
-        }
-
-        /* Empty State */
-        .empty-chat {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .empty-chat-icon {
-            font-size: 4rem;
-            opacity: 0.3;
-        }
-
-        .empty-chat h3 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        /* Error Message */
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        /* Unread Badge */
-        .unread-badge {
-            background: #ff4757;
-            color: white;
-            font-size: 0.7rem;
-            min-width: 18px;
-            height: 18px;
-            border-radius: 9px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 5px;
-            margin-left: 5px;
-        }
-
-        /* Scroll to bottom button */
+        /* Scroll to bottom */
         .scroll-bottom {
             position: absolute;
             bottom: 90px;
-            right: 20px;
+            right: 16px;
             background: white;
-            border: none;
+            border: 1px solid #ccc;
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
-            color: #667eea;
-            transition: all 0.3s ease;
-            z-index: 99;
+            color: #2b3a67;
             opacity: 0;
             pointer-events: none;
+            transition: 0.2s;
+            z-index: 10;
         }
-
         .scroll-bottom.show {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .scroll-bottom:hover {
-            transform: scale(1.1);
+        /* New message badge */
+        .new-message-badge {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2b3a67;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: none;
+            border: none;
+            white-space: nowrap;
+            z-index: 10;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
         }
 
-        /* Responsive */
+        /* Loading & Empty States */
+        .loading-state, .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2b3a67;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 350px;
+        }
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        .toast.info { background: #3b82f6; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 480px) {
-            body {
-                padding: 0;
-            }
-
-            .chat-container {
-                height: 100vh;
-                border-radius: 0;
-                max-width: 100%;
-            }
-
-            .message-bubble {
-                max-width: 85%;
-            }
-
-            .quick-replies {
-                padding: 10px 15px;
-            }
+            body { padding: 0; }
+            .chat-container { height: 100vh; border-radius: 0; max-width: 100%; }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
     <div class="chat-container">
         <!-- Header -->
         <div class="chat-header">
-            <a href="/dashboard.html" class="back-button">←</a>
+            <a href="/dashboard.html" class="back-btn">←</a>
             <div class="header-info">
                 <h2>Admin Support</h2>
-                <div class="online-status">
-                    <span class="online-dot"></span>
-                    <span>Online</span>
+                <div class="status">
+                    <span class="online-dot" id="statusDot"></span>
+                    <span id="statusText">Online</span>
                     <span class="admin-badge">ADMIN</span>
+                    <span class="connection-status" id="connectionStatus">Connected</span>
                 </div>
             </div>
-            <div style="display: flex; gap: 5px;">
-                <button class="emoji-button" onclick="window.location.href='/dashboard.html'">🏠</button>
+            <a href="/dashboard.html" class="dashboard-link"><i class="fas fa-home"></i></a>
+        </div>
+
+        <!-- Messages Container -->
+        <div class="messages-container" id="messagesContainer">
+            <div class="loading-state" id="loadingState">
+                <div class="spinner"></div>
+                <p>Loading conversations...</p>
             </div>
         </div>
 
-        <!-- Messages Area -->
-        <div class="messages-area" id="messagesArea">
-            <div class="loading-messages" id="loadingMessages">
-                <div class="loading-spinner"></div>
-                <p>Loading messages...</p>
-            </div>
-        </div>
-
-        <!-- Quick Replies (hidden by default) -->
-        <div class="quick-replies" id="quickReplies" style="display: none;">
-            <button class="quick-reply" onclick="sendQuickReply('Hello, I need help with my account')">👋 Hello</button>
-            <button class="quick-reply" onclick="sendQuickReply('I have a question about withdrawal')">💰 Withdrawal</button>
-            <button class="quick-reply" onclick="sendQuickReply('I need help with investment')">📈 Investment</button>
-            <button class="quick-reply" onclick="sendQuickReply('My card is not working')">💳 Card Issue</button>
-            <button class="quick-reply" onclick="sendQuickReply('Thank you for your help')">🙏 Thanks</button>
+        <!-- Typing Indicator (hidden by default) -->
+        <div class="typing-indicator" id="typingIndicator" style="display: none;">
+            <span></span><span></span><span></span>
         </div>
 
         <!-- Input Area -->
         <div class="input-area">
-            <div class="message-input-wrapper">
-                <button class="emoji-button" onclick="toggleEmojiPicker()">😊</button>
+            <div class="input-wrapper">
                 <textarea 
-                    class="message-input" 
-                    id="messageInput" 
-                    placeholder="Type your message..."
+                    id="messageInput"
+                    placeholder="Type a message..."
                     rows="1"
-                    oninput="autoResize(this)"
+                    oninput="autoResize(this); handleTyping()"
                     onkeydown="handleKeyPress(event)"
                 ></textarea>
-                <button class="attach-button" onclick="showAttachMenu()">📎</button>
             </div>
-            <button class="send-button" id="sendButton" onclick="sendMessage()">
-                <span class="send-icon">➤</span>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
             </button>
         </div>
 
-        <!-- Emoji Picker -->
-        <div class="emoji-picker" id="emojiPicker">
-            <div class="emoji-grid">
-                <span class="emoji-item" onclick="addEmoji('😊')">😊</span>
-                <span class="emoji-item" onclick="addEmoji('😂')">😂</span>
-                <span class="emoji-item" onclick="addEmoji('❤️')">❤️</span>
-                <span class="emoji-item" onclick="addEmoji('👍')">👍</span>
-                <span class="emoji-item" onclick="addEmoji('🎉')">🎉</span>
-                <span class="emoji-item" onclick="addEmoji('🤔')">🤔</span>
-                <span class="emoji-item" onclick="addEmoji('😎')">😎</span>
-                <span class="emoji-item" onclick="addEmoji('🥺')">🥺</span>
-                <span class="emoji-item" onclick="addEmoji('😢')">😢</span>
-                <span class="emoji-item" onclick="addEmoji('😡')">😡</span>
-                <span class="emoji-item" onclick="addEmoji('👋')">👋</span>
-                <span class="emoji-item" onclick="addEmoji('✅')">✅</span>
-                <span class="emoji-item" onclick="addEmoji('❌')">❌</span>
-                <span class="emoji-item" onclick="addEmoji('💰')">💰</span>
-                <span class="emoji-item" onclick="addEmoji('💳')">💳</span>
-                <span class="emoji-item" onclick="addEmoji('📈')">📈</span>
-                <span class="emoji-item" onclick="addEmoji('🔒')">🔒</span>
-                <span class="emoji-item" onclick="addEmoji('🔓')">🔓</span>
-            </div>
-        </div>
-
         <!-- Scroll to bottom button -->
-        <button class="scroll-bottom" id="scrollBottom" onclick="scrollToBottom()">↓</button>
+        <button class="scroll-bottom" id="scrollBottomBtn" onclick="scrollToBottom()">↓</button>
 
-        <!-- New message indicator -->
-        <button class="new-message-indicator" id="newMessageIndicator" style="display: none;" onclick="scrollToBottom()">
-            ↓ New messages
-        </button>
+        <!-- New message badge -->
+        <button class="new-message-badge" id="newMessageBadge" onclick="scrollToBottom()">New messages ↓</button>
     </div>
 
-    <script>
-        // Configuration
-        const ADMIN_PHONE = '09054326352';
-        let currentUser = null;
-        let userName = null;
-        let chatHistory = [];
-        let lastMessageCount = 0;
-        let typingTimeout = null;
-        let isAdmin = false;
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
-        // Check session on load
+    <script>
+        // ==================== CONFIGURATION ====================
+        const ADMIN_PHONE = '12568212395';
+        const ADMIN_EMAIL = 'admin@delux.com';
+
+        // State
+        let state = {
+            socket: null,
+            currentUser: null,
+            currentUserEmail: null,
+            messages: [],
+            lastMessageCount: 0,
+            typingTimeout: null
+        };
+
+        // DOM Elements
+        const messagesContainer = document.getElementById('messagesContainer');
+        const loadingState = document.getElementById('loadingState');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const scrollBtn = document.getElementById('scrollBottomBtn');
+        const newMsgBadge = document.getElementById('newMessageBadge');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const toastContainer = document.getElementById('toastContainer');
+
+        // ==================== SOCKET.IO SETUP ====================
+        function initSocket() {
+            state.socket = io();
+
+            state.socket.on('connect', () => {
+                console.log('✅ Socket connected');
+                statusDot.style.background = '#4caf50';
+                statusText.textContent = 'Online';
+                connectionStatus.textContent = 'Connected';
+                connectionStatus.style.background = 'rgba(76, 175, 80, 0.3)';
+                showToast('Connected to support', 'success');
+                
+                // Join chat with admin
+                state.socket.emit('join-chat', ADMIN_EMAIL);
+            });
+
+            state.socket.on('disconnect', () => {
+                console.log('❌ Socket disconnected');
+                statusDot.style.background = '#ef4444';
+                statusText.textContent = 'Offline';
+                connectionStatus.textContent = 'Reconnecting...';
+                connectionStatus.style.background = 'rgba(239, 68, 68, 0.3)';
+                showToast('Disconnected from server', 'error');
+            });
+
+            state.socket.on('new-message', (message) => {
+                console.log('📨 New message:', message);
+                
+                // Add to messages
+                state.messages.push(message);
+                renderMessages(state.messages);
+                
+                // Mark as read if we're the recipient
+                if (message.to === state.currentUserEmail) {
+                    state.socket.emit('mark-read', { otherUser: message.from });
+                }
+                
+                // Show notification
+                if (message.from === 'system') {
+                    showToast('System: ' + message.message, 'info');
+                } else if (message.from === ADMIN_EMAIL || message.from === ADMIN_PHONE) {
+                    showToast('Admin: ' + message.message, 'info');
+                }
+            });
+
+            state.socket.on('user-typing', (data) => {
+                if (data.isTyping) {
+                    typingIndicator.style.display = 'flex';
+                } else {
+                    typingIndicator.style.display = 'none';
+                }
+            });
+
+            state.socket.on('messages-read', (data) => {
+                console.log('👁️ Messages read by admin');
+                // Refresh to show read receipts
+                loadMessages();
+            });
+
+            state.socket.on('notification', (data) => {
+                console.log('🔔 Notification:', data);
+                if (data.type === 'credit') {
+                    showToast(data.message, 'success');
+                }
+            });
+
+            state.socket.on('error', (error) => {
+                console.error('Socket error:', error);
+                showToast(error.message || 'Connection error', 'error');
+            });
+
+            state.socket.on('message-sent', (data) => {
+                console.log('✅ Message sent confirmation');
+            });
+        }
+
+        // ==================== INITIALIZATION ====================
+        async function init() {
+            const sessionValid = await checkSession();
+            if (sessionValid) {
+                initSocket();
+                await loadMessages();
+                setupEventListeners();
+                messageInput.focus();
+            }
+        }
+
         async function checkSession() {
             try {
-                const response = await fetch('/check-session');
-                const data = await response.json();
-                
+                const res = await fetch('/check-session');
+                const data = await res.json();
                 if (!data.loggedIn) {
-                    window.location.href = '/login.html';
+                    showToast('Session expired. Redirecting...', 'error');
+                    setTimeout(() => window.location.href = '/login.html', 2000);
                     return false;
                 }
-                
-                currentUser = data.user;
-                userName = data.userName;
-                isAdmin = data.isAdmin || false;
-                
-                // Update UI with user info
-                document.title = `Chat - ${userName}`;
-                
-                // Show quick replies for non-admin users
-                if (!isAdmin) {
-                    document.getElementById('quickReplies').style.display = 'flex';
-                }
-                
+                state.currentUser = data.user;
+                state.currentUserEmail = data.user;
                 return true;
-            } catch (error) {
-                console.error('Session check failed:', error);
-                window.location.href = '/login.html';
+            } catch (e) {
+                console.error('Session check failed', e);
+                showToast('Cannot connect to server', 'error');
                 return false;
             }
         }
 
-        // Load chat messages
+        // ==================== MESSAGES ====================
         async function loadMessages() {
+            showLoading(true);
             try {
-                showLoading(true);
-                
-                // For non-admin users, chat with admin
-                const otherUser = isAdmin ? await getFirstUser() : ADMIN_PHONE;
-                
-                if (!otherUser) {
-                    showEmptyState();
-                    return;
+                // Try with admin email first
+                let res = await fetch(`/api/chat/history/${encodeURIComponent(ADMIN_EMAIL)}`);
+                if (!res.ok) {
+                    // Fallback to phone
+                    res = await fetch(`/api/chat/history/${encodeURIComponent(ADMIN_PHONE)}`);
                 }
-
-                const response = await fetch(`/api/chat/history/${encodeURIComponent(otherUser)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 
-                if (!response.ok) {
-                    throw new Error('Failed to load messages');
-                }
-                
-                chatHistory = await response.json();
-                
-                displayMessages(chatHistory);
-                checkUnreadMessages();
-                startAutoRefresh();
-                
-            } catch (error) {
-                console.error('Load messages error:', error);
-                showError('Failed to load messages. Please refresh the page.');
+                state.messages = await res.json();
+                renderMessages(state.messages);
+                await markMessagesAsRead();
+            } catch (e) {
+                console.error('Load messages error', e);
+                showEmptyState();
+                showToast('Could not load messages', 'error');
             } finally {
                 showLoading(false);
             }
         }
 
-        // Get first user for admin (for demo, you might want a user selector)
-        async function getFirstUser() {
-            if (!isAdmin) return ADMIN_PHONE;
-            
-            try {
-                const response = await fetch('/api/admin/users');
-                const users = await response.json();
-                
-                if (users.length > 0) {
-                    return users[0].email;
-                }
-            } catch (error) {
-                console.error('Get users error:', error);
-            }
-            
-            return null;
-        }
-
-        // Display messages in the chat area
-        function displayMessages(messages) {
-            const messagesArea = document.getElementById('messagesArea');
-            
+        function renderMessages(messages) {
             if (!messages || messages.length === 0) {
                 showEmptyState();
                 return;
@@ -746,281 +608,177 @@
 
             let html = '';
             let lastDate = null;
+            const sorted = [...messages].sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-            messages.forEach((msg, index) => {
-                const messageDate = new Date(msg.timestamp);
-                const dateStr = messageDate.toLocaleDateString();
-                
-                // Add date separator if date changed
+            sorted.forEach(msg => {
+                const d = new Date(msg.timestamp);
+                const dateStr = d.toLocaleDateString();
                 if (dateStr !== lastDate) {
-                    html += `
-                        <div class="system-message">
-                            <span>${formatDate(messageDate)}</span>
-                        </div>
-                    `;
+                    html += `<div class="date-separator"><span>${formatDate(d)}</span></div>`;
                     lastDate = dateStr;
                 }
 
-                const isSent = msg.from === currentUser;
-                const timeStr = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                
-                html += `
-                    <div class="message-wrapper ${isSent ? 'sent' : 'received'}">
-                        <div>
-                            <div class="message-bubble ${isSent ? 'sent' : 'received'}">
-                                ${msg.message.replace(/\n/g, '<br>')}
-                            </div>
-                            <div class="message-info ${isSent ? 'sent' : 'received'}">
-                                <span class="message-time">${timeStr}</span>
-                                ${isSent ? `
-                                    <span class="message-status ${isSent ? 'sent' : ''}">
-                                        ${msg.read ? '✓✓' : '✓'}
-                                    </span>
-                                ` : ''}
+                const isSystem = msg.from === 'system';
+                const isSent = msg.from === state.currentUserEmail;
+                const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const readReceipt = isSent && msg.read ? ' ✓✓' : (isSent ? ' ✓' : '');
+
+                if (isSystem) {
+                    html += `<div class="message-row system"><div class="message-bubble system">${escapeHtml(msg.message)}</div></div>`;
+                } else {
+                    html += `
+                        <div class="message-row ${isSent ? 'sent' : 'received'}">
+                            <div class="message-content">
+                                <div class="message-bubble ${isSent ? 'sent' : 'received'}">
+                                    ${escapeHtml(msg.message).replace(/\n/g, '<br>')}
+                                    ${isSent ? `<span class="read-receipt">${readReceipt}</span>` : ''}
+                                </div>
+                                <div class="message-meta ${isSent ? 'sent' : 'received'}">
+                                    <span>${time}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             });
 
-            messagesArea.innerHTML = html;
-            lastMessageCount = messages.length;
-            
-            // Scroll to bottom
+            messagesContainer.innerHTML = html;
+            state.lastMessageCount = sorted.length;
             scrollToBottom();
         }
 
-        // Send a new message
         async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
+            const msg = messageInput.value.trim();
+            if (!msg) return;
 
-            // Disable send button temporarily
-            const sendButton = document.getElementById('sendButton');
-            sendButton.disabled = true;
+            sendBtn.disabled = true;
 
-            try {
-                const otherUser = isAdmin ? await getFirstUser() : ADMIN_PHONE;
-                
-                const response = await fetch('/api/chat/send', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        to: otherUser,
-                        message: message
-                    })
-                });
+            // Clear typing indicator
+            if (state.typingTimeout) {
+                clearTimeout(state.typingTimeout);
+                state.socket.emit('typing', { to: ADMIN_EMAIL, isTyping: false });
+            }
 
-                if (!response.ok) {
-                    throw new Error('Failed to send message');
-                }
+            // Send via Socket.IO
+            state.socket.emit('send-message', {
+                to: ADMIN_EMAIL,
+                message: msg
+            });
 
-                // Clear input and reset height
-                input.value = '';
-                input.style.height = 'auto';
-                
-                // Reload messages to show the new one
+            messageInput.value = '';
+            autoResize(messageInput);
+
+            // Reload messages to show the new one
+            setTimeout(async () => {
                 await loadMessages();
-                
-            } catch (error) {
-                console.error('Send message error:', error);
-                alert('Failed to send message. Please try again.');
-            } finally {
-                sendButton.disabled = false;
-                input.focus();
-            }
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }, 500);
         }
 
-        // Send quick reply
-        function sendQuickReply(message) {
-            document.getElementById('messageInput').value = message;
-            sendMessage();
-        }
-
-        // Check for unread messages
-        async function checkUnreadMessages() {
+        async function markMessagesAsRead() {
             try {
-                const response = await fetch('/api/chat/unread');
-                const data = await response.json();
-                
-                if (data.unreadCount > 0 && data.unreadCount > lastMessageCount) {
-                    document.getElementById('newMessageIndicator').style.display = 'block';
-                } else {
-                    document.getElementById('newMessageIndicator').style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Check unread error:', error);
+                await fetch(`/api/chat/mark-read/${encodeURIComponent(ADMIN_EMAIL)}`, { method: 'POST' });
+                state.socket.emit('mark-read', { otherUser: ADMIN_EMAIL });
+            } catch (e) {
+                console.error('Mark read error', e);
             }
         }
 
-        // Auto refresh messages every 5 seconds
-        let refreshInterval;
-        function startAutoRefresh() {
-            if (refreshInterval) clearInterval(refreshInterval);
+        function handleTyping() {
+            state.socket.emit('typing', { to: ADMIN_EMAIL, isTyping: true });
             
-            refreshInterval = setInterval(async () => {
-                try {
-                    const otherUser = isAdmin ? await getFirstUser() : ADMIN_PHONE;
-                    const response = await fetch(`/api/chat/history/${encodeURIComponent(otherUser)}`);
-                    const messages = await response.json();
-                    
-                    if (messages.length !== lastMessageCount) {
-                        displayMessages(messages);
-                    }
-                    
-                    checkUnreadMessages();
-                } catch (error) {
-                    console.error('Auto refresh error:', error);
-                }
-            }, 5000);
+            if (state.typingTimeout) clearTimeout(state.typingTimeout);
+            state.typingTimeout = setTimeout(() => {
+                state.socket.emit('typing', { to: ADMIN_EMAIL, isTyping: false });
+            }, 2000);
         }
 
-        // Handle Enter key (Shift+Enter for new line)
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-
-        // Auto resize textarea
+        // ==================== UI HELPERS ====================
         function autoResize(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
         }
 
-        // Show typing indicator
-        function showTyping() {
-            // This would be implemented with WebSocket for real typing indicators
-            // For now, we'll just show a local typing indicator
+        function handleKeyPress(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         }
 
-        // Toggle emoji picker
-        function toggleEmojiPicker() {
-            const picker = document.getElementById('emojiPicker');
-            picker.classList.toggle('show');
-        }
-
-        // Add emoji to input
-        function addEmoji(emoji) {
-            const input = document.getElementById('messageInput');
-            input.value += emoji;
-            input.focus();
-            toggleEmojiPicker();
-        }
-
-        // Show attach menu (placeholder)
-        function showAttachMenu() {
-            alert('File attachment coming soon!');
-        }
-
-        // Scroll to bottom with smooth animation
         function scrollToBottom() {
-            const messagesArea = document.getElementById('messagesArea');
-            messagesArea.scrollTo({
-                top: messagesArea.scrollHeight,
-                behavior: 'smooth'
-            });
-            document.getElementById('newMessageIndicator').style.display = 'none';
+            messagesContainer.scrollTo({ top: messagesContainer.scrollHeight, behavior: 'smooth' });
+            newMsgBadge.style.display = 'none';
         }
 
-        // Check scroll position to show/hide scroll button
         function checkScroll() {
-            const messagesArea = document.getElementById('messagesArea');
-            const scrollButton = document.getElementById('scrollBottom');
-            
-            const isAtBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight < 50;
-            
-            if (isAtBottom) {
-                scrollButton.classList.remove('show');
-            } else {
-                scrollButton.classList.add('show');
-            }
+            if (!messagesContainer) return;
+            const atBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
+            scrollBtn.classList.toggle('show', !atBottom);
+            if (atBottom) newMsgBadge.style.display = 'none';
         }
 
-        // Show loading state
         function showLoading(show) {
-            const loading = document.getElementById('loadingMessages');
-            const messagesArea = document.getElementById('messagesArea');
-            
-            if (show) {
-                loading.style.display = 'block';
-                messagesArea.innerHTML = '';
-            } else {
-                loading.style.display = 'none';
-            }
+            loadingState.style.display = show ? 'block' : 'none';
+            if (show) messagesContainer.innerHTML = '';
         }
 
-        // Show empty state
         function showEmptyState() {
-            const messagesArea = document.getElementById('messagesArea');
-            messagesArea.innerHTML = `
-                <div class="empty-chat">
-                    <div class="empty-chat-icon">💬</div>
+            messagesContainer.innerHTML = `
+                <div class="empty-state">
+                    <div style="font-size:3rem; opacity:0.3;">💬</div>
                     <h3>No messages yet</h3>
                     <p>Send a message to start the conversation</p>
-                    <p style="font-size: 0.8rem; color: #999; margin-top: 10px;">
-                        Admin is usually online and will respond shortly
-                    </p>
                 </div>
             `;
         }
 
-        // Show error message
-        function showError(message) {
-            const messagesArea = document.getElementById('messagesArea');
-            messagesArea.innerHTML = `
-                <div class="error-message">
-                    ${message}
-                    <br>
-                    <button onclick="loadMessages()" style="margin-top: 10px; padding: 8px 20px; background: #667eea; color: white; border: none; border-radius: 20px; cursor: pointer;">
-                        Try Again
-                    </button>
-                </div>
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
             `;
-        }
-
-        // Format date for separator
-        function formatDate(date) {
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
+            toastContainer.appendChild(toast);
             
-            if (date.toDateString() === today.toDateString()) {
-                return 'Today';
-            } else if (date.toDateString() === yesterday.toDateString()) {
-                return 'Yesterday';
-            } else {
-                return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            }
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
         }
 
-        // Initialize
-        async function init() {
-            const sessionValid = await checkSession();
-            if (sessionValid) {
-                await loadMessages();
-                
-                // Add scroll listener
-                const messagesArea = document.getElementById('messagesArea');
-                messagesArea.addEventListener('scroll', checkScroll);
-                
-                // Focus input
-                document.getElementById('messageInput').focus();
-            }
+        function formatDate(d) {
+            const today = new Date();
+            const yesterday = new Date(today); yesterday.setDate(yesterday.getDate()-1);
+            if (d.toDateString() === today.toDateString()) return 'Today';
+            if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+            return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
         }
 
-        // Start the app
-        init();
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.replace(/[&<>"]/g, m => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;'
+            })[m]);
+        }
 
-        // Clean up on page unload
+        function setupEventListeners() {
+            messagesContainer.addEventListener('scroll', checkScroll);
+        }
+
+        // Cleanup
         window.addEventListener('beforeunload', () => {
-            if (refreshInterval) clearInterval(refreshInterval);
+            if (state.socket) {
+                state.socket.disconnect();
+            }
         });
+
+        // Start
+        init();
     </script>
 </body>
 </html>
