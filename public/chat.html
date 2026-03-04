@@ -3,75 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💬 Delux Chat - Admin Support</title>
+    <title>💬 Support Chat - Supper Cash</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        :root {
+            --primary: #0047AB;
+            --primary-dark: #002D72;
+            --secondary: #1A1A2E;
+            --light-bg: #f5f7ff;
+            --white: #ffffff;
+            --gray: #8C98A9;
+            --gray-light: #F0F2F5;
+            --success: #00C853;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f5f7ff 0%, #eef1ff 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
-        /* Navbar */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 15px 25px;
+        /* Header */
+        .header {
+            background: var(--white);
+            box-shadow: var(--shadow);
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            z-index: 10;
         }
 
-        .nav-brand {
+        .logo-area {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
-        .nav-brand h2 {
-            font-size: 24px;
-            color: #2c3e50;
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .back-btn {
+            background: var(--gray-light);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            color: var(--secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             gap: 10px;
+            text-decoration: none;
         }
 
-        .admin-badge {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
+        .back-btn:hover {
+            background: var(--primary);
             color: white;
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            transform: translateY(-2px);
         }
 
-        .online-status {
+        /* Main Chat Container */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 30px auto;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        /* Admin Info */
+        .admin-info {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
             display: flex;
             align-items: center;
-            gap: 5px;
-            background: #f0f0f0;
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 13px;
+            gap: 15px;
+        }
+
+        .admin-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .admin-details h3 {
+            font-size: 18px;
+            color: var(--secondary);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: var(--success);
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
-            background: #2ecc71;
+            background: var(--success);
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -81,268 +152,29 @@
             50% { opacity: 0.5; }
         }
 
-        .nav-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .back-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.3s;
-        }
-
-        .back-btn:hover {
-            background: #5a6fd8;
-            transform: translateY(-2px);
-        }
-
-        /* Main Chat Container */
-        .chat-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        /* Admin Info Sidebar */
-        .admin-sidebar {
-            width: 300px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .admin-profile {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-        }
-
-        .admin-avatar-large {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: white;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 50px;
-            border: 4px solid rgba(255,255,255,0.3);
-        }
-
-        .admin-profile h3 {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .admin-profile .role {
-            font-size: 13px;
-            opacity: 0.9;
-            background: rgba(255,255,255,0.2);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 50px;
-        }
-
-        .admin-stats {
-            padding: 20px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px dashed #f0f0f0;
-        }
-
-        .stat-row:last-child {
-            border-bottom: none;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .stat-value {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .admin-info {
-            padding: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            color: #666;
-            font-size: 13px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .info-item:last-child {
-            border-bottom: none;
-        }
-
-        .info-item .emoji {
-            font-size: 16px;
-            width: 25px;
-        }
-
-        /* Quick Support Topics */
-        .quick-topics {
-            padding: 0 20px 20px;
-        }
-
-        .quick-topics h4 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .quick-replies {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .quick-reply {
-            background: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            border-radius: 50px;
-            padding: 8px 15px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: #666;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .quick-reply:hover {
-            background: #667eea;
-            border-color: #667eea;
-            color: white;
-        }
-
         /* Chat Area */
         .chat-area {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: var(--white);
             border-radius: 20px;
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .chat-header {
-            padding: 20px 25px;
-            background: white;
-            border-bottom: 2px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .chat-user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
-
-        .chat-user-details h3 {
-            color: #2c3e50;
-            margin-bottom: 3px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .chat-user-details .status {
-            font-size: 12px;
-            color: #27ae60;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .chat-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: #f8f9fa;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .action-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.1);
+            height: calc(100vh - 280px);
+            min-height: 400px;
         }
 
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 25px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            background: #f8f9fa;
+            background: #fafbff;
+            border-radius: 20px 20px 0 0;
         }
 
+        /* Message Bubbles */
         .message {
             display: flex;
             flex-direction: column;
@@ -363,85 +195,44 @@
             align-self: flex-start;
         }
 
-        .message-wrapper {
-            display: flex;
-            align-items: flex-end;
-            gap: 8px;
-        }
-
-        .message.sent .message-wrapper {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-        }
-
         .message-content {
             padding: 12px 18px;
-            border-radius: 20px;
+            border-radius: 18px;
             font-size: 14px;
             line-height: 1.5;
-            position: relative;
             word-wrap: break-word;
         }
 
         .message.sent .message-content {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border-bottom-right-radius: 5px;
         }
 
         .message.received .message-content {
-            background: white;
-            color: #2c3e50;
+            background: var(--gray-light);
+            color: var(--secondary);
             border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .admin-tag {
-            display: inline-block;
-            background: #f39c12;
-            color: white;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 50px;
-            margin-left: 8px;
-            vertical-align: middle;
         }
 
         .message-time {
-            font-size: 10px;
-            margin-top: 3px;
-            margin-left: 38px;
-            color: #999;
+            font-size: 11px;
+            color: var(--gray);
+            margin-top: 5px;
+            margin-left: 10px;
         }
 
         .message.sent .message-time {
             text-align: right;
-            margin-right: 38px;
+            margin-right: 10px;
             margin-left: 0;
-        }
-
-        .message-status {
-            font-size: 10px;
-            margin-left: 5px;
-            opacity: 0.7;
         }
 
         /* System Message */
         .system-message {
             align-self: center;
-            background: #f0f0f0;
-            color: #666;
+            background: rgba(0, 71, 171, 0.1);
+            color: var(--primary);
             padding: 8px 15px;
             border-radius: 50px;
             font-size: 12px;
@@ -450,208 +241,93 @@
             text-align: center;
         }
 
-        /* Typing Indicator */
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 5px;
-            padding: 10px 15px;
-            background: white;
-            border-radius: 50px;
-            width: fit-content;
-            margin: 0 25px 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            background: #999;
-            border-radius: 50%;
-            animation: typing 1s infinite;
-        }
-
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typing {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        /* Chat Input Area */
+        /* Chat Input */
         .chat-input-area {
-            padding: 20px 25px;
+            padding: 25px 30px;
             background: white;
-            border-top: 2px solid #f0f0f0;
+            border-top: 2px solid var(--gray-light);
+            border-radius: 0 0 20px 20px;
         }
 
         .input-wrapper {
             display: flex;
             gap: 15px;
             align-items: flex-end;
-            margin-bottom: 15px;
         }
 
         .message-input {
             flex: 1;
             padding: 15px 20px;
-            border: 2px solid #e0e0e0;
+            border: 2px solid var(--gray-light);
             border-radius: 25px;
             font-size: 15px;
             outline: none;
-            transition: 0.3s;
+            transition: var(--transition);
             resize: none;
-            max-height: 150px;
+            max-height: 120px;
             min-height: 50px;
-            line-height: 1.6;
+            line-height: 1.5;
             font-family: inherit;
         }
 
         .message-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .message-input::placeholder {
-            color: #999;
-            font-style: italic;
+            border-color: var(--primary);
         }
 
         .send-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             width: 55px;
             height: 55px;
             border-radius: 50%;
             cursor: pointer;
-            transition: 0.3s;
+            transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
         }
 
         .send-btn:hover:not(:disabled) {
             transform: scale(1.1);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
         .send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        /* Input Tools Bar */
-        .input-tools {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
-        }
-
-        .tool-btn {
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 22px;
-            padding: 8px;
-            border-radius: 50%;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-        }
-
-        .tool-btn:hover {
-            background: #f0f0f0;
-            color: #667eea;
-            transform: scale(1.1);
         }
 
         .char-counter {
-            margin-left: auto;
+            text-align: right;
             font-size: 12px;
-            color: #999;
-            background: #f8f9fa;
-            padding: 5px 12px;
-            border-radius: 50px;
+            color: var(--gray);
+            margin-top: 8px;
+            padding-right: 10px;
         }
 
         .char-counter.warning {
-            color: #e67e22;
-            background: #fff3e0;
+            color: #FF9800;
         }
 
         .char-counter.danger {
-            color: #e74c3c;
-            background: #fde8e8;
+            color: #FF5252;
         }
 
-        /* Quick Message Suggestions */
-        .quick-suggestions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--gray-light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .suggestion-chip {
-            background: #f0f3ff;
-            border: 1px solid #667eea;
-            border-radius: 50px;
-            padding: 8px 16px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: #667eea;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .suggestion-chip:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        /* Emoji Picker */
-        .emoji-picker {
-            position: absolute;
-            bottom: 100px;
-            right: 30px;
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            display: none;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 8px;
-            z-index: 100;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .emoji-picker span {
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: 0.3s;
-            text-align: center;
-        }
-
-        .emoji-picker span:hover {
-            background: #f0f0f0;
-            transform: scale(1.2);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Notification Toast */
@@ -659,7 +335,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #2ecc71;
+            background: var(--primary);
             color: white;
             padding: 15px 25px;
             border-radius: 50px;
@@ -676,241 +352,165 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Loading Spinner */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        /* Quick Reply Buttons */
+        .quick-replies {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .quick-reply {
+            background: var(--gray-light);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--secondary);
+        }
+
+        .quick-reply:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            opacity: 0.3;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .chat-container {
-                flex-direction: column;
-            }
-            
-            .admin-sidebar {
-                width: 100%;
-                height: auto;
-            }
-            
             .message {
                 max-width: 85%;
             }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .chat-container {
+                margin: 20px auto;
+            }
+            
+            .messages-container {
+                padding: 20px;
+            }
+            
+            .chat-input-area {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 18px;
+            }
+            
+            .admin-info {
+                padding: 15px;
+            }
+            
+            .admin-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Notification Toast -->
     <div id="notificationToast" class="notification-toast">
-        <span>🔔</span>
+        <i class="fas fa-bell"></i>
         <span id="toastMessage">New message received!</span>
     </div>
 
-    <!-- Emoji Picker -->
-    <div class="emoji-picker" id="emojiPicker">
-        <span onclick="insertEmoji('😊')">😊</span>
-        <span onclick="insertEmoji('😂')">😂</span>
-        <span onclick="insertEmoji('❤️')">❤️</span>
-        <span onclick="insertEmoji('👍')">👍</span>
-        <span onclick="insertEmoji('🎉')">🎉</span>
-        <span onclick="insertEmoji('🤔')">🤔</span>
-        <span onclick="insertEmoji('😢')">😢</span>
-        <span onclick="insertEmoji('👋')">👋</span>
-        <span onclick="insertEmoji('💰')">💰</span>
-        <span onclick="insertEmoji('💸')">💸</span>
-        <span onclick="insertEmoji('📊')">📊</span>
-        <span onclick="insertEmoji('✅')">✅</span>
-        <span onclick="insertEmoji('🙏')">🙏</span>
-        <span onclick="insertEmoji('🤝')">🤝</span>
-        <span onclick="insertEmoji('⭐')">⭐</span>
-        <span onclick="insertEmoji('🔥')">🔥</span>
-        <span onclick="insertEmoji('💯')">💯</span>
-        <span onclick="insertEmoji('🔔')">🔔</span>
-        <span onclick="insertEmoji('⚡')">⚡</span>
-        <span onclick="insertEmoji('💡')">💡</span>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <div class="logo-text">Support Chat</div>
+        </div>
+        <a href="/dashboard.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
     </div>
 
-    <!-- Navbar -->
-    <div class="navbar">
-        <div class="nav-brand">
-            <h2>
-                <span>💬</span>
-                Delux Support
-            </h2>
-            <span class="admin-badge">
-                <span>👑</span>
-                Official Support
-            </span>
-        </div>
-        <div class="nav-actions">
-            <button class="back-btn" onclick="window.location.href='/dashboard.html'">
-                <span>⬅️</span>
-                Back to Dashboard
-            </button>
-        </div>
-    </div>
-
+    <!-- Main Chat Container -->
     <div class="chat-container">
-        <!-- Admin Info Sidebar -->
-        <div class="admin-sidebar">
-            <div class="admin-profile">
-                <div class="admin-avatar-large">👑</div>
-                <h3>Admin Support</h3>
-                <div class="role">Customer Service</div>
+        <!-- Admin Info -->
+        <div class="admin-info">
+            <div class="admin-avatar">
+                <i class="fas fa-headset"></i>
             </div>
-
-            <div class="admin-stats">
-                <div class="stat-row">
-                    <span class="stat-label"><span>⏱️</span> Response Time</span>
-                    <span class="stat-value">&lt; 5 mins</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label"><span>✅</span> Support Rating</span>
-                    <span class="stat-value">4.9/5</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label"><span>👥</span> Users Helped</span>
-                    <span class="stat-value">1,234+</span>
-                </div>
-            </div>
-
-            <div class="admin-info">
-                <div class="info-item">
-                    <span class="emoji">📱</span>
-                    <span>WhatsApp: +2348110679255</span>
-                </div>
-                <div class="info-item">
-                    <span class="emoji">⏰</span>
-                    <span>Online: 24/7 Support</span>
-                </div>
-                <div class="info-item">
-                    <span class="emoji">📧</span>
-                    <span>Email: support@delux.com</span>
-                </div>
-            </div>
-
-            <!-- Quick Support Topics -->
-            <div class="quick-topics">
-                <h4>
-                    <span>⚡</span>
-                    Quick Help
-                </h4>
-                <div class="quick-replies">
-                    <span class="quick-reply" onclick="insertQuickMessage('I need help with deposit')">
-                        <span>💰</span> Deposit
+            <div class="admin-details">
+                <h3>
+                    Support Team
+                    <span class="admin-status">
+                        <span class="status-dot"></span>
+                        Online
                     </span>
-                    <span class="quick-reply" onclick="insertQuickMessage('I want to withdraw money')">
-                        <span>💸</span> Withdraw
-                    </span>
-                    <span class="quick-reply" onclick="insertQuickMessage('Question about my balance')">
-                        <span>📊</span> Balance
-                    </span>
-                    <span class="quick-reply" onclick="insertQuickMessage('Investment help')">
-                        <span>📈</span> Investment
-                    </span>
-                    <span class="quick-reply" onclick="insertQuickMessage('Card issue')">
-                        <span>💳</span> Card
-                    </span>
-                    <span class="quick-reply" onclick="insertQuickMessage('Account problem')">
-                        <span>⚠️</span> Account
-                    </span>
-                </div>
+                </h3>
+                <p style="color: var(--gray); font-size: 14px;">We typically reply in a few minutes</p>
             </div>
         </div>
 
         <!-- Chat Area -->
         <div class="chat-area">
-            <div class="chat-header">
-                <div class="chat-user-info">
-                    <div class="chat-user-avatar">👑</div>
-                    <div class="chat-user-details">
-                        <h3>
-                            Admin Support
-                            <span class="admin-tag">Support</span>
-                        </h3>
-                        <div class="status">
-                            <span class="status-dot"></span>
-                            <span>Online - Usually replies instantly</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chat-actions">
-                    <button class="action-btn" onclick="refreshChat()" title="Refresh">
-                        <span>🔄</span>
-                    </button>
-                    <button class="action-btn" onclick="clearChat()" title="Clear chat">
-                        <span>🗑️</span>
-                    </button>
-                </div>
-            </div>
-
             <div class="messages-container" id="messagesContainer">
                 <!-- Welcome Message -->
-                <div class="system-message" id="welcomeMessage">
-                    👋 Welcome to Delux Support! How can we help you today?
+                <div class="system-message">
+                    👋 Welcome! How can we help you today?
                 </div>
             </div>
 
-            <!-- Typing Indicator -->
-            <div class="typing-indicator" id="typingIndicator">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span style="margin-left: 5px;">Admin is typing...</span>
-            </div>
-
-            <!-- Chat Input Area -->
+            <!-- Chat Input -->
             <div class="chat-input-area">
                 <div class="input-wrapper">
                     <textarea class="message-input" id="messageInput" 
-                              placeholder="Type your message to admin... (Press Enter to send, Shift+Enter for new line)" 
+                              placeholder="Type your message here..." 
                               rows="1"
                               onkeydown="handleKeyDown(event)"
-                              oninput="autoResize(this); handleTyping(); updateCharCounter()"
+                              oninput="autoResize(this); updateCharCounter()"
                               maxlength="500"></textarea>
                     <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                        <span>📤</span>
+                        <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
                 
-                <!-- Input Tools Bar -->
-                <div class="input-tools">
-                    <button class="tool-btn" onclick="toggleEmojiPicker()" title="Add emoji">
-                        <span>😊</span>
-                    </button>
-                    <button class="tool-btn" onclick="suggestHelp()" title="Get help suggestion">
-                        <span>❓</span>
-                    </button>
-                    <button class="tool-btn" onclick="clearInput()" title="Clear input">
-                        <span>🗑️</span>
-                    </button>
-                    <div class="char-counter" id="charCounter">0/500</div>
-                </div>
+                <div class="char-counter" id="charCounter">0/500</div>
 
-                <!-- Quick Message Suggestions -->
-                <div class="quick-suggestions">
-                    <span class="suggestion-chip" onclick="insertQuickMessage('Hello, I need help with my account')">
-                        <span>👋</span> Hello
-                    </span>
-                    <span class="suggestion-chip" onclick="insertQuickMessage('Thank you for your help!')">
-                        <span>🙏</span> Thanks
-                    </span>
-                    <span class="suggestion-chip" onclick="insertQuickMessage('When will my deposit reflect?')">
-                        <span>⏰</span> Deposit time
-                    </span>
-                    <span class="suggestion-chip" onclick="insertQuickMessage('I have an issue with my card')">
-                        <span>💳</span> Card issue
-                    </span>
+                <!-- Quick Replies -->
+                <div class="quick-replies">
+                    <button class="quick-reply" onclick="insertQuickMessage('Hello, I need help')">
+                        👋 Hello
+                    </button>
+                    <button class="quick-reply" onclick="insertQuickMessage('I have a question about my balance')">
+                        💰 Balance
+                    </button>
+                    <button class="quick-reply" onclick="insertQuickMessage('I want to make a deposit')">
+                        📥 Deposit
+                    </button>
+                    <button class="quick-reply" onclick="insertQuickMessage('Thank you for your help')">
+                        🙏 Thanks
+                    </button>
                 </div>
             </div>
         </div>
@@ -918,22 +518,16 @@
 
     <script>
         // ==================== Configuration ====================
-        const ADMIN_PHONE = '09054326352';
-        const NTFY_TOPIC_CHAT = 'delux_new_chat';
-
-        // ==================== State ====================
+        const ADMIN_PHONE = '12568212395'; // Admin WhatsApp number
         let currentUser = null;
         let messages = [];
         let messageCheckInterval;
-        let typingTimeout;
-        let isTyping = false;
 
         // ==================== Initial Load ====================
         window.addEventListener('load', async () => {
             await loadCurrentUser();
             await loadChatHistory();
             startPolling();
-            setupEventListeners();
             updateCharCounter();
         });
 
@@ -951,7 +545,7 @@
                     fullName: data.fullName
                 };
             } catch (err) {
-                console.error('Error loading current user:', err);
+                console.error('Error loading user:', err);
                 showNotification('Error loading user data', 'error');
             }
         }
@@ -978,7 +572,7 @@
             if (messages.length === 0) {
                 container.innerHTML = `
                     <div class="system-message">
-                        👋 Welcome to Delux Support! How can we help you today?
+                        👋 Welcome! How can we help you today?
                     </div>
                 `;
                 return;
@@ -992,10 +586,11 @@
                 const isFromAdmin = msg.from === ADMIN_PHONE;
                 const msgDate = new Date(msg.timestamp).toDateString();
                 
+                // Add date separator if date changed
                 if (msgDate !== lastDate) {
                     html += `
                         <div class="system-message">
-                            ${new Date(msg.timestamp).toLocaleDateString('en-NG', { 
+                            ${new Date(msg.timestamp).toLocaleDateString('en-US', { 
                                 weekday: 'long', 
                                 year: 'numeric', 
                                 month: 'long', 
@@ -1008,18 +603,11 @@
 
                 html += `
                     <div class="message ${isFromMe ? 'sent' : 'received'}">
-                        <div class="message-wrapper">
-                            ${!isFromMe ? `
-                                <div class="message-avatar">👑</div>
-                            ` : ''}
-                            <div class="message-content">
-                                ${escapeHtml(msg.message)}
-                                ${isFromAdmin && !isFromMe ? '<span class="admin-tag">Admin</span>' : ''}
-                            </div>
+                        <div class="message-content">
+                            ${escapeHtml(msg.message)}
                         </div>
                         <div class="message-time">
                             ${new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            ${isFromMe ? '<span class="message-status">✓✓</span>' : ''}
                         </div>
                     </div>
                 `;
@@ -1061,16 +649,12 @@
                     autoResize(input);
                     updateCharCounter();
                     await loadChatHistory();
-                    showNotification('✅ Message sent to admin');
-                    
-                    const welcomeMsg = document.getElementById('welcomeMessage');
-                    if (welcomeMsg) welcomeMsg.style.display = 'none';
                 } else {
-                    showNotification('❌ Failed to send message', 'error');
+                    showNotification('Failed to send message', 'error');
                 }
             } catch (err) {
                 console.error('Error sending message:', err);
-                showNotification('❌ Error sending message', 'error');
+                showNotification('Error sending message', 'error');
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
@@ -1103,7 +687,7 @@
                     if (newMsgCount > 0) {
                         const lastMsg = messages[messages.length - 1];
                         if (lastMsg.from === ADMIN_PHONE) {
-                            showNotification(`📬 Admin: ${lastMsg.message.substring(0, 50)}...`);
+                            showNotification(`New message from Support`);
                         }
                     }
                 }
@@ -1122,7 +706,7 @@
 
         function autoResize(textarea) {
             textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
         }
 
         function handleKeyDown(e) {
@@ -1130,17 +714,6 @@
                 e.preventDefault();
                 sendMessage();
             }
-        }
-
-        function handleTyping() {
-            if (!isTyping) {
-                isTyping = true;
-            }
-            
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                isTyping = false;
-            }, 1000);
         }
 
         function updateCharCounter() {
@@ -1158,77 +731,21 @@
             }
         }
 
-        function clearInput() {
-            const input = document.getElementById('messageInput');
-            input.value = '';
-            autoResize(input);
-            updateCharCounter();
-            input.focus();
-        }
-
-        // ==================== Quick Actions ====================
         function insertQuickMessage(msg) {
             const input = document.getElementById('messageInput');
             input.value = msg;
-            input.focus();
             autoResize(input);
             updateCharCounter();
-        }
-
-        function insertEmoji(emoji) {
-            const input = document.getElementById('messageInput');
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
-            
-            input.value = input.value.substring(0, start) + emoji + input.value.substring(end);
             input.focus();
-            input.selectionStart = input.selectionEnd = start + emoji.length;
-            
-            document.getElementById('emojiPicker').style.display = 'none';
-            autoResize(input);
-            updateCharCounter();
         }
 
-        function toggleEmojiPicker() {
-            const picker = document.getElementById('emojiPicker');
-            picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
-        }
-
-        function suggestHelp() {
-            const helpMessages = [
-                "I need help with my account",
-                "How do I make a deposit?",
-                "I want to withdraw money",
-                "Tell me about investment options",
-                "My balance is incorrect",
-                "I forgot my PIN",
-                "When will my deposit reflect?",
-                "Can I increase my investment limit?"
-            ];
-            const randomHelp = helpMessages[Math.floor(Math.random() * helpMessages.length)];
-            insertQuickMessage(randomHelp);
-        }
-
-        function refreshChat() {
-            loadChatHistory();
-            showNotification('Chat refreshed');
-        }
-
-        function clearChat() {
-            if (confirm('Clear all messages? This only clears your local view.')) {
-                messages = [];
-                displayMessages();
-                showNotification('Chat cleared locally');
-            }
-        }
-
-        // ==================== Notifications ====================
+        // ==================== Notification ====================
         function showNotification(message, type = 'success') {
             const toast = document.getElementById('notificationToast');
             const toastMessage = document.getElementById('toastMessage');
             
             toastMessage.textContent = message;
-            toast.style.background = type === 'success' ? '#2ecc71' : '#e74c3c';
+            toast.style.background = type === 'success' ? 'var(--primary)' : '#FF5252';
             toast.style.display = 'flex';
             
             setTimeout(() => {
@@ -1237,38 +754,26 @@
         }
 
         // ==================== Event Listeners ====================
-        function setupEventListeners() {
-            document.addEventListener('click', (e) => {
-                const picker = document.getElementById('emojiPicker');
-                const toolBtn = e.target.closest('.tool-btn');
-                
-                if (!toolBtn && !picker.contains(e.target)) {
-                    picker.style.display = 'none';
-                }
-            });
+        window.addEventListener('online', () => {
+            showNotification('🟢 Back online');
+            loadChatHistory();
+        });
 
-            window.addEventListener('online', () => {
-                showNotification('🟢 Back online');
+        window.addEventListener('offline', () => {
+            showNotification('🔴 You are offline', 'error');
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
                 loadChatHistory();
-            });
-
-            window.addEventListener('offline', () => {
-                showNotification('🔴 You are offline', 'error');
-            });
-
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') {
-                    loadChatHistory();
-                }
-            });
-        }
+            }
+        });
 
         // ==================== Cleanup ====================
         window.addEventListener('beforeunload', () => {
             if (messageCheckInterval) {
                 clearInterval(messageCheckInterval);
             }
-            clearTimeout(typingTimeout);
         });
     </script>
 </body>
