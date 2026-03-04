@@ -14,12 +14,16 @@ const USERS_BIN_ID = '69371f88d0ea881f401b56d2';
 const TRANSACTIONS_BIN_ID = '6937206e43b1c97be9e049e6';
 const INVESTMENTS_BIN_ID = '69372124ae596e708f8c086d';
 const CARDS_BIN_ID = '6937224e043b5e708f8c086e';
+const CHATS_BIN_ID = '67c7022b8a456b7966720b88'; // New bin for chats
+const ADMIN_BIN_ID = '67c702988a456b7966720b8a'; // New bin for admin settings
 
 // JSONBin API URLs
 const USERS_URL = `https://api.jsonbin.io/v3/b/${USERS_BIN_ID}`;
 const TRANSACTIONS_URL = `https://api.jsonbin.io/v3/b/${TRANSACTIONS_BIN_ID}`;
 const INVESTMENTS_URL = `https://api.jsonbin.io/v3/b/${INVESTMENTS_BIN_ID}`;
 const CARDS_URL = `https://api.jsonbin.io/v3/b/${CARDS_BIN_ID}`;
+const CHATS_URL = `https://api.jsonbin.io/v3/b/${CHATS_BIN_ID}`;
+const ADMIN_URL = `https://api.jsonbin.io/v3/b/${ADMIN_BIN_ID}`;
 
 const headers = {
   'Content-Type': 'application/json',
@@ -27,7 +31,14 @@ const headers = {
   'X-Bin-Version': 'latest'
 };
 
+// Ntfy Configuration
+const NTFY_TOPIC_REGISTER = 'delux_new_register';
+const NTFY_TOPIC_CHAT = 'delux_new_chat';
+const ADMIN_PHONE = '09054326352'; // Admin phone number
+const ADMIN_PIN = '3389'; // Admin PIN
+
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({ 
   secret: 'delux-secret', 
@@ -111,6 +122,95 @@ async function saveCards(cards) {
   return await writeJSONBin(CARDS_URL, cards);
 }
 
+async function readChats() {
+  return await readJSONBin(CHATS_URL);
+}
+
+async function saveChats(chats) {
+  return await writeJSONBin(CHATS_URL, chats);
+}
+
+async function readAdminSettings() {
+  return await readJSONBin(ADMIN_URL);
+}
+
+async function saveAdminSettings(settings) {
+  return await writeJSONBin(ADMIN_URL, settings);
+}
+
+// Ntfy notification functions
+const sendNtfyRegistration = async (title, message, priority = 4) => {
+  try {
+    const cleanTitle = title.replace(/[^\x20-\x7E]/g, '').trim();
+    
+    await fetch(`https://ntfy.sh/${NTFY_TOPIC_REGISTER}`, {
+      method: 'POST',
+      body: message,
+      headers: {
+        'Title': cleanTitle || 'New Registration',
+        'Priority': priority.toString(),
+        'Tags': 'tada'
+      }
+    });
+    console.log(`✅ Ntfy registration notification sent: ${cleanTitle}`);
+  } catch (error) {
+    console.error('❌ Ntfy registration notification failed:', error.message);
+  }
+};
+
+const sendNtfyChat = async (title, message, priority = 3) => {
+  try {
+    const cleanTitle = title.replace(/[^\x20-\x7E]/g, '').trim();
+    
+    await fetch(`https://ntfy.sh/${NTFY_TOPIC_CHAT}`, {
+      method: 'POST',
+      body: message,
+      headers: {
+        'Title': cleanTitle || 'New Chat Message',
+        'Priority': priority.toString(),
+        'Tags': 'speech_balloon'
+      }
+    });
+    console.log(`✅ Ntfy chat notification sent: ${cleanTitle}`);
+  } catch (error) {
+    console.error('❌ Ntfy chat notification failed:', error.message);
+  }
+};
+
+// Initialize admin user
+async function initializeAdmin() {
+  try {
+    let adminSettings = await readAdminSettings();
+    
+    if (!adminSettings || adminSettings.length === 0) {
+      adminSettings = [{
+        phone: ADMIN_PHONE,
+        pin: ADMIN_PIN,
+        fullName: 'System Administrator',
+        email: 'admin@delux.com',
+        createdAt: new Date().toISOString()
+      }];
+      await saveAdminSettings(adminSettings);
+      console.log('✅ Admin user initialized');
+    }
+  } catch (error) {
+    console.error('Error initializing admin:', error);
+  }
+}
+
+// Check if user is admin
+async function isAdmin(email) {
+  const adminSettings = await readAdminSettings();
+  const admin = adminSettings[0];
+  return admin && (email === admin.email || email === admin.phone);
+}
+
+// Get admin info
+async function getAdminInfo() {
+  const adminSettings = await readAdminSettings();
+  return adminSettings[0] || { phone: ADMIN_PHONE, fullName: 'Admin' };
+}
+
 async function logTransaction(email, type, amount) {
   try {
     const transactions = await readTransactions();
@@ -149,6 +249,20 @@ async function testJSONBinConnection() {
       await saveCards(cards);
     }
     console.log(`✓ Cards bin connection successful. Found ${cards.length} cards.`);
+    
+    let chats = await readChats();
+    if (!Array.isArray(chats)) {
+      chats = [];
+      await saveChats(chats);
+    }
+    console.log(`✓ Chats bin connection successful. Found ${chats.length} conversations.`);
+    
+    let admin = await readAdminSettings();
+    if (!Array.isArray(admin)) {
+      admin = [];
+      await saveAdminSettings(admin);
+    }
+    console.log(`✓ Admin bin connection successful.`);
     
     return true;
   } catch (error) {
@@ -194,11 +308,21 @@ app.post('/register', async (req, res) => {
           date: new Date().toLocaleString(),
           balanceAfterTransaction: 1800,
         }
-      ]
+      ],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      lastLogin: null
     };
 
     users.push(newUser);
     await saveUsers(users);
+
+    // Send ntfy notification
+    sendNtfyRegistration(
+      'New User Registered',
+      `Name: ${fullName}\nEmail: ${email}\nPhone: ${phoneNumber}\nTime: ${new Date().toLocaleString()}`,
+      4
+    ).catch(err => console.error('Background notification error:', err));
 
     req.session.user = email;
 
@@ -224,16 +348,41 @@ app.post('/login', async (req, res) => {
       return res.send("Email and PIN are required.");
     }
     
+    // Check if admin
+    const adminSettings = await readAdminSettings();
+    const admin = adminSettings[0];
+    
+    if (admin && (email === admin.email || email === admin.phone) && pin === admin.pin) {
+      req.session.user = admin.email;
+      req.session.userName = admin.fullName;
+      req.session.isAdmin = true;
+      
+      return res.send(`<h2>Admin Login Successful!</h2> 
+                      <p>Welcome back, ${admin.fullName}!</p>
+                      <p>Redirecting to admin dashboard...</p> 
+                      <script>
+                        setTimeout(() => window.location.href = '/admin.html', 2000);
+                      </script>`);
+    }
+    
+    // Regular user login
     const users = await readUsers();
     const user = users.find(u => (u.email === email || u.phoneNumber === email) && u.pin === pin);
 
     if (!user) {
       return res.send("Invalid credentials. Please check your email/phone and PIN.");
     }
+    
+    if (!user.isActive) {
+      return res.send("Your account has been deactivated. Please contact admin.");
+    }
+
+    user.lastLogin = new Date().toISOString();
+    await saveUsers(users);
 
     req.session.user = user.email;
     req.session.userName = user.fullName;
-    req.session.userId = user.email;
+    req.session.isAdmin = false;
 
     res.send(`<h2>Login Successful!</h2> 
               <p>Welcome back, ${user.fullName}!</p>
@@ -268,7 +417,10 @@ app.get('/user-info', async (req, res) => {
       email: user.email,
       phoneNumber: user.phoneNumber,
       profile: user.profile || {},
-      cards: user.cards || []
+      cards: user.cards || [],
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      isAdmin: req.session.isAdmin || false
     });
   } catch (error) {
     console.error('User info error:', error);
@@ -835,13 +987,379 @@ app.get('/process-investments', async (req, res) => {
   }
 });
 
+// ==================== CHAT SYSTEM ====================
+
+// Send chat message
+app.post('/api/chat/send', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const { to, message } = req.body;
+    const from = req.session.user;
+
+    if (!to || !message) {
+      return res.status(400).json({ error: "Recipient and message required" });
+    }
+
+    // Get users and admin info
+    const users = await readUsers();
+    const adminSettings = await readAdminSettings();
+    const admin = adminSettings[0];
+
+    // Validate recipient exists
+    const isSendingToAdmin = to === admin.email || to === admin.phone;
+    let recipient = null;
+    
+    if (isSendingToAdmin) {
+      recipient = admin;
+    } else {
+      recipient = users.find(u => u.email === to || u.phoneNumber === to);
+    }
+    
+    if (!recipient) {
+      return res.status(404).json({ error: "Recipient not found" });
+    }
+
+    // Create chat ID
+    const chatId = [from, to].sort().join('_');
+    let chats = await readChats();
+    
+    let conversation = chats.find(c => c.id === chatId);
+    
+    if (!conversation) {
+      conversation = {
+        id: chatId,
+        participants: [from, to],
+        messages: [],
+        createdAt: new Date().toISOString()
+      };
+      chats.push(conversation);
+    }
+
+    const newMessage = {
+      from,
+      to,
+      message,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+
+    conversation.messages.push(newMessage);
+    await saveChats(chats);
+
+    // Send ntfy notification for messages to/from admin
+    if (isSendingToAdmin || from === admin.email || from === admin.phone) {
+      const sender = users.find(u => u.email === from) || { fullName: from };
+      const senderName = sender.fullName || from;
+      
+      sendNtfyChat(
+        'New Chat Message',
+        `From: ${senderName} (${from})\nTo: ${isSendingToAdmin ? 'Admin' : to}\nMessage: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}\nTime: ${new Date().toLocaleString()}`,
+        3
+      ).catch(err => console.error('Background chat notification error:', err));
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Send message error:', error);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+// Get chat history
+app.get('/api/chat/history/:otherUser', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const otherUser = req.params.otherUser;
+    const currentUser = req.session.user;
+
+    const chatId = [currentUser, otherUser].sort().join('_');
+    const chats = await readChats();
+    
+    let conversation = chats.find(c => c.id === chatId);
+    
+    if (!conversation) {
+      return res.json([]);
+    }
+
+    // Mark messages as read
+    conversation.messages = conversation.messages.map(msg => {
+      if (msg.to === currentUser && !msg.read) {
+        msg.read = true;
+      }
+      return msg;
+    });
+
+    await saveChats(chats);
+
+    res.json(conversation.messages);
+  } catch (error) {
+    console.error('Get chat history error:', error);
+    res.status(500).json({ error: "Failed to load chat history" });
+  }
+});
+
+// Get unread messages count
+app.get('/api/chat/unread', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const currentUser = req.session.user;
+    const chats = await readChats();
+    let unreadCount = 0;
+
+    chats.forEach(conversation => {
+      if (conversation.participants.includes(currentUser)) {
+        const unread = conversation.messages.filter(m => m.to === currentUser && !m.read).length;
+        unreadCount += unread;
+      }
+    });
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('Get unread count error:', error);
+    res.status(500).json({ error: "Failed to get unread count" });
+  }
+});
+
+// Get user's chat list
+app.get('/api/chat/users', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const currentUser = req.session.user;
+    const users = await readUsers();
+    const adminSettings = await readAdminSettings();
+    const admin = adminSettings[0];
+    
+    // For non-admin users, only show admin
+    if (!req.session.isAdmin) {
+      const adminUser = {
+        phone: admin.phone,
+        fullName: admin.fullName,
+        picture: 'admin_avatar.png',
+        isAdmin: true
+      };
+      return res.json([adminUser]);
+    }
+    
+    // For admin, show all active users
+    const chatUsers = users
+      .filter(u => u.email !== currentUser && u.isActive !== false)
+      .map(u => ({
+        phone: u.email,
+        fullName: u.fullName,
+        picture: 'user_avatar.png',
+        isAdmin: false
+      }));
+
+    res.json(chatUsers);
+  } catch (error) {
+    console.error('Get chat users error:', error);
+    res.status(500).json({ error: "Failed to load chat users" });
+  }
+});
+
+// Get unread messages per user
+app.get('/api/chat/unread/:otherUser', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  try {
+    const otherUser = req.params.otherUser;
+    const currentUser = req.session.user;
+
+    const chatId = [currentUser, otherUser].sort().join('_');
+    const chats = await readChats();
+    
+    const conversation = chats.find(c => c.id === chatId);
+    
+    if (!conversation) {
+      return res.json({ unreadCount: 0 });
+    }
+
+    const unreadCount = conversation.messages.filter(m => m.to === currentUser && !m.read).length;
+
+    res.json({ unreadCount });
+  } catch (error) {
+    console.error('Get unread count error:', error);
+    res.status(500).json({ error: "Failed to get unread count" });
+  }
+});
+
+// ==================== ADMIN PANEL ====================
+
+// Get all users (admin only)
+app.get('/api/admin/users', async (req, res) => {
+  if (!req.session.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+
+  try {
+    const users = await readUsers();
+    const safeUsers = users.map(user => {
+      const { pin, ...safeUser } = user;
+      return safeUser;
+    });
+    res.json(safeUsers);
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ error: "Failed to load users" });
+  }
+});
+
+// Update user (admin only)
+app.post('/api/admin/user/update', async (req, res) => {
+  if (!req.session.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+
+  try {
+    const { phone, fullName, email, isActive, newPin } = req.body;
+    
+    const users = await readUsers();
+    const userIndex = users.findIndex(u => u.email === phone || u.phoneNumber === phone);
+    
+    if (userIndex === -1) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update fields
+    if (fullName) users[userIndex].fullName = fullName;
+    if (email) users[userIndex].email = email;
+    if (isActive !== undefined) users[userIndex].isActive = isActive === 'true';
+    if (newPin) users[userIndex].pin = newPin;
+
+    await saveUsers(users);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
+// Credit user (admin only)
+app.post('/api/admin/user/credit', async (req, res) => {
+  if (!req.session.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+
+  try {
+    const { phone, amount } = req.body;
+    
+    const users = await readUsers();
+    const userIndex = users.findIndex(u => u.email === phone || u.phoneNumber === phone);
+    
+    if (userIndex === -1) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const creditAmount = parseFloat(amount);
+    if (isNaN(creditAmount) || creditAmount <= 0) {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
+    users[userIndex].balance += creditAmount;
+    
+    // Add transaction record
+    if (!users[userIndex].transactions) users[userIndex].transactions = [];
+    users[userIndex].transactions.push({
+      type: "Credit",
+      amount: creditAmount,
+      date: new Date().toISOString(),
+      description: `Admin credited account with ${creditAmount}€`,
+      balanceAfterTransaction: users[userIndex].balance
+    });
+
+    await saveUsers(users);
+
+    // Send system message to user
+    const chatId = [users[userIndex].email, 'system'].sort().join('_');
+    let chats = await readChats();
+    
+    let conversation = chats.find(c => c.id === chatId);
+    if (!conversation) {
+      conversation = {
+        id: chatId,
+        participants: [users[userIndex].email, 'system'],
+        messages: [],
+        createdAt: new Date().toISOString()
+      };
+      chats.push(conversation);
+    }
+
+    conversation.messages.push({
+      from: 'system',
+      to: users[userIndex].email,
+      message: `✅ Your account has been credited with ${creditAmount}€. New balance: ${users[userIndex].balance}€`,
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+
+    await saveChats(chats);
+
+    res.json({ success: true, newBalance: users[userIndex].balance });
+  } catch (error) {
+    console.error('Credit user error:', error);
+    res.status(500).json({ error: "Failed to credit user" });
+  }
+});
+
+// Get dashboard stats (admin only)
+app.get('/api/admin/stats', async (req, res) => {
+  if (!req.session.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+
+  try {
+    const users = await readUsers();
+    const investments = await readInvestments();
+    const chats = await readChats();
+    
+    const activeUsers = users.filter(u => u.isActive !== false).length;
+    const totalBalance = users.reduce((sum, u) => sum + (u.balance || 0), 0);
+    const totalInvestments = investments.reduce((sum, i) => sum + (i.amount || 0), 0);
+    
+    const today = new Date().toDateString();
+    const todayReg = users.filter(u => new Date(u.createdAt).toDateString() === today).length;
+    
+    const unreadMessages = chats.reduce((sum, chat) => {
+      return sum + chat.messages.filter(m => !m.read).length;
+    }, 0);
+
+    res.json({
+      totalUsers: users.length,
+      activeUsers,
+      totalBalance,
+      totalInvestments,
+      todayReg,
+      unreadMessages
+    });
+  } catch (error) {
+    console.error('Get stats error:', error);
+    res.status(500).json({ error: "Failed to load stats" });
+  }
+});
+
 // Check session status
 app.get('/check-session', (req, res) => {
   if (req.session.user) {
     res.json({ 
       loggedIn: true, 
       user: req.session.user,
-      userName: req.session.userName 
+      userName: req.session.userName,
+      isAdmin: req.session.isAdmin || false
     });
   } else {
     res.json({ loggedIn: false });
@@ -901,6 +1419,7 @@ async function initializeServer() {
   console.log('Testing JSONBin connection...');
   
   const connectionSuccess = await testJSONBinConnection();
+  await initializeAdmin();
   
   if (connectionSuccess) {
     console.log('✅ Server is ready and connected to JSONBin');
@@ -922,6 +1441,22 @@ async function initializeServer() {
     console.log('  - GET  /check-session');
     console.log('  - GET  /profile-data');
     console.log('  - GET  /test');
+    console.log('\n=== NEW FEATURES ===');
+    console.log('  - POST /api/chat/send');
+    console.log('  - GET  /api/chat/history/:otherUser');
+    console.log('  - GET  /api/chat/unread');
+    console.log('  - GET  /api/chat/users');
+    console.log('  - GET  /api/chat/unread/:otherUser');
+    console.log('  - GET  /api/admin/users');
+    console.log('  - POST /api/admin/user/update');
+    console.log('  - POST /api/admin/user/credit');
+    console.log('  - GET  /api/admin/stats');
+    console.log('\n📱 Ntfy Notifications:');
+    console.log(`   - Registration: ${NTFY_TOPIC_REGISTER}`);
+    console.log(`   - Chat: ${NTFY_TOPIC_CHAT}`);
+    console.log('\n👑 Admin Credentials:');
+    console.log(`   Phone/Email: ${ADMIN_PHONE}`);
+    console.log(`   PIN: ${ADMIN_PIN}`);
     console.log('\nServer is running and ready to accept connections.');
   } else {
     console.log('❌ JSONBin connection failed. Please check your API key and bin IDs.');
