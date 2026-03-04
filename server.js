@@ -14,8 +14,8 @@ const USERS_BIN_ID = '69371f88d0ea881f401b56d2';
 const TRANSACTIONS_BIN_ID = '6937206e43b1c97be9e049e6';
 const INVESTMENTS_BIN_ID = '69372124ae596e708f8c086d';
 const CARDS_BIN_ID = '6937224e043b5e708f8c086e';
-const CHATS_BIN_ID = '67c7022b8a456b7966720b88'; // New bin for chats
-const ADMIN_BIN_ID = '67c702988a456b7966720b8a'; // New bin for admin settings
+const CHATS_BIN_ID = '69a78f20ae596e708f5cd2a0'; // New bin for chats
+const ADMIN_BIN_ID = '69a78f66d0ea881f40ec6f47'; // New bin for admin settings
 
 // JSONBin API URLs
 const USERS_URL = `https://api.jsonbin.io/v3/b/${USERS_BIN_ID}`;
@@ -35,7 +35,7 @@ const headers = {
 const NTFY_TOPIC_REGISTER = 'delux_new_register';
 const NTFY_TOPIC_CHAT = 'delux_new_chat';
 const ADMIN_PHONE = '09054326352'; // Admin phone number
-const ADMIN_PIN = '3389'; // Admin PIN
+const ADMIN_PIN = '338989'; // Admin PIN
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
