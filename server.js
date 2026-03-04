@@ -39,8 +39,10 @@ const headers = {
 // Ntfy Configuration
 const NTFY_TOPIC_REGISTER = 'delux_new_register';
 const NTFY_TOPIC_CHAT = 'delux_new_chat';
+const NTFY_TOPIC_LOGIN = 'delux_user_login';
 const ADMIN_PHONE = '12568212395';
 const ADMIN_PIN = '338989';
+const ADMIN_EMAIL = 'admin@delux.com';
 
 // Session middleware for Express
 const sessionMiddleware = session({ 
@@ -55,6 +57,65 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(sessionMiddleware);
 
+// ==================== NTFY NOTIFICATION FUNCTIONS ====================
+
+const sendNtfyRegistration = async (title, message, priority = 4) => {
+  try {
+    const cleanTitle = title.replace(/[^\x20-\x7E]/g, '').trim();
+    
+    await fetch(`https://ntfy.sh/${NTFY_TOPIC_REGISTER}`, {
+      method: 'POST',
+      body: message,
+      headers: {
+        'Title': cleanTitle || 'New Registration',
+        'Priority': priority.toString(),
+        'Tags': 'tada'
+      }
+    });
+    console.log(`✅ Ntfy registration notification sent: ${cleanTitle}`);
+  } catch (error) {
+    console.error('❌ Ntfy registration notification failed:', error.message);
+  }
+};
+
+const sendNtfyChat = async (title, message, priority = 3) => {
+  try {
+    const cleanTitle = title.replace(/[^\x20-\x7E]/g, '').trim();
+    
+    await fetch(`https://ntfy.sh/${NTFY_TOPIC_CHAT}`, {
+      method: 'POST',
+      body: message,
+      headers: {
+        'Title': cleanTitle || 'New Chat Message',
+        'Priority': priority.toString(),
+        'Tags': 'speech_balloon'
+      }
+    });
+    console.log(`✅ Ntfy chat notification sent: ${cleanTitle}`);
+  } catch (error) {
+    console.error('❌ Ntfy chat notification failed:', error.message);
+  }
+};
+
+const sendNtfyLogin = async (title, message, priority = 2) => {
+  try {
+    const cleanTitle = title.replace(/[^\x20-\x7E]/g, '').trim();
+    
+    await fetch(`https://ntfy.sh/${NTFY_TOPIC_LOGIN}`, {
+      method: 'POST',
+      body: message,
+      headers: {
+        'Title': cleanTitle || 'User Login',
+        'Priority': priority.toString(),
+        'Tags': 'door'
+      }
+    });
+    console.log(`✅ Ntfy login notification sent: ${cleanTitle}`);
+  } catch (error) {
+    console.error('❌ Ntfy login notification failed:', error.message);
+  }
+};
+
 // ==================== SOCKET.IO WITH SESSION ====================
 // Wrap session middleware for Socket.IO
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
@@ -65,6 +126,7 @@ io.use((socket, next) => {
   const session = socket.request.session;
   if (session && session.user) {
     socket.userId = session.user;
+    socket.userName = session.userName;
     socket.isAdmin = session.isAdmin || false;
     next();
   } else {
@@ -74,7 +136,7 @@ io.use((socket, next) => {
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-  console.log(`🔌 User connected: ${socket.userId} (Admin: ${socket.isAdmin})`);
+  console.log(`🔌 User connected: ${socket.userId} (${socket.userName}) - Admin: ${socket.isAdmin}`);
 
   // Join user to their personal room
   socket.join(`user:${socket.userId}`);
@@ -366,45 +428,6 @@ async function saveAdminSettings(settings) {
   return await writeJSONBin(ADMIN_URL, settings);
 }
 
-// Ntfy notification functions
-const sendNtfyRegistration = async (title, message, priority = 4) => {
-  try {
-    const cleanTitle = title.replace(/[^\x20-\x7E]/g, '').trim();
-    
-    await fetch(`https://ntfy.sh/${NTFY_TOPIC_REGISTER}`, {
-      method: 'POST',
-      body: message,
-      headers: {
-        'Title': cleanTitle || 'New Registration',
-        'Priority': priority.toString(),
-        'Tags': 'tada'
-      }
-    });
-    console.log(`✅ Ntfy registration notification sent: ${cleanTitle}`);
-  } catch (error) {
-    console.error('❌ Ntfy registration notification failed:', error.message);
-  }
-};
-
-const sendNtfyChat = async (title, message, priority = 3) => {
-  try {
-    const cleanTitle = title.replace(/[^\x20-\x7E]/g, '').trim();
-    
-    await fetch(`https://ntfy.sh/${NTFY_TOPIC_CHAT}`, {
-      method: 'POST',
-      body: message,
-      headers: {
-        'Title': cleanTitle || 'New Chat Message',
-        'Priority': priority.toString(),
-        'Tags': 'speech_balloon'
-      }
-    });
-    console.log(`✅ Ntfy chat notification sent: ${cleanTitle}`);
-  } catch (error) {
-    console.error('❌ Ntfy chat notification failed:', error.message);
-  }
-};
-
 // Initialize admin user
 async function initializeAdmin() {
   try {
@@ -415,7 +438,7 @@ async function initializeAdmin() {
         phone: ADMIN_PHONE,
         pin: ADMIN_PIN,
         fullName: 'System Administrator',
-        email: 'admin@delux.com',
+        email: ADMIN_EMAIL,
         createdAt: new Date().toISOString()
       }];
       await saveAdminSettings(adminSettings);
@@ -429,7 +452,7 @@ async function initializeAdmin() {
 // Get admin info
 async function getAdminInfo() {
   const adminSettings = await readAdminSettings();
-  return adminSettings[0] || { phone: ADMIN_PHONE, fullName: 'Admin', email: 'admin@delux.com' };
+  return adminSettings[0] || { phone: ADMIN_PHONE, fullName: 'Admin', email: ADMIN_EMAIL };
 }
 
 async function logTransaction(email, type, amount) {
@@ -582,6 +605,13 @@ app.post('/login', async (req, res) => {
       req.session.userName = admin.fullName;
       req.session.isAdmin = true;
       
+      // Send login notification
+      sendNtfyLogin(
+        'Admin Login',
+        `Admin logged in: ${admin.fullName}\nTime: ${new Date().toLocaleString()}\nEmail: ${admin.email}`,
+        3
+      ).catch(err => console.error('Login notification error:', err));
+      
       return res.send(`<h2>Admin Login Successful!</h2> 
                       <p>Welcome back, ${admin.fullName}!</p>
                       <p>Redirecting to admin dashboard...</p> 
@@ -602,12 +632,20 @@ app.post('/login', async (req, res) => {
       return res.send("Your account has been deactivated. Please contact admin.");
     }
 
+    // Update last login
     user.lastLogin = new Date().toISOString();
     await saveUsers(users);
 
     req.session.user = user.email;
     req.session.userName = user.fullName;
     req.session.isAdmin = false;
+
+    // Send login notification
+    sendNtfyLogin(
+      'User Login',
+      `User logged in: ${user.fullName}\nTime: ${new Date().toLocaleString()}\nEmail: ${user.email}\nPhone: ${user.phoneNumber}`,
+      2
+    ).catch(err => console.error('Login notification error:', err));
 
     res.send(`<h2>Login Successful!</h2> 
               <p>Welcome back, ${user.fullName}!</p>
@@ -638,7 +676,14 @@ app.get('/check-session', (req, res) => {
 
 // Logout
 app.get('/logout', (req, res) => {
+  const userName = req.session.userName;
+  const isAdmin = req.session.isAdmin;
+  
   req.session.destroy(() => {
+    // Optional: Send logout notification
+    if (userName) {
+      console.log(`👋 User logged out: ${userName} (Admin: ${isAdmin})`);
+    }
     res.redirect('/login.html');
   });
 });
@@ -668,6 +713,7 @@ app.get('/user-info', async (req, res) => {
       cards: user.cards || [],
       isActive: user.isActive,
       createdAt: user.createdAt,
+      lastLogin: user.lastLogin,
       isAdmin: req.session.isAdmin || false
     });
   } catch (error) {
@@ -1445,6 +1491,16 @@ app.post('/api/admin/user/update', async (req, res) => {
     if (newPin) users[userIndex].pin = newPin;
 
     await saveUsers(users);
+    
+    // Send notification about account status change
+    if (isActive !== undefined) {
+      const action = isActive === 'true' ? 'activated' : 'deactivated';
+      sendNtfyLogin(
+        `User ${action}`,
+        `User ${users[userIndex].fullName} (${users[userIndex].email}) was ${action} by admin`,
+        2
+      ).catch(err => console.error('Status change notification error:', err));
+    }
 
     res.json({ success: true });
   } catch (error) {
@@ -1487,6 +1543,13 @@ app.post('/api/admin/user/credit', async (req, res) => {
     });
 
     await saveUsers(users);
+
+    // Send ntfy notification about credit
+    sendNtfyRegistration(
+      'Account Credited',
+      `User: ${users[userIndex].fullName}\nEmail: ${users[userIndex].email}\nAmount: ${creditAmount}€\nNew Balance: ${users[userIndex].balance}€\nAdmin: ${req.session.userName}`,
+      3
+    ).catch(err => console.error('Credit notification error:', err));
 
     // Send system message to user via Socket.IO
     const chatId = [users[userIndex].email, 'system'].sort().join('_');
@@ -1658,6 +1721,7 @@ async function initializeServer() {
     console.log('\n📱 Ntfy Notifications:');
     console.log(`   • Registration: ${NTFY_TOPIC_REGISTER}`);
     console.log(`   • Chat: ${NTFY_TOPIC_CHAT}`);
+    console.log(`   • Login: ${NTFY_TOPIC_LOGIN}`);
     
     console.log('\n👑 Admin Credentials:');
     console.log(`   • Phone: ${ADMIN_PHONE}`);
