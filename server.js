@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
 const app = express();
-const PORT = 3000;
+const PORT = 1000;
 
 // Dynamic import for node-fetch v3+
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
