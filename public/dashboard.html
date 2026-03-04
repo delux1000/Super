@@ -126,6 +126,46 @@
       margin-top: 2px;
     }
     
+    /* Chat Button in Header */
+    .chat-header-btn {
+      position: relative;
+      background: linear-gradient(135deg, var(--accent), #00B894);
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+    }
+    
+    .chat-header-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
+    }
+    
+    .chat-unread-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--danger);
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      border: 2px solid white;
+    }
+    
     .notification-btn {
       position: relative;
       background: none;
@@ -332,6 +372,8 @@
       box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
+      text-decoration: none;
+      color: inherit;
     }
     
     .action-btn:hover {
@@ -373,6 +415,16 @@
       font-size: 13px;
       color: var(--gray);
       line-height: 1.4;
+    }
+    
+    /* Message Support Button - Special Style */
+    .message-support-btn {
+      background: linear-gradient(135deg, var(--accent), #00B894);
+      color: white;
+    }
+    
+    .message-support-btn .action-icon {
+      background: rgba(255,255,255,0.2);
     }
     
     /* Recent Transactions */
@@ -634,115 +686,110 @@
       font-size: 14px;
     }
     
-    /* Contact Form */
-    #contact-icon {  
-      position: fixed;  
-      bottom: 40px;  
-      right: 40px;  
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));  
-      color: white;  
-      border-radius: 50%;  
-      width: 70px;  
-      height: 70px;  
+    /* Chat Preview in Sidebar */
+    .chat-preview {
+      background: white;
+      border-radius: var(--card-radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 2px solid transparent;
+    }
+    
+    .chat-preview:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .chat-preview-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--accent), #00B894);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 30px;  
-      cursor: pointer;  
-      z-index: 999;  
-      box-shadow: 0 8px 30px rgba(0, 71, 171, 0.4);  
-      transition: var(--transition);  
-      border: none;
-    }  
-  
-    #contact-icon:hover {  
-      transform: translateY(-8px) scale(1.05);  
-      box-shadow: 0 15px 40px rgba(0, 71, 171, 0.6);  
-    }  
-  
-    #contact-form {  
-      display: none;  
-      position: fixed;  
-      bottom: 130px;  
-      right: 40px;  
-      background: white;  
-      border-radius: var(--card-radius);  
-      padding: 30px;  
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);  
-      z-index: 1000;  
-      width: 350px;  
-      animation: slideUp 0.3s ease;
-    }  
-  
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      color: white;
+      font-size: 24px;
     }
     
-    #contact-form h4 {  
-      margin-bottom: 25px;  
-      color: var(--secondary);  
-      font-size: 22px;
-      text-align: center;
-      font-weight: 700;
-    }  
-  
-    .form-group {
-      margin-bottom: 20px;
+    .chat-preview-info {
+      flex: 1;
     }
     
-    #contact-form label {  
-      display: block;  
-      margin-bottom: 8px;  
-      color: var(--secondary);  
-      font-weight: 600;  
-      font-size: 14px;
-    }  
-  
-    #contact-form input,  
-    #contact-form textarea {  
-      width: 100%;  
-      padding: 15px;  
-      border-radius: 10px;  
-      border: 2px solid #e0e0e0;  
-      font-family: inherit;
-      font-size: 15px;
-      transition: var(--transition);
-      background: #f9f9ff;
-    }  
-    
-    #contact-form input:focus,  
-    #contact-form textarea:focus {  
-      border-color: var(--primary);
-      outline: none;
-      background: white;
-      box-shadow: 0 5px 15px rgba(0, 71, 171, 0.1);
+    .chat-preview-title {
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-  
-    #contact-form button {  
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));  
-      color: white;  
-      border: none;  
-      padding: 16px;  
-      width: 100%;  
-      border-radius: 10px;  
-      font-size: 16px;  
-      font-weight: 600;  
+    
+    .chat-preview-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--success);
+    }
+    
+    .chat-preview-message {
+      font-size: 13px;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .chat-preview-badge {
+      background: var(--danger);
+      color: white;
+      font-size: 11px;
+      font-weight: bold;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+    }
+    
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+    }
+    
+    .toast {
+      background: var(--secondary);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
       margin-top: 10px;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 8px 20px rgba(0, 71, 171, 0.3);
-    }  
-  
-    #contact-form button:hover {  
-      transform: translateY(-3px);
-      box-shadow: 0 12px 25px rgba(0, 71, 171, 0.4);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.info { background: var(--primary); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
     
     /* Responsive */
@@ -761,18 +808,6 @@
       
       .balance-amount {
         font-size: 36px;
-      }
-      
-      #contact-icon {  
-        bottom: 20px;  
-        right: 20px;  
-      }  
-      
-      #contact-form {  
-        bottom: 100px;  
-        right: 20px;  
-        width: calc(100% - 40px);
-        max-width: 400px;
       }
     }  
     
@@ -845,7 +880,6 @@
       font-size: 15px;
       transition: var(--transition);
       box-shadow: 0 8px 20px rgba(0, 212, 170, 0.3);
-      margin-top: 10px;
     }
     
     .dashboard-home-btn:hover {
@@ -856,8 +890,12 @@
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
 </head>  
 <body>  
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
   <!-- Header -->
   <header class="main-header">
     <div class="header-container">
@@ -873,6 +911,12 @@
           <div class="user-name" id="userName">Loading...</div>
           <div class="user-email" id="userEmail">Loading...</div>
         </div>
+        
+        <!-- Chat Button in Header -->
+        <a href="/chat.html" class="chat-header-btn" id="chatHeaderBtn">
+          <i class="fas fa-comment-dots"></i>
+          <span class="chat-unread-badge" id="chatUnreadBadge" style="display: none;">0</span>
+        </a>
         
         <button class="notification-btn">
           <i class="fas fa-bell"></i>
@@ -980,16 +1024,15 @@
           <div class="action-desc">Low interest rates</div>
         </a>
         
-        <!-- New Button: Withdraw to Card -->
-        <a href="/cashout.html" class="action-btn">
+        <!-- Message Support Button -->
+        <a href="/chat.html" class="action-btn message-support-btn">
           <div class="action-icon">
-            <i class="fas fa-money-check"></i>
+            <i class="fas fa-headset"></i>
           </div>
-          <div class="action-title">Withdraw to Card</div>
-          <div class="action-desc">Cashout to your debit card</div>
+          <div class="action-title">Message Support</div>
+          <div class="action-desc">Chat with our team</div>
         </a>
         
-        <!-- New Button: Profile -->
         <a href="/profile.html" class="action-btn">
           <div class="action-icon">
             <i class="fas fa-user-circle"></i>
@@ -1009,8 +1052,8 @@
           </a>
         </div>
         
-        <div class="transaction-list">
-          <!-- Will be populated by JavaScript -->
+        <div class="transaction-list" id="transactionList">
+          <!-- Populated by JavaScript -->
           <div class="transaction-item">
             <div class="transaction-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
               <i class="fas fa-gift"></i>
@@ -1021,34 +1064,33 @@
             </div>
             <div class="transaction-amount positive">+$1,800.00</div>
           </div>
-          
-          <div class="transaction-item">
-            <div class="transaction-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
-              <i class="fas fa-exchange-alt"></i>
-            </div>
-            <div class="transaction-info">
-              <div class="transaction-name">Wire Transfer</div>
-              <div class="transaction-date">Yesterday • 14:30 PM</div>
-            </div>
-            <div class="transaction-amount positive">+$500.00</div>
-          </div>
-          
-          <div class="transaction-item">
-            <div class="transaction-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
-              <i class="fas fa-shopping-cart"></i>
-            </div>
-            <div class="transaction-info">
-              <div class="transaction-name">Online Purchase</div>
-              <div class="transaction-date">Dec 10 • 11:15 AM</div>
-            </div>
-            <div class="transaction-amount negative">-$89.99</div>
-          </div>
         </div>
       </section>
     </main>
     
     <!-- Sidebar -->
     <aside class="dashboard-sidebar">
+      <!-- Chat Preview Card -->
+      <div class="chat-preview" onclick="window.location.href='/chat.html'">
+        <div class="chat-preview-avatar">
+          <i class="fas fa-headset"></i>
+        </div>
+        <div class="chat-preview-info">
+          <div class="chat-preview-title">
+            Support Chat
+            <span class="chat-preview-status">
+              <span class="online-dot" style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
+              Online
+            </span>
+          </div>
+          <div class="chat-preview-message" id="chatPreviewMessage">
+            <i class="fas fa-comment"></i>
+            <span>Click to chat with support</span>
+          </div>
+        </div>
+        <div class="chat-preview-badge" id="chatPreviewBadge" style="display: none;">0</div>
+      </div>
+      
       <!-- Stats -->
       <div class="stats-card">
         <div class="stats-title">Monthly Growth</div>
@@ -1093,11 +1135,11 @@
             <div class="link-text">Account Settings</div>
           </a>
           
-          <a href="https://wa.me/12568212395" class="link-item">
+          <a href="/chat.html" class="link-item">
             <div class="link-icon">
               <i class="fas fa-headset"></i>
             </div>
-            <div class="link-text">Support Center</div>
+            <div class="link-text">Live Support</div>
           </a>
           
           <a href="/about.html" class="link-item">
@@ -1169,7 +1211,7 @@
     </div>
   </footer>
   
-  <!-- Contact Support -->
+  <!-- Contact Support (Legacy) -->
   <button id="contact-icon">
     <i class="fas fa-comment-dots"></i>
   </button>
@@ -1177,7 +1219,7 @@
   <div id="contact-form">  
     <h4>Contact Support</h4>  
     <div class="form-group">
-      <label for="name">your name</label>
+      <label for="name">Your Name</label>
       <input type="text" id="name" placeholder="Enter your name" required>  
     </div>
     
@@ -1195,10 +1237,79 @@
   </div>  
   
   <script>  
-    // Fetch user info  
-    fetch('/user-info')  
-      .then(response => response.json())  
-      .then(data => {  
+    // ==================== STATE ====================
+    let socket;
+    let currentUser = null;
+    let unreadCount = 0;
+    let messages = [];
+    
+    const ADMIN_EMAIL = 'admin@delux.com';
+    const ADMIN_PHONE = '12568212395';
+    
+    // DOM Elements
+    const toastContainer = document.getElementById('toastContainer');
+    const chatUnreadBadge = document.getElementById('chatUnreadBadge');
+    const chatPreviewBadge = document.getElementById('chatPreviewBadge');
+    const chatPreviewMessage = document.getElementById('chatPreviewMessage');
+    
+    // ==================== SOCKET.IO SETUP ====================
+    function initSocket() {
+      socket = io();
+      
+      socket.on('connect', () => {
+        console.log('✅ Socket connected');
+        showToast('Connected to live support', 'success');
+        loadUnreadCount();
+      });
+      
+      socket.on('disconnect', () => {
+        console.log('❌ Socket disconnected');
+        showToast('Disconnected from support', 'error');
+      });
+      
+      socket.on('new-message', (message) => {
+        console.log('📨 New message:', message);
+        
+        // If message is from admin or system, update unread count and preview
+        if (message.from === ADMIN_EMAIL || message.from === ADMIN_PHONE || message.from === 'system') {
+          messages.push(message);
+          updateChatPreview();
+          loadUnreadCount();
+          
+          // Show notification
+          if (message.from === 'system') {
+            showToast('📢 ' + message.message, 'info');
+          } else {
+            showToast('💬 New message from Admin', 'info');
+          }
+        }
+      });
+      
+      socket.on('notification', (data) => {
+        console.log('🔔 Notification:', data);
+        if (data.type === 'credit') {
+          showToast(data.message, 'success');
+          // Reload balance
+          loadUserData();
+        }
+      });
+    }
+    
+    // ==================== LOAD USER DATA ====================
+    async function loadUserData() {
+      try {
+        const response = await fetch('/user-info');
+        if (!response.ok) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const data = await response.json();
+        
+        currentUser = {
+          email: data.email,
+          fullName: data.fullName
+        };
+        
         document.getElementById('user-info').textContent = data.fullName;  
         document.getElementById('userName').textContent = data.fullName;  
         document.getElementById('userEmail').textContent = data.email;  
@@ -1207,90 +1318,72 @@
           maximumFractionDigits: 2
         });  
         
-        // Update transaction list with real data if available
         updateRecentTransactions();
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching user info:', error);
         document.getElementById('balValue').textContent = '0.00';
-      });
-  
-    // Toggle contact form  
-    document.getElementById('contact-icon').addEventListener('click', () => {  
-      const form = document.getElementById('contact-form');  
-      form.style.display = form.style.display === 'block' ? 'none' : 'block';  
-    });  
-  
-    // Send message  
-    function sendMessage() {  
-      const name = document.getElementById('name').value;  
-      const email = document.getElementById('email').value;  
-      const message = document.getElementById('message').value;  
-      
-      if (!name || !email || !message) {
-        alert('Please fill in all fields');
-        return;
       }
-      
-      const fullMessage = `Name: ${name}%0AEmail: ${email}%0AMessage: ${message}`;  
-      const whatsappURL = `https://wa.me/share/url?url=&text=${encodeURIComponent(fullMessage)}&to=+12568212395`;  
-      window.open(whatsappURL, '_blank');  
-      
-      // Reset form
-      document.getElementById('name').value = '';
-      document.getElementById('email').value = '';
-      document.getElementById('message').value = '';
-      
-      // Show confirmation
-      const form = document.getElementById('contact-form');  
-      form.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-          <div style="width: 60px; height: 60px; background: #00C853; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 24px;">
-            <i class="fas fa-check"></i>
-          </div>
-          <h4 style="color: var(--secondary); margin-bottom: 10px;">Message Sent!</h4>
-          <p style="color: var(--gray);">Our support team will contact you shortly.</p>
-        </div>
-      `;
-      
-      setTimeout(() => {
-        form.style.display = 'none';
-        form.innerHTML = `
-          <h4>Contact Support</h4>  
-          <div class="form-group">
-            <label for="name">Your Name</label>
-            <input type="text" id="name" placeholder="Enter your name" required>  
-          </div>
-          
-          <div class="form-group">
-            <label for="email">Your Email</label>
-            <input type="email" id="email" placeholder="Enter your email" required>  
-          </div>
-          
-          <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" placeholder="How can we help you?" rows="4" required></textarea>  
-          </div>
-          
-          <button onclick="sendMessage()">Send Message</button>
-        `;
-      }, 3000);
     }
     
-    // Update recent transactions
+    // ==================== CHAT FUNCTIONS ====================
+    async function loadUnreadCount() {
+      try {
+        const res = await fetch('/api/chat/unread');
+        const data = await res.json();
+        unreadCount = data.unreadCount || 0;
+        
+        // Update badges
+        if (unreadCount > 0) {
+          chatUnreadBadge.style.display = 'flex';
+          chatUnreadBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+          chatPreviewBadge.style.display = 'flex';
+          chatPreviewBadge.textContent = unreadCount;
+        } else {
+          chatUnreadBadge.style.display = 'none';
+          chatPreviewBadge.style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Error loading unread count:', err);
+      }
+    }
+    
+    async function updateChatPreview() {
+      try {
+        const res = await fetch(`/api/chat/history/${ADMIN_EMAIL}`);
+        if (!res.ok) return;
+        messages = await res.json();
+        
+        if (messages.length > 0) {
+          const lastMessage = messages[messages.length - 1];
+          let previewText = '';
+          
+          if (lastMessage.from === 'system') {
+            previewText = '📢 ' + lastMessage.message.substring(0, 30);
+          } else if (lastMessage.from === ADMIN_EMAIL || lastMessage.from === ADMIN_PHONE) {
+            previewText = 'Admin: ' + lastMessage.message.substring(0, 30);
+          } else {
+            previewText = 'You: ' + lastMessage.message.substring(0, 30);
+          }
+          
+          if (previewText.length > 30) previewText += '...';
+          chatPreviewMessage.innerHTML = `<i class="fas fa-comment"></i> <span>${previewText}</span>`;
+        }
+      } catch (err) {
+        console.error('Error updating chat preview:', err);
+      }
+    }
+    
+    // ==================== TRANSACTIONS ====================
     function updateRecentTransactions() {
       fetch('/transaction-history')
         .then(response => response.json())
         .then(data => {
           if (data.transactions && data.transactions.length > 0) {
-            // Get last 3 transactions
             const recentTransactions = data.transactions.slice(-3).reverse();
-            const transactionList = document.querySelector('.transaction-list');
+            const transactionList = document.getElementById('transactionList');
             
-            // Clear placeholder items
             transactionList.innerHTML = '';
             
-            // Add real transactions
             recentTransactions.forEach(transaction => {
               const isCredit = transaction.type === 'Credit' || transaction.type === 'Wire Received' || transaction.type === 'Investment Return';
               const icon = isCredit ? 'fa-arrow-down' : 'fa-arrow-up';
@@ -1336,7 +1429,83 @@
       }
     }
     
-    // Animated welcome message
+    // ==================== TOAST NOTIFICATIONS ====================
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      let icon = 'fa-info-circle';
+      if (type === 'success') icon = 'fa-check-circle';
+      if (type === 'error') icon = 'fa-exclamation-circle';
+      
+      toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 4000);
+    }
+    
+    // ==================== CONTACT FORM ====================
+    document.getElementById('contact-icon').addEventListener('click', () => {  
+      const form = document.getElementById('contact-form');  
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';  
+    });  
+  
+    function sendMessage() {  
+      const name = document.getElementById('name').value;  
+      const email = document.getElementById('email').value;  
+      const message = document.getElementById('message').value;  
+      
+      if (!name || !email || !message) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      const fullMessage = `Name: ${name}%0AEmail: ${email}%0AMessage: ${message}`;  
+      const whatsappURL = `https://wa.me/share/url?url=&text=${encodeURIComponent(fullMessage)}&to=+12568212395`;  
+      window.open(whatsappURL, '_blank');  
+      
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('message').value = '';
+      
+      const form = document.getElementById('contact-form');  
+      form.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <div style="width: 60px; height: 60px; background: #00C853; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 24px;">
+            <i class="fas fa-check"></i>
+          </div>
+          <h4 style="color: var(--secondary); margin-bottom: 10px;">Message Sent!</h4>
+          <p style="color: var(--gray);">Our support team will contact you shortly.</p>
+        </div>
+      `;
+      
+      setTimeout(() => {
+        form.style.display = 'none';
+        form.innerHTML = `
+          <h4>Contact Support</h4>  
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" placeholder="Enter your name" required>  
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Your Email</label>
+            <input type="email" id="email" placeholder="Enter your email" required>  
+          </div>
+          
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" placeholder="How can we help you?" rows="4" required></textarea>  
+          </div>
+          
+          <button onclick="sendMessage()">Send Message</button>
+        `;
+      }, 3000);
+    }
+    
+    // ==================== ANIMATED WELCOME ====================
     const welcomeMessages = [  
       "Welcome to Supper Cash Premium",  
       "Your financial future starts here",  
@@ -1353,14 +1522,13 @@
       messageIndex = (messageIndex + 1) % welcomeMessages.length;  
     }, 4000);  
     
-    // Reset to original text after cycling
     setTimeout(() => {
       setInterval(() => {
         logoText.textContent = originalText;
       }, welcomeMessages.length * 4000);
     }, welcomeMessages.length * 4000);
     
-    // Add click outside to close contact form
+    // ==================== CLICK OUTSIDE ====================
     document.addEventListener('click', (e) => {
       const contactForm = document.getElementById('contact-form');
       const contactIcon = document.getElementById('contact-icon');
@@ -1370,6 +1538,18 @@
           !contactIcon.contains(e.target)) {
         contactForm.style.display = 'none';
       }
+    });
+    
+    // ==================== PERIODIC REFRESH ====================
+    setInterval(() => {
+      loadUnreadCount();
+    }, 10000); // Check every 10 seconds
+    
+    // ==================== INITIALIZE ====================
+    window.addEventListener('load', () => {
+      loadUserData();
+      initSocket();
+      loadUnreadCount();
     });
   </script>  
 </body>  
