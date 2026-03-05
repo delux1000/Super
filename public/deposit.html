@@ -2,18 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Deposit Funds - Supper Cash</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deposit Funds - Supper Cash Premium</title>
   <style>
     :root {
-      --primary: #FF6B35;
-      --primary-dark: #E55A2B;
-      --secondary: #004E89;
-      --accent: #FFD166;
-      --light: #F8F9FA;
-      --dark: #212529;
-      --success: #06D6A0;
-      --gray: #6C757D;
-      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --primary: #0047AB;
+      --primary-dark: #002D72;
+      --secondary: #1A1A2E;
+      --accent: #00D4AA;
+      --accent-gold: #FFD700;
+      --light: #F8F9FF;
+      --dark: #0F1419;
+      --success: #00C853;
+      --warning: #FF9800;
+      --danger: #FF5252;
+      --gray: #8C98A9;
+      --gray-light: #F0F2F5;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 15px 50px rgba(0, 0, 0, 0.12);
+      --card-radius: 24px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     * {
@@ -23,456 +31,962 @@
     }
     
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: var(--dark);
       line-height: 1.6;
       min-height: 100vh;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
     }
     
     .container {
-      max-width: 600px;
-      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     
-    .header {
-      text-align: center;
+    /* Header */
+    .main-header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: var(--card-radius);
+      padding: 20px 30px;
       margin-bottom: 30px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
-    .logo {
+    .logo-area {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 15px;
-      margin-bottom: 20px;
     }
     
-    .logo-icon {
+    .logo-badge {
       width: 50px;
       height: 50px;
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
+      color: white;
+      font-weight: 700;
       font-size: 24px;
-      color: var(--primary-dark);
-      box-shadow: var(--shadow);
+      box-shadow: 0 4px 15px rgba(0, 71, 171, 0.3);
     }
     
     .logo-text {
-      font-size: 2.2em;
+      font-size: 24px;
       font-weight: 800;
-      color: var(--secondary);
-      letter-spacing: 1px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
-    .page-title {
-      font-size: 2.2em;
-      margin-bottom: 10px;
-      color: var(--secondary);
-      font-weight: 700;
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
     
-    .subtitle {
-      font-size: 1.1em;
-      color: var(--gray);
-      margin-bottom: 30px;
+    .user-details {
+      text-align: right;
     }
     
-    .form-container {
-      background: white;
-      border-radius: 16px;
-      padding: 40px;
-      box-shadow: var(--shadow);
-      margin-bottom: 30px;
-    }
-    
-    .welcome-message {
-      text-align: center;
-      font-size: 1.2em;
+    .user-name {
       font-weight: 600;
-      margin-bottom: 25px;
-      color: var(--primary);
-      padding: 15px;
-      background: rgba(255, 107, 53, 0.1);
-      border-radius: 10px;
+      color: var(--secondary);
     }
     
+    .user-email {
+      font-size: 12px;
+      color: var(--gray);
+    }
+    
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--gray-light);
+      border-radius: 30px;
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    
+    .back-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateX(-3px);
+    }
+    
+    /* Deposit Container */
+    .deposit-container {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 30px;
+    }
+    
+    @media (max-width: 992px) {
+      .deposit-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Main Form Card */
+    .form-card {
+      background: white;
+      border-radius: var(--card-radius);
+      padding: 40px;
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .form-header {
+      margin-bottom: 30px;
+    }
+    
+    .form-header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 10px;
+    }
+    
+    .form-header p {
+      color: var(--gray);
+      font-size: 1.1rem;
+    }
+    
+    .welcome-banner {
+      background: linear-gradient(135deg, rgba(0, 71, 171, 0.05), rgba(0, 212, 170, 0.05));
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .welcome-banner p {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 5px;
+    }
+    
+    .welcome-banner small {
+      color: var(--gray);
+    }
+    
+    /* Form Groups */
     .form-group {
       margin-bottom: 25px;
     }
     
-    label {
+    .form-group label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-weight: 600;
       color: var(--secondary);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
-    input, select {
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-wrapper i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      font-size: 1.2rem;
+    }
+    
+    .input-wrapper input,
+    .input-wrapper select {
       width: 100%;
-      padding: 14px;
-      border: 2px solid #e1e5ee;
-      border-radius: 8px;
-      font-size: 1em;
-      transition: border 0.3s ease;
+      padding: 16px 16px 16px 48px;
+      border: 2px solid var(--gray-light);
+      border-radius: 16px;
+      font-size: 1.1rem;
+      transition: var(--transition);
+      background: white;
+      appearance: none;
     }
     
-    input:focus, select:focus {
+    .input-wrapper input:focus,
+    .input-wrapper select:focus {
       border-color: var(--primary);
       outline: none;
+      box-shadow: 0 0 0 4px rgba(0, 71, 171, 0.1);
     }
     
-    .conversion-result {
-      font-size: 1.1em;
-      margin-top: 10px;
-      padding: 12px;
-      background: rgba(6, 214, 160, 0.1);
-      border-radius: 8px;
-      color: var(--success);
-      font-weight: 600;
-      text-align: center;
-      border-left: 4px solid var(--success);
-    }
-    
-    .btn {
-      padding: 16px;
-      font-size: 1.2em;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      box-shadow: var(--shadow);
-      text-align: center;
-      text-decoration: none;
-      display: block;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(to right, var(--primary), var(--primary-dark));
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
-    }
-    
-    .btn-secondary {
-      background: white;
-      color: var(--secondary);
-      border: 2px solid var(--secondary);
-      margin-top: 15px;
-    }
-    
-    .btn-secondary:hover {
-      background: var(--secondary);
-      color: white;
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    .loading {
-      text-align: center;
+    /* Conversion Result */
+    .conversion-card {
+      background: linear-gradient(135deg, #f6f9fc, #f1f5f9);
+      border-radius: 16px;
       padding: 20px;
-      background: rgba(255, 214, 102, 0.2);
-      border-radius: 10px;
-      margin: 20px 0;
-      font-weight: 600;
+      margin: 20px 0 30px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border: 2px dashed var(--primary);
+    }
+    
+    .conversion-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+    }
+    
+    .conversion-details {
+      flex: 1;
+    }
+    
+    .conversion-label {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-bottom: 5px;
+    }
+    
+    .conversion-value {
+      font-size: 1.4rem;
+      font-weight: 700;
       color: var(--primary);
     }
     
-    .instructions {
-      background: rgba(0, 78, 137, 0.1);
-      border-radius: 12px;
-      padding: 25px;
-      margin-top: 25px;
-      border-left: 4px solid var(--secondary);
-    }
-    
-    .instructions h3 {
-      color: var(--secondary);
-      margin-bottom: 15px;
-      font-size: 1.3em;
-    }
-    
-    .instructions p {
-      margin-bottom: 15px;
-      color: var(--dark);
-    }
-    
-    .account-details {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 15px 0;
-      box-shadow: var(--shadow);
-    }
-    
-    .account-details p {
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    
-    footer {
-      background: var(--dark);
-      color: white;
-      padding: 30px 0;
-      text-align: center;
-      margin-top: 50px;
+    /* Submit Button */
+    .submit-btn {
       width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
       border-radius: 16px;
-    }
-    
-    .footer-links {
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 8px 20px rgba(0, 71, 171, 0.3);
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 25px;
-      margin: 20px 0;
-      flex-wrap: wrap;
+      gap: 10px;
     }
     
-    .footer-links a {
-      color: #ddd;
-      text-decoration: none;
-      transition: color 0.3s ease;
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 71, 171, 0.4);
     }
     
-    .footer-links a:hover {
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* Loading State */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .loading-overlay.active {
+      display: flex;
+    }
+    
+    .loading-content {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 30px;
+      box-shadow: var(--shadow-hover);
+    }
+    
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid var(--gray-light);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Instructions Card */
+    .instructions-card {
+      background: white;
+      border-radius: var(--card-radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-top: 30px;
+      border: 2px solid var(--accent);
+    }
+    
+    .instructions-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .instructions-header i {
+      font-size: 2rem;
       color: var(--accent);
     }
     
-    .copyright {
-      margin-top: 20px;
-      color: #aaa;
-      font-size: 0.9em;
+    .instructions-header h3 {
+      font-size: 1.5rem;
+      color: var(--secondary);
     }
     
+    .bank-details {
+      background: linear-gradient(135deg, #f8faff, #f0f4ff);
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+    
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .detail-row:last-child {
+      border-bottom: none;
+    }
+    
+    .detail-label {
+      font-weight: 600;
+      color: var(--gray);
+    }
+    
+    .detail-value {
+      font-weight: 700;
+      color: var(--secondary);
+      font-size: 1.1rem;
+    }
+    
+    .chat-action-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent), #00B894);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .chat-action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 212, 170, 0.4);
+    }
+    
+    /* Sidebar Cards */
+    .sidebar-card {
+      background: white;
+      border-radius: var(--card-radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
+    }
+    
+    .sidebar-card h3 {
+      font-size: 1.3rem;
+      color: var(--secondary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .feature-list {
+      list-style: none;
+    }
+    
+    .feature-list li {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-light);
+    }
+    
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .feature-list i {
+      color: var(--success);
+      font-size: 1.2rem;
+    }
+    
+    .exchange-rate {
+      background: linear-gradient(135deg, #f8faff, #eef2ff);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .exchange-rate .rate {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 10px 0;
+    }
+    
+    .exchange-rate small {
+      color: var(--gray);
+    }
+    
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1100;
+    }
+    
+    .toast {
+      background: white;
+      color: var(--secondary);
+      padding: 16px 24px;
+      border-radius: 12px;
+      margin-top: 10px;
+      box-shadow: var(--shadow-hover);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Responsive */
     @media (max-width: 768px) {
-      .page-title {
-        font-size: 1.8em;
+      .main-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
       }
       
-      .form-container {
+      .form-card {
         padding: 30px 20px;
       }
       
-      .logo-text {
-        font-size: 1.8em;
+      .form-header h1 {
+        font-size: 1.8rem;
       }
       
-      .footer-links {
+      .detail-row {
         flex-direction: column;
-        gap: 10px;
+        gap: 5px;
       }
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h3>Processing Your Deposit</h3>
+      <p style="color: var(--gray); margin-top: 10px;">Please wait a moment...</p>
+    </div>
+  </div>
 
   <div class="container">
-    <div class="header">
-      <div class="logo">
-        <div class="logo-icon">$</div>
-        <div class="logo-text">Supper Cash</div>
+    <!-- Header -->
+    <header class="main-header">
+      <div class="logo-area">
+        <div class="logo-badge">
+          <i class="fas fa-university"></i>
+        </div>
+        <div class="logo-text">Supper Cash Premium</div>
       </div>
-      <h1 class="page-title">Deposit Funds</h1>
-      <p class="subtitle">Add money to your account securely</p>
-    </div>
-
-    <div class="form-container">
-      <div class="welcome-message" id="welcomeMessage">Welcome! Start your deposit below.</div>
       
-      <form id="depositForm">
-        <div class="form-group">
-          <label for="amount">Amount in USD ($):</label>
-          <input type="number" id="amount" name="amount" required step="0.01" placeholder="Enter amount in USD">
+      <div class="user-info">
+        <div class="user-details">
+          <div class="user-name" id="userName">Loading...</div>
+          <div class="user-email" id="userEmail">Loading...</div>
         </div>
-
-        <div class="conversion-result" id="conversionResult"></div>
-
-        <div class="form-group">
-          <label for="country">Select Country:</label>
-          <select id="country" name="country" required>
-            <option value="">-- Select Country --</option>
-            <option value="Nigeria">Nigeria</option>
-            <option value="USA">USA</option>
-            <option value="UK">UK</option>
-            <option value="Germany">Germany</option>
-            <option value="India">India</option>
-            <option value="Canada">Canada</option>
-            <option value="Australia">Australia</option>
-            <option value="France">France</option>
-            <option value="Italy">Italy</option>
-            <option value="Spain">Spain</option>
-            <option value="Brazil">Brazil</option>
-            <option value="Mexico">Mexico</option>
-            <option value="Japan">Japan</option>
-            <option value="China">China</option>
-            <option value="Russia">Russia</option>
-            <option value="South Africa">South Africa</option>
-            <option value="Argentina">Argentina</option>
-            <option value="Saudi Arabia">Saudi Arabia</option>
-            <option value="Egypt">Egypt</option>
-            <option value="Turkey">Turkey</option>
-          </select>
-        </div>
-
-        <div id="paymentTypeSection" class="form-group hidden">
-          <label for="paymentType">Select Payment Type:</label>
-          <select id="paymentType" name="paymentType">
-            <option value="Bitcoin">Bitcoin</option>
-            <option value="Ethereum">Ethereum</option>
-            <option value="USDT">USDT</option>
-            <option value="PayPal">PayPal</option>
-            <option value="Skrill">Skrill</option>
-            <option value="Zelle">Zelle</option>
-            <option value="Cash App">Cash App</option>
-            <option value="Alipay">Alipay</option>
-            <option value="WeChat Pay">WeChat Pay</option>
-            <option value="Western Union">Western Union</option>
-            <option value="MoneyGram">MoneyGram</option>
-            <option value="Perfect Money">Perfect Money</option>
-            <option value="Neteller">Neteller</option>
-            <option value="Payeer">Payeer</option>
-            <option value="Ria Money Transfer">Ria Money Transfer</option>
-            <option value="Gift Card">Gift Card</option>
-            <option value="Wise (TransferWise)">Wise (TransferWise)</option>
-            <option value="Venmo">Venmo</option>
-            <option value="Apple Pay">Apple Pay</option>
-            <option value="Google Pay">Google Pay</option>
-          </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Process Deposit</button>
-      </form>
-
-      <div id="loading" class="loading hidden">
-        <p>Processing your deposit request...</p>
-        <p>Please wait 5 seconds</p>
+        <a href="/dashboard.html" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+          <span>Dashboard</span>
+        </a>
       </div>
+    </header>
 
-      <div id="nigeriaInstructions" class="instructions hidden">
-        <h3>Deposit Instructions for Nigeria</h3>
-        <p>Please send the exact amount to the account details below:</p>
-        
-        <div class="account-details">
-          <p><strong>Account Number:</strong> 8110679255</p>
-          <p><strong>Bank:</strong> Opay</p>
-          <p><strong>Account Name:</strong> Lawrence Kabirat</p>
+    <!-- Main Deposit Section -->
+    <div class="deposit-container">
+      <!-- Left Column - Main Form -->
+      <div class="form-card">
+        <div class="form-header">
+          <h1>Make a Deposit</h1>
+          <p>Add funds to your account securely</p>
         </div>
         
-        <p>After making the payment, click the button below to confirm:</p>
-        <a href="https://wa.me/+12568212395" target="_blank" class="btn btn-primary">I Have Paid</a>
+        <div class="welcome-banner" id="welcomeBanner">
+          <p id="welcomeMessage">Welcome! Enter an amount to begin</p>
+          <small>All transactions are secure and encrypted</small>
+        </div>
+        
+        <form id="depositForm">
+          <div class="form-group">
+            <label for="amount">Amount (USD)</label>
+            <div class="input-wrapper">
+              <i class="fas fa-dollar-sign"></i>
+              <input type="number" id="amount" name="amount" required step="0.01" min="10" placeholder="0.00">
+            </div>
+          </div>
+          
+          <div class="conversion-card" id="conversionCard" style="display: none;">
+            <div class="conversion-icon">
+              <i class="fas fa-exchange-alt"></i>
+            </div>
+            <div class="conversion-details">
+              <div class="conversion-label">Converted Amount</div>
+              <div class="conversion-value" id="conversionResult">$0.00</div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="country">Select Country</label>
+            <div class="input-wrapper">
+              <i class="fas fa-globe"></i>
+              <select id="country" name="country" required>
+                <option value="">-- Choose Country --</option>
+                <option value="Nigeria">🇳🇬 Nigeria</option>
+                <option value="USA">🇺🇸 USA</option>
+                <option value="UK">🇬🇧 United Kingdom</option>
+                <option value="Germany">🇩🇪 Germany</option>
+                <option value="India">🇮🇳 India</option>
+                <option value="Canada">🇨🇦 Canada</option>
+                <option value="Australia">🇦🇺 Australia</option>
+                <option value="France">🇫🇷 France</option>
+                <option value="Italy">🇮🇹 Italy</option>
+                <option value="Spain">🇪🇸 Spain</option>
+                <option value="Brazil">🇧🇷 Brazil</option>
+                <option value="Mexico">🇲🇽 Mexico</option>
+                <option value="Japan">🇯🇵 Japan</option>
+                <option value="China">🇨🇳 China</option>
+                <option value="Russia">🇷🇺 Russia</option>
+                <option value="South Africa">🇿🇦 South Africa</option>
+                <option value="UAE">🇦🇪 UAE</option>
+                <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
+                <option value="Egypt">🇪🇬 Egypt</option>
+                <option value="Turkey">🇹🇷 Turkey</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group" id="paymentTypeGroup" style="display: none;">
+            <label for="paymentType">Payment Method</label>
+            <div class="input-wrapper">
+              <i class="fas fa-credit-card"></i>
+              <select id="paymentType" name="paymentType">
+                <option value="Bitcoin">₿ Bitcoin</option>
+                <option value="Ethereum">Ξ Ethereum</option>
+                <option value="USDT">💵 USDT</option>
+                <option value="PayPal">🅿️ PayPal</option>
+                <option value="Skrill">💰 Skrill</option>
+                <option value="Zelle">💳 Zelle</option>
+                <option value="Cash App">📱 Cash App</option>
+                <option value="Venmo">💚 Venmo</option>
+                <option value="Wise">🌐 Wise</option>
+                <option value="Western Union">📮 Western Union</option>
+                <option value="MoneyGram">💸 MoneyGram</option>
+              </select>
+            </div>
+          </div>
+          
+          <button type="submit" class="submit-btn" id="submitBtn">
+            <i class="fas fa-lock"></i>
+            <span>Process Deposit</span>
+          </button>
+        </form>
+        
+        <!-- Nigeria Instructions (Hidden by default) -->
+        <div class="instructions-card" id="nigeriaInstructions" style="display: none;">
+          <div class="instructions-header">
+            <i class="fas fa-university"></i>
+            <h3>Local Bank Transfer</h3>
+          </div>
+          
+          <div class="bank-details">
+            <div class="detail-row">
+              <span class="detail-label">Account Number</span>
+              <span class="detail-value">8110679255</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Bank Name</span>
+              <span class="detail-value">Opay Digital Services</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Account Name</span>
+              <span class="detail-value">Lawrence Kabirat</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Amount (NGN)</span>
+              <span class="detail-value" id="nairaAmount">₦0.00</span>
+            </div>
+          </div>
+          
+          <p style="margin-bottom: 20px; color: var(--gray);">
+            <i class="fas fa-info-circle"></i> After making the payment, click the button below to notify support.
+          </p>
+          
+          <button class="chat-action-btn" id="notifySupportBtn">
+            <i class="fas fa-comment-dots"></i>
+            <span>I Have Made the Payment</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Right Column - Sidebar Info -->
+      <div class="sidebar">
+        <div class="sidebar-card">
+          <h3><i class="fas fa-clock"></i> Processing Time</h3>
+          <ul class="feature-list">
+            <li><i class="fas fa-bolt"></i> <strong>Bitcoin:</strong> 1-3 confirmations</li>
+            <li><i class="fas fa-bolt"></i> <strong>Bank Transfer:</strong> Instant</li>
+            <li><i class="fas fa-bolt"></i> <strong>E-wallets:</strong> 5-30 minutes</li>
+          </ul>
+        </div>
+        
+        <div class="sidebar-card">
+          <h3><i class="fas fa-chart-line"></i> Exchange Rates</h3>
+          <div class="exchange-rate">
+            <p>USD to NGN</p>
+            <div class="rate">₦1,500</div>
+            <small>Rate may vary</small>
+          </div>
+          <div class="exchange-rate" style="margin-top: 15px;">
+            <p>USD to BTC</p>
+            <div class="rate">₿ 0.000022</div>
+            <small>Market rate</small>
+          </div>
+        </div>
+        
+        <div class="sidebar-card">
+          <h3><i class="fas fa-shield-alt"></i> Secure Deposit</h3>
+          <p style="color: var(--gray); margin-bottom: 15px;">All deposits are protected with bank-level security.</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <span style="background: var(--gray-light); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem;">256-bit SSL</span>
+            <span style="background: var(--gray-light); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem;">2FA Protected</span>
+            <span style="background: var(--gray-light); padding: 5px 12px; border-radius: 20px; font-size: 0.9rem;">FDIC Insured</span>
+          </div>
+        </div>
       </div>
     </div>
-
-    <a href="dashboard.html" class="btn btn-secondary">Back to Dashboard</a>
-
-    <footer>
-      <div class="container">
-        <p>Secure and fast deposits with Supper Cash</p>
-        <div class="footer-links">
-          <a href="/privacy.html">Privacy Policy</a>
-          <a href="/terms.html">Terms of Service</a>
-          <a href="/faq.html">FAQ</a>
-          <a href="/contact.html">Contact</a>
-        </div>
-        <div class="copyright">
-          &copy; 2023 Supper Cash. All rights reserved.
-        </div>
-      </div>
-    </footer>
   </div>
 
   <script>
-    // Update currency from Euro to USD
+    // ==================== STATE ====================
+    let socket = null;
+    let currentUser = null;
+    
+    // DOM Elements
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const welcomeMessage = document.getElementById('welcomeMessage');
     const amountInput = document.getElementById('amount');
     const countrySelect = document.getElementById('country');
+    const paymentTypeGroup = document.getElementById('paymentTypeGroup');
     const paymentTypeSelect = document.getElementById('paymentType');
+    const conversionCard = document.getElementById('conversionCard');
     const conversionResult = document.getElementById('conversionResult');
-    const paymentTypeSection = document.getElementById('paymentTypeSection');
-    const depositForm = document.getElementById('depositForm');
-    const loadingDiv = document.getElementById('loading');
-    const instructionsDiv = document.getElementById('nigeriaInstructions');
-    const welcomeMessage = document.getElementById('welcomeMessage');
-
-    // Update rates for USD
-    let usdToNairaRate = 1500; // Approximate rate
-    let usdToBitcoinRate = 1 / 45000; // Approximate rate
-
-    async function updateConversion() {
+    const nigeriaInstructions = document.getElementById('nigeriaInstructions');
+    const nairaAmount = document.getElementById('nairaAmount');
+    const notifySupportBtn = document.getElementById('notifySupportBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastContainer = document.getElementById('toastContainer');
+    
+    // Exchange rates
+    const USD_TO_NGN = 1500;
+    const USD_TO_BTC = 1 / 45000; // 1 BTC = $45,000
+    
+    // ==================== INITIALIZATION ====================
+    async function init() {
+      await loadUserData();
+      initSocket();
+      setupEventListeners();
+    }
+    
+    // Load user data
+    async function loadUserData() {
+      try {
+        const response = await fetch('/user-info');
+        if (!response.ok) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const data = await response.json();
+        
+        currentUser = data;
+        userName.textContent = data.fullName;
+        userEmail.textContent = data.email;
+        
+        welcomeMessage.textContent = `Welcome back, ${data.fullName}! Enter an amount to deposit.`;
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        showToast('Failed to load user data', 'error');
+      }
+    }
+    
+    // Initialize Socket.IO
+    function initSocket() {
+      socket = io();
+      
+      socket.on('connect', () => {
+        console.log('✅ Connected to chat server');
+      });
+      
+      socket.on('new-message', (message) => {
+        if (message.from === 'system') {
+          showToast('System: ' + message.message, 'info');
+        } else if (message.from === 'admin@delux.com') {
+          showToast('Admin: ' + message.message, 'info');
+        }
+      });
+      
+      socket.on('notification', (data) => {
+        if (data.type === 'credit') {
+          showToast(data.message, 'success');
+        }
+      });
+    }
+    
+    // ==================== EVENT LISTENERS ====================
+    function setupEventListeners() {
+      amountInput.addEventListener('input', updateConversion);
+      countrySelect.addEventListener('change', handleCountryChange);
+      if (paymentTypeSelect) {
+        paymentTypeSelect.addEventListener('change', updateConversion);
+      }
+      
+      document.getElementById('depositForm').addEventListener('submit', handleSubmit);
+      notifySupportBtn.addEventListener('click', notifySupport);
+    }
+    
+    // Handle country change
+    function handleCountryChange() {
+      const country = countrySelect.value;
+      
+      if (country === 'Nigeria') {
+        paymentTypeGroup.style.display = 'none';
+        updateConversion();
+      } else {
+        paymentTypeGroup.style.display = 'block';
+        updateConversion();
+      }
+    }
+    
+    // Update conversion display
+    function updateConversion() {
       const amount = parseFloat(amountInput.value);
       const country = countrySelect.value;
-      const paymentType = paymentTypeSelect?.value;
-
-      if (isNaN(amount)) {
-        conversionResult.textContent = "";
-        welcomeMessage.innerText = "Welcome! Start your deposit below.";
+      
+      if (isNaN(amount) || amount <= 0) {
+        conversionCard.style.display = 'none';
+        welcomeMessage.textContent = currentUser ? 
+          `Welcome back, ${currentUser.fullName}! Enter an amount to deposit.` : 
+          'Enter an amount to begin';
         return;
       }
-
-      let message = `You are depositing $${amount}`;
-
-      if (country === "Nigeria") {
-        const naira = amount * usdToNairaRate;
-        conversionResult.textContent = `Converted to Naira: ₦${naira.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-        message += ` ~ ₦${naira.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+      
+      conversionCard.style.display = 'flex';
+      
+      if (country === 'Nigeria') {
+        const naira = amount * USD_TO_NGN;
+        conversionResult.textContent = `₦${naira.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+        welcomeMessage.textContent = `Depositing $${amount.toFixed(2)} ≈ ₦${naira.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+      } else if (paymentTypeSelect && paymentTypeSelect.value === 'Bitcoin') {
+        const btc = amount * USD_TO_BTC;
+        conversionResult.textContent = `₿ ${btc.toFixed(8)} BTC`;
+        welcomeMessage.textContent = `Depositing $${amount.toFixed(2)} ≈ ${btc.toFixed(8)} BTC`;
+      } else {
+        conversionResult.textContent = `$${amount.toFixed(2)} USD`;
+        welcomeMessage.textContent = `Depositing $${amount.toFixed(2)} USD`;
       }
-
-      if (paymentType === "Bitcoin") {
-        const btc = amount * usdToBitcoinRate;
-        conversionResult.textContent = `Converted to BTC: ${btc.toFixed(8)} BTC`;
-        message += ` ~ ${btc.toFixed(8)} BTC`;
-      }
-
-      welcomeMessage.innerText = message;
     }
-
-    amountInput.addEventListener('input', updateConversion);
-    countrySelect.addEventListener('change', () => {
-      const country = countrySelect.value;
-      paymentTypeSection.classList.toggle('hidden', country === 'Nigeria');
-      updateConversion();
-    });
-
-    paymentTypeSelect?.addEventListener('change', updateConversion);
-
-    depositForm.addEventListener('submit', async function(e) {
+    
+    // Handle form submission
+    async function handleSubmit(e) {
       e.preventDefault();
+      
       const amount = parseFloat(amountInput.value);
       const country = countrySelect.value;
-      const paymentType = paymentTypeSelect?.value || '';
-
-      if (country === 'Nigeria') {
-        loadingDiv.classList.remove('hidden');
-
-        setTimeout(async () => {
-          loadingDiv.classList.add('hidden');
-          instructionsDiv.classList.remove('hidden');
-          const naira = (amount * usdToNairaRate).toLocaleString();
-          alert(`You are depositing ₦${naira}. Send to the account shown.`);
-        }, 5000);
-      } else {
-        const btc = (amount * usdToBitcoinRate).toFixed(8);
-        const message = encodeURIComponent(`Supper Cash Deposit\nAmount: $${amount}\nCountry: ${country}\nPayment Type: ${paymentType}\nBTC: ${btc}`);
-        const link = `https://wa.me/+12568212395?text=${message}`;
-        window.location.href = link;
+      
+      if (isNaN(amount) || amount <= 0) {
+        showToast('Please enter a valid amount', 'error');
+        return;
       }
-    });
+      
+      if (!country) {
+        showToast('Please select your country', 'error');
+        return;
+      }
+      
+      submitBtn.disabled = true;
+      
+      if (country === 'Nigeria') {
+        // Show loading
+        loadingOverlay.classList.add('active');
+        
+        // Simulate processing
+        setTimeout(() => {
+          loadingOverlay.classList.remove('active');
+          
+          // Show bank instructions
+          const naira = amount * USD_TO_NGN;
+          nairaAmount.textContent = `₦${naira.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+          nigeriaInstructions.style.display = 'block';
+          
+          // Scroll to instructions
+          nigeriaInstructions.scrollIntoView({ behavior: 'smooth' });
+          
+          showToast('Bank details ready. Please complete the transfer.', 'success');
+          submitBtn.disabled = false;
+        }, 3000);
+      } else {
+        const paymentType = paymentTypeSelect.value;
+        const btc = amount * USD_TO_BTC;
+        
+        // Create deposit message for admin
+        const message = `🟢 New Deposit Request\n\n` +
+          `User: ${currentUser.fullName}\n` +
+          `Email: ${currentUser.email}\n` +
+          `Amount: $${amount.toFixed(2)} USD\n` +
+          `Country: ${country}\n` +
+          `Payment Method: ${paymentType}\n` +
+          `BTC: ${btc.toFixed(8)} BTC\n` +
+          `Time: ${new Date().toLocaleString()}`;
+        
+        // Send to admin via Socket.IO
+        if (socket && socket.connected) {
+          socket.emit('send-message', {
+            to: 'admin@delux.com',
+            message: message
+          });
+          
+          showToast('Deposit request sent to admin!', 'success');
+          
+          // Redirect to chat after 2 seconds
+          setTimeout(() => {
+            window.location.href = '/chat.html';
+          }, 2000);
+        } else {
+          // Fallback if socket not connected
+          showToast('Connecting to chat... Please try again.', 'error');
+          submitBtn.disabled = false;
+        }
+      }
+    }
+    
+    // Notify support about payment
+    async function notifySupport() {
+      const amount = parseFloat(amountInput.value);
+      const naira = amount * USD_TO_NGN;
+      
+      const message = `✅ Payment Confirmation\n\n` +
+        `User: ${currentUser.fullName}\n` +
+        `Email: ${currentUser.email}\n` +
+        `Amount: $${amount.toFixed(2)} USD\n` +
+        `Naira: ₦${naira.toLocaleString(undefined, { maximumFractionDigits: 2 })}\n` +
+        `Bank: Opay\n` +
+        `Account: 8110679255\n` +
+        `Status: Payment completed, awaiting confirmation\n` +
+        `Time: ${new Date().toLocaleString()}`;
+      
+      if (socket && socket.connected) {
+        socket.emit('send-message', {
+          to: 'admin@delux.com',
+          message: message
+        });
+        
+        showToast('Payment notification sent to admin!', 'success');
+        
+        setTimeout(() => {
+          window.location.href = '/chat.html';
+        }, 2000);
+      } else {
+        showToast('Connecting to chat... Please try again.', 'error');
+      }
+    }
+    
+    // Show toast notification
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 4000);
+    }
+    
+    // ==================== START ====================
+    init();
   </script>
-
 </body>
 </html>
