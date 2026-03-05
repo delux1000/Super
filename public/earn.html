@@ -1161,34 +1161,40 @@
     let taskStartTime = null;
     let countdownInterval = null;
 
-    // DOM Elements
-    const vipGate = document.getElementById('vipGate');
-    const appContainer = document.getElementById('appContainer');
-    const vipInput = document.getElementById('vipInput');
-    const vipError = document.getElementById('vipError');
-    const userName = document.getElementById('userName');
-    const userEmail = document.getElementById('userEmail');
-    const taskTitle = document.getElementById('taskTitle');
-    const rewardAmount = document.getElementById('rewardAmount');
-    const rewardDisplay = document.getElementById('rewardDisplay');
-    const claimAmount = document.getElementById('claimAmount');
-    const timeRemaining = document.getElementById('timeRemaining');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
-    const dailyCount = document.getElementById('dailyCount');
-    const circleCount = document.getElementById('circleCount');
-    const circleProgress = document.getElementById('circleProgress');
-    const limitWarning = document.getElementById('limitWarning');
-    const videoWrapper = document.getElementById('videoWrapper');
-    const audioWrapper = document.getElementById('audioWrapper');
-    const claimSection = document.getElementById('claimSection');
-    const ytAudio = document.getElementById('yt-audio');
-    const modeVideo = document.getElementById('modeVideo');
-    const modeMusic = document.getElementById('modeMusic');
-    const modeAuto = document.getElementById('modeAuto');
-    const testimonialSlider = document.getElementById('testimonialSlider');
-    const toastContainer = document.getElementById('toastContainer');
-    const loadingOverlay = document.getElementById('loadingOverlay');
+    // ==================== DOM ELEMENTS ====================
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize all DOM elements after page load
+      window.vipGate = document.getElementById('vipGate');
+      window.appContainer = document.getElementById('appContainer');
+      window.vipInput = document.getElementById('vipInput');
+      window.vipError = document.getElementById('vipError');
+      window.userName = document.getElementById('userName');
+      window.userEmail = document.getElementById('userEmail');
+      window.taskTitle = document.getElementById('taskTitle');
+      window.rewardAmount = document.getElementById('rewardAmount');
+      window.rewardDisplay = document.getElementById('rewardDisplay');
+      window.claimAmount = document.getElementById('claimAmount');
+      window.timeRemaining = document.getElementById('timeRemaining');
+      window.progressBar = document.getElementById('progressBar');
+      window.progressText = document.getElementById('progressText');
+      window.dailyCount = document.getElementById('dailyCount');
+      window.circleCount = document.getElementById('circleCount');
+      window.circleProgress = document.getElementById('circleProgress');
+      window.limitWarning = document.getElementById('limitWarning');
+      window.videoWrapper = document.getElementById('videoWrapper');
+      window.audioWrapper = document.getElementById('audioWrapper');
+      window.claimSection = document.getElementById('claimSection');
+      window.ytAudio = document.getElementById('yt-audio');
+      window.modeVideo = document.getElementById('modeVideo');
+      window.modeMusic = document.getElementById('modeMusic');
+      window.modeAuto = document.getElementById('modeAuto');
+      window.testimonialSlider = document.getElementById('testimonialSlider');
+      window.toastContainer = document.getElementById('toastContainer');
+      window.loadingOverlay = document.getElementById('loadingOverlay');
+      
+      // Start the app
+      init();
+    });
 
     // ==================== HELPER FUNCTIONS ====================
     const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -1251,7 +1257,7 @@
     }
 
     // ==================== VIP GATE ====================
-    function checkVip() {
+    window.checkVip = function() {
       const code = vipInput.value.trim();
       
       if (code === VIP_CODE) {
@@ -1268,7 +1274,7 @@
       } else {
         vipError.textContent = "❌ Invalid VIP code. Please try again.";
       }
-    }
+    };
 
     // ==================== DAILY PROGRESS ====================
     function loadDailyProgress() {
@@ -1319,7 +1325,7 @@
     }
 
     // ==================== TASK MANAGEMENT ====================
-    function setMode(newMode) {
+    window.setMode = function(newMode) {
       mode = newMode;
       
       [modeVideo, modeMusic, modeAuto].forEach(btn => btn.classList.remove('active'));
@@ -1328,7 +1334,7 @@
       if (newMode === 'auto') modeAuto.classList.add('active');
       
       nextTask();
-    }
+    };
 
     async function ytSearch(term) {
       const API_KEY = 'AIzaSyBQ37WSC-Rsxt3nK1KPj8LiPv7Ua7Ezao8';
@@ -1342,7 +1348,7 @@
       }
     }
 
-    async function nextTask() {
+    window.nextTask = async function() {
       // Clear existing timer and interval
       if (watchTimer) clearTimeout(watchTimer);
       if (countdownInterval) clearInterval(countdownInterval);
@@ -1419,7 +1425,7 @@
       } finally {
         showLoading(false);
       }
-    }
+    };
 
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.PLAYING && !watchStarted && dailyTasks < DAILY_LIMIT) {
@@ -1463,7 +1469,7 @@
       claimSection.classList.remove('hidden');
     }
 
-    async function claimReward() {
+    window.claimReward = async function() {
       if (!currentTask || dailyTasks >= DAILY_LIMIT) return;
       
       showLoading(true);
@@ -1521,7 +1527,7 @@
       } finally {
         showLoading(false);
       }
-    }
+    };
 
     // ==================== TESTIMONIALS ====================
     function initTestimonials() {
@@ -1575,9 +1581,6 @@
     window.onYouTubeIframeAPIReady = function() {
       console.log('YouTube API ready');
     };
-
-    // ==================== START ====================
-    init();
   </script>
 </body>
 </html>
