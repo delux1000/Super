@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Delux Earning</title>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <!-- Add Socket.IO client for admin chat -->
+  <!-- Socket.IO client for real‑time admin chat -->
   <script src="/socket.io/socket.io.js"></script>
   <style>
     :root {
@@ -218,7 +218,8 @@
 
     let mode = "auto";
     let player, watchTimer, watchStarted = false, currentTask;
-    let currentUser = null; // Will store authenticated user info
+    let socket = null;                // Socket.IO connection
+    let currentUser = null;           // Logged‑in user info
 
     const $ = id => document.getElementById(id);
     const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -229,7 +230,6 @@
       try {
         const res = await fetch('/user-info');
         if (!res.ok) {
-          // Not logged in – redirect to login
           window.location.href = '/login.html';
           return;
         }
@@ -238,6 +238,17 @@
         console.error('Failed to load user data', e);
         window.location.href = '/login.html';
       }
+    }
+
+    // ==================== SOCKET.IO INIT ====================
+    function initSocket() {
+      socket = io();
+      socket.on('connect', () => {
+        console.log('✅ Connected to chat server');
+      });
+      socket.on('error', (err) => {
+        console.error('Socket error:', err);
+      });
     }
 
     // ==================== VIP GATE ====================
@@ -324,7 +335,7 @@
       $("claim-section").classList.remove("hidden");
     }
 
-    // ==================== CLAIM REWARD (NOW VIA CHAT) ====================
+    // ==================== CLAIM REWARD (SEND TO ADMIN CHAT) ====================
     async function claimReward() {
       const name = $("user-name").value.trim();
       if (!name) {
@@ -332,8 +343,8 @@
         return;
       }
 
-      // Prepare message for admin
-      const message = `🎉 Task completed!\n\n` +
+      // Build the message that will appear in the admin chat
+      const adminMessage = `🎉 Task completed!\n\n` +
         `Delux Name: ${name}\n` +
         `Task: ${currentTask.title}\n` +
         `Reward: €${currentTask.amount}\n` +
@@ -341,21 +352,29 @@
         `Time: ${new Date().toLocaleString()}`;
 
       try {
-        const response = await fetch('/api/chat/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: 'admin@delux.com', // Admin email
-            message: message
-          })
-        });
-
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || 'Failed to send message');
+        // If socket is connected, send directly via Socket.IO (real‑time)
+        if (socket && socket.connected) {
+          socket.emit('send-message', {
+            to: 'admin@delux.com',   // admin email (or you can use admin phone)
+            message: adminMessage
+          });
+          alert('Reward claimed! Admin has been notified.');
+        } else {
+          // Fallback to HTTP endpoint if socket not available
+          const response = await fetch('/api/chat/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: 'admin@delux.com',
+              message: adminMessage
+            })
+          });
+          if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Failed to send message');
+          }
+          alert('Reward claimed! Admin has been notified.');
         }
-
-        alert('Reward claimed! Admin has been notified.');
         $("claim-section").classList.add("hidden");
       } catch (error) {
         console.error('Claim error:', error);
@@ -388,8 +407,9 @@
 
     // ==================== ON PAGE LOAD ====================
     window.addEventListener('load', async () => {
-      await loadUserData();  // Ensures user is logged in
-      // The VIP gate remains visible until user enters code
+      await loadUserData();      // ensure user is logged in
+      initSocket();              // connect to chat server
+      // VIP gate remains visible until user enters code
     });
   </script>
 </body>
