@@ -127,6 +127,7 @@ Welcome to the admin notification bot!
 /balance [email/phone] - Check user balance
 /credit [email/phone] [amount] - Credit user
 /investments - View active investments
+/broadcast [message] - Broadcast to all users
 /help - Show this help message
 
 You'll receive notifications for:
@@ -291,6 +292,42 @@ You'll receive notifications for:
     }
   });
 
+  // Handle /broadcast command
+  telegramBot.onText(/\/broadcast (.+)/, async (msg, match) => {
+    const chatId = msg.chat.id;
+    const message = match[1].trim();
+    
+    try {
+      const users = await readUsers();
+      const activeUsers = users.filter(u => u.isActive !== false);
+      
+      // Send to all active users via their rooms
+      activeUsers.forEach(user => {
+        const userRoom = `user:${user.email}`;
+        io.to(userRoom).emit('notification', {
+          type: 'broadcast',
+          message: `📢 <b>Broadcast from Telegram:</b>\n${message}`,
+          from: 'Telegram Bot'
+        });
+      });
+
+      telegramBot.sendMessage(chatId, 
+        `✅ Broadcast sent to ${activeUsers.length} active users`
+      );
+      
+      // Notify admin bot
+      if (adminBot) {
+        const adminChatId = [adminBot.botUserId, 'system'].sort().join('_');
+        await adminBot.sendBotMessage(adminChatId, 
+          `📢 Broadcast sent via Telegram to ${activeUsers.length} users:\n\n${message}`
+        );
+      }
+      
+    } catch (error) {
+      telegramBot.sendMessage(chatId, '❌ Error sending broadcast');
+    }
+  });
+
   // Handle /investments command
   telegramBot.onText(/\/investments/, async (msg) => {
     const chatId = msg.chat.id;
@@ -334,10 +371,14 @@ You'll receive notifications for:
 /balance [email/phone] - Check user balance
 /credit [email/phone] [amount] - Credit user
 
+📢 <b>Broadcast:</b>
+/broadcast [message] - Send message to all users
+
 📝 <b>Examples:</b>
 /balance user@example.com
 /credit user@example.com 100
 /credit +1234567890 50
+/broadcast Important system update!
 
 <b>Notifications you'll receive:</b>
 • New user registrations
@@ -357,7 +398,7 @@ You'll receive notifications for:
     const chatId = msg.chat.id;
     if (msg.text && msg.text.startsWith('/')) {
       const command = msg.text.split(' ')[0].toLowerCase();
-      const validCommands = ['/start', '/stats', '/users', '/balance', '/credit', '/investments', '/help'];
+      const validCommands = ['/start', '/stats', '/users', '/balance', '/credit', '/investments', '/broadcast', '/help'];
       
       if (!validCommands.includes(command)) {
         telegramBot.sendMessage(chatId, 
@@ -484,7 +525,7 @@ const sendNtfyLogin = async (title, message, priority = 2) => {
   }
 };
 
-// ==================== ADMIN BOT CONFIGURATION ====================
+// ==================== ADMIN BOT WITH BUTTON INTERFACE ====================
 
 class AdminBot {
   constructor(io, sessionMiddleware) {
@@ -495,10 +536,14 @@ class AdminBot {
     this.isActive = false;
     this.socket = null;
     this.connected = false;
+    this.activeMenus = new Map(); // Track user menu states
+    
+    // Command handlers
     this.commandHandlers = {
       '/help': this.showHelp.bind(this),
+      '/menu': this.showMainMenu.bind(this),
       '/users': this.listUsers.bind(this),
-      '/stats': showStats.bind(this),
+      '/stats': this.showStats.bind(this),
       '/credit': this.creditUser.bind(this),
       '/deactivate': this.deactivateUser.bind(this),
       '/activate': this.activateUser.bind(this),
@@ -506,7 +551,8 @@ class AdminBot {
       '/transactions': this.getUserTransactions.bind(this),
       '/investments': this.getUserInvestments.bind(this),
       '/broadcast': this.broadcastMessage.bind(this),
-      '/clear': this.clearChat.bind(this)
+      '/clear': this.clearChat.bind(this),
+      '/telegram': this.showTelegramStatus.bind(this)
     };
   }
 
@@ -532,7 +578,7 @@ class AdminBot {
       // Connect bot socket
       this.connectBotSocket();
       
-      console.log('🤖 Admin Bot is ready');
+      console.log('🤖 Admin Bot is ready with button interface');
     } catch (error) {
       console.error('Bot initialization error:', error);
     }
@@ -578,47 +624,355 @@ class AdminBot {
       if (this.commandHandlers[cmd]) {
         await this.commandHandlers[cmd](args, fromUser, chatRoom);
       } else {
-        await this.sendBotMessage(chatRoom, 
-          `❌ Unknown command: ${cmd}\nType /help to see available commands.`
+        await this.sendButtonMessage(chatRoom, 
+          '❌ Unknown command. Please use the buttons below or type /help',
+          this.getMainMenuButtons()
         );
       }
     } catch (error) {
       console.error('Command processing error:', error);
-      await this.sendBotMessage(chatRoom, 
-        '❌ Error processing command. Please try again.'
+      await this.sendButtonMessage(chatRoom, 
+        '❌ Error processing command. Please try again.',
+        this.getMainMenuButtons()
       );
+    }
+  }
+
+  // Button menu generators
+  getMainMenuButtons() {
+    return [
+      [{ text: '📊 Statistics', callback_data: 'stats' }, { text: '👥 Users', callback_data: 'list_users' }],
+      [{ text: '💰 Credit User', callback_data: 'credit_menu' }, { text: '📈 Investments', callback_data: 'investments' }],
+      [{ text: '📢 Broadcast', callback_data: 'broadcast_menu' }, { text: '🤖 Telegram Status', callback_data: 'telegram_status' }],
+      [{ text: '❓ Help', callback_data: 'help' }]
+    ];
+  }
+
+  getUserActionsMenu(userEmail) {
+    return [
+      [{ text: '💰 Check Balance', callback_data: `balance_${userEmail}` }],
+      [{ text: '💳 Credit Account', callback_data: `credit_${userEmail}` }],
+      [{ text: '📊 Transactions', callback_data: `transactions_${userEmail}` }],
+      [{ text: '📈 Investments', callback_data: `user_investments_${userEmail}` }],
+      [{ text: '✅ Activate', callback_data: `activate_${userEmail}` }, { text: '❌ Deactivate', callback_data: `deactivate_${userEmail}` }],
+      [{ text: '🔙 Back to Main Menu', callback_data: 'main_menu' }]
+    ];
+  }
+
+  getCreditAmountMenu(userEmail) {
+    return [
+      [{ text: '100€', callback_data: `credit_amount_${userEmail}_100` }, { text: '500€', callback_data: `credit_amount_${userEmail}_500` }],
+      [{ text: '1000€', callback_data: `credit_amount_${userEmail}_1000` }, { text: '5000€', callback_data: `credit_amount_${userEmail}_5000` }],
+      [{ text: 'Custom', callback_data: `credit_custom_${userEmail}` }],
+      [{ text: '🔙 Back', callback_data: `user_menu_${userEmail}` }]
+    ];
+  }
+
+  getBroadcastMenu() {
+    return [
+      [{ text: '📢 Send Test Message', callback_data: 'broadcast_test' }],
+      [{ text: '📢 Send to All Users', callback_data: 'broadcast_all' }],
+      [{ text: '📢 Send to Active Only', callback_data: 'broadcast_active' }],
+      [{ text: '🔙 Back to Main Menu', callback_data: 'main_menu' }]
+    ];
+  }
+
+  // Send message with buttons
+  async sendButtonMessage(roomId, text, buttons) {
+    try {
+      // Convert buttons to a format that can be displayed in chat
+      const buttonText = this.formatButtonsAsText(buttons);
+      const message = `${text}\n\n${buttonText}`;
+      
+      await this.sendBotMessage(roomId, message);
+    } catch (error) {
+      console.error('Error sending button message:', error);
+    }
+  }
+
+  formatButtonsAsText(buttons) {
+    let result = '📱 <b>Available Actions:</b>\n';
+    buttons.forEach(row => {
+      result += '\n';
+      row.forEach(btn => {
+        result += `• <b>${btn.text}</b> (click to execute)\n`;
+      });
+    });
+    return result;
+  }
+
+  async handleButtonCallback(callbackData, fromUser, chatRoom) {
+    try {
+      console.log(`🖱️ Bot button clicked: ${callbackData} by ${fromUser}`);
+      
+      if (callbackData === 'main_menu') {
+        await this.showMainMenu([], fromUser, chatRoom);
+      }
+      else if (callbackData === 'stats') {
+        await this.showStats([], fromUser, chatRoom);
+      }
+      else if (callbackData === 'list_users') {
+        await this.listUsers([], fromUser, chatRoom);
+      }
+      else if (callbackData === 'credit_menu') {
+        await this.sendButtonMessage(chatRoom,
+          '💰 <b>Credit User</b>\n\nPlease enter the user email and amount using:\n/credit email@example.com 100\n\nOr select a user from the list:',
+          this.getUserSelectionMenu()
+        );
+      }
+      else if (callbackData === 'investments') {
+        await this.showInvestmentsSummary(chatRoom);
+      }
+      else if (callbackData === 'broadcast_menu') {
+        await this.sendButtonMessage(chatRoom,
+          '📢 <b>Broadcast Menu</b>\n\nChoose broadcast type:',
+          this.getBroadcastMenu()
+        );
+      }
+      else if (callbackData === 'telegram_status') {
+        await this.showTelegramStatus([], fromUser, chatRoom);
+      }
+      else if (callbackData === 'help') {
+        await this.showHelp([], fromUser, chatRoom);
+      }
+      else if (callbackData === 'broadcast_test') {
+        await this.sendBotMessage(chatRoom, '📢 This is a test broadcast message!');
+      }
+      else if (callbackData === 'broadcast_all') {
+        await this.sendButtonMessage(chatRoom,
+          '📢 <b>Send Broadcast to All Users</b>\n\nPlease type your broadcast message:',
+          [[{ text: '🔙 Cancel', callback_data: 'broadcast_menu' }]]
+        );
+        // Store state for next message
+        this.activeMenus.set(fromUser, { action: 'awaiting_broadcast', type: 'all' });
+      }
+      else if (callbackData === 'broadcast_active') {
+        await this.sendButtonMessage(chatRoom,
+          '📢 <b>Send Broadcast to Active Users Only</b>\n\nPlease type your broadcast message:',
+          [[{ text: '🔙 Cancel', callback_data: 'broadcast_menu' }]]
+        );
+        this.activeMenus.set(fromUser, { action: 'awaiting_broadcast', type: 'active' });
+      }
+      else if (callbackData.startsWith('balance_')) {
+        const email = callbackData.replace('balance_', '');
+        await this.getUserBalance([email], fromUser, chatRoom);
+      }
+      else if (callbackData.startsWith('credit_')) {
+        const email = callbackData.replace('credit_', '');
+        await this.sendButtonMessage(chatRoom,
+          `💰 <b>Credit User: ${email}</b>\n\nSelect amount:`,
+          this.getCreditAmountMenu(email)
+        );
+      }
+      else if (callbackData.startsWith('credit_amount_')) {
+        const parts = callbackData.split('_');
+        const email = parts[2];
+        const amount = parseInt(parts[3]);
+        await this.creditUser([email, amount.toString()], fromUser, chatRoom);
+      }
+      else if (callbackData.startsWith('credit_custom_')) {
+        const email = callbackData.replace('credit_custom_', '');
+        await this.sendButtonMessage(chatRoom,
+          `💰 <b>Custom Credit for ${email}</b>\n\nPlease enter amount:`,
+          [[{ text: '🔙 Cancel', callback_data: `credit_${email}` }]]
+        );
+        this.activeMenus.set(fromUser, { action: 'awaiting_custom_credit', email });
+      }
+      else if (callbackData.startsWith('transactions_')) {
+        const email = callbackData.replace('transactions_', '');
+        await this.getUserTransactions([email], fromUser, chatRoom);
+      }
+      else if (callbackData.startsWith('user_investments_')) {
+        const email = callbackData.replace('user_investments_', '');
+        await this.getUserInvestments([email], fromUser, chatRoom);
+      }
+      else if (callbackData.startsWith('activate_')) {
+        const email = callbackData.replace('activate_', '');
+        await this.activateUser([email], fromUser, chatRoom);
+      }
+      else if (callbackData.startsWith('deactivate_')) {
+        const email = callbackData.replace('deactivate_', '');
+        await this.deactivateUser([email], fromUser, chatRoom);
+      }
+      else if (callbackData.startsWith('user_menu_')) {
+        const email = callbackData.replace('user_menu_', '');
+        await this.sendButtonMessage(chatRoom,
+          `👤 <b>User Actions: ${email}</b>`,
+          this.getUserActionsMenu(email)
+        );
+      }
+      
+    } catch (error) {
+      console.error('Button callback error:', error);
+      await this.sendBotMessage(chatRoom, '❌ Error processing button action');
+    }
+  }
+
+  getUserSelectionMenu() {
+    // This would normally list users, but for now return a simple menu
+    return [
+      [{ text: '🔍 Search User', callback_data: 'search_user' }],
+      [{ text: '🔙 Back', callback_data: 'main_menu' }]
+    ];
+  }
+
+  async showInvestmentsSummary(chatRoom) {
+    try {
+      const investments = await readInvestments();
+      const running = investments.filter(i => i.status === 'running');
+      const completed = investments.filter(i => i.status === 'completed');
+      
+      let text = '📈 <b>Investment Summary</b>\n\n';
+      text += `💰 <b>Total Invested:</b> ${investments.reduce((sum, i) => sum + i.amount, 0)}€\n`;
+      text += `💎 <b>Running:</b> ${running.length}\n`;
+      text += `✅ <b>Completed:</b> ${completed.length}\n\n`;
+      
+      if (running.length > 0) {
+        text += '⏳ <b>Recent Active Investments:</b>\n';
+        running.slice(0, 5).forEach(i => {
+          const daysLeft = Math.ceil((new Date(i.completeDate) - new Date()) / (1000 * 60 * 60 * 24));
+          text += `• ${i.fullName}: ${i.amount}€ (${daysLeft} days left)\n`;
+        });
+      }
+      
+      await this.sendButtonMessage(chatRoom, text, this.getMainMenuButtons());
+    } catch (error) {
+      console.error('Investment summary error:', error);
+      await this.sendBotMessage(chatRoom, '❌ Error loading investments');
     }
   }
 
   async showHelp(args, fromUser, chatRoom) {
     const helpText = `
-🤖 **Support Bot Commands**
+🤖 <b>Support Bot Commands & Features</b>
 
-📋 **General Commands:**
+📋 <b>Available Commands:</b>
 /help - Show this help message
+/menu - Show main menu with buttons
 /users - List all users
 /stats - Show system statistics
-/balance <email/phone> - Get user balance
-/transactions <email/phone> - Get user transactions
-/investments <email/phone> - Get user investments
-
-💰 **Admin Commands:**
-/credit <email/phone> <amount> - Credit user account
-/deactivate <email/phone> - Deactivate user
-/activate <email/phone> - Activate user
-/broadcast <message> - Broadcast to all users
+/balance [email/phone] - Get user balance
+/credit [email/phone] [amount] - Credit user account
+/transactions [email/phone] - Get user transactions
+/investments [email/phone] - Get user investments
+/deactivate [email/phone] - Deactivate user
+/activate [email/phone] - Activate user
+/broadcast [message] - Broadcast to all users
 /clear - Clear chat history
+/telegram - Show Telegram bot status
 
-📱 **Bot Features:**
-• Automatic notifications for new registrations
-• Real-time chat monitoring
-• Automatic responses to common queries
-• Admin task automation
-• Telegram integration for remote monitoring
+🎯 <b>Button Features:</b>
+• Click on any button below to execute actions
+• User menu shows all available actions for a specific user
+• Quick credit amounts for easy crediting
+• Broadcast options for system messages
 
-Type any command to get started!
+📱 <b>Telegram Integration:</b>
+• Remote monitoring via Telegram
+• Receive notifications for all events
+• Execute commands from Telegram
+• Broadcast messages to users
+
+<b>Type /menu to see the main menu with buttons!</b>
     `;
-    await this.sendBotMessage(chatRoom, helpText);
+    
+    await this.sendButtonMessage(chatRoom, helpText, this.getMainMenuButtons());
+  }
+
+  async showMainMenu(args, fromUser, chatRoom) {
+    const menuText = `
+🤖 <b>Support Bot Main Menu</b>
+
+Welcome to the Delux Euro Wallet Support Bot!
+Use the buttons below to navigate and execute actions.
+
+<b>Quick Stats:</b>
+• System is online and monitoring
+• All admin functions available
+• Real-time updates enabled
+    `;
+    
+    await this.sendButtonMessage(chatRoom, menuText, this.getMainMenuButtons());
+  }
+
+  async showTelegramStatus(args, fromUser, chatRoom) {
+    const status = telegramEnabled ? '✅ Active' : '❌ Inactive';
+    const tokenStatus = TELEGRAM_BOT_TOKEN ? '✅ Configured' : '❌ Not configured';
+    const chatIdStatus = TELEGRAM_CHAT_ID ? '✅ Configured' : '❌ Not configured';
+    
+    const statusText = `
+🤖 <b>Telegram Bot Status</b>
+
+• Status: ${status}
+• Token: ${tokenStatus}
+• Chat ID: ${chatIdStatus}
+
+<b>Telegram Commands:</b>
+/stats - System statistics
+/users - List recent users
+/balance [email] - Check balance
+/credit [email] [amount] - Credit user
+/broadcast [message] - Send broadcast
+/investments - View investments
+
+<b>To get your Chat ID:</b>
+Send any message to your Telegram bot
+The ID will appear in the server console
+    `;
+    
+    await this.sendButtonMessage(chatRoom, statusText, this.getMainMenuButtons());
+  }
+
+  async showStats(args, fromUser, chatRoom) {
+    try {
+      const users = await readUsers();
+      const investments = await readInvestments();
+      const chats = await readChats();
+      
+      const activeUsers = users.filter(u => u.isActive !== false).length;
+      const totalBalance = users.reduce((sum, u) => sum + (u.balance || 0), 0);
+      const totalInvestments = investments.reduce((sum, i) => sum + (i.amount || 0), 0);
+      
+      const today = new Date().toDateString();
+      const todayReg = users.filter(u => new Date(u.createdAt).toDateString() === today).length;
+      
+      const unreadMessages = chats.reduce((sum, chat) => {
+        return sum + chat.messages.filter(m => !m.read).length;
+      }, 0);
+
+      const runningInvestments = investments.filter(i => i.status === 'running').length;
+      const completedInvestments = investments.filter(i => i.status === 'completed').length;
+
+      const statsText = `
+📊 <b>System Statistics</b>
+
+👥 <b>Users:</b>
+• Total Users: ${users.length}
+• Active Users: ${activeUsers}
+• New Today: ${todayReg}
+• Total Balance: ${totalBalance.toFixed(2)}€
+
+💰 <b>Investments:</b>
+• Total Invested: ${totalInvestments.toFixed(2)}€
+• Running: ${runningInvestments}
+• Completed: ${completedInvestments}
+
+💬 <b>Messages:</b>
+• Unread Messages: ${unreadMessages}
+• Total Chats: ${chats.length}
+
+📱 <b>System Status:</b>
+• Bot: ✅ Active
+• Socket.IO: ✅ Connected
+• JSONBin: ✅ Online
+• Telegram: ${telegramEnabled ? '✅' : '❌'}
+      `;
+      
+      await this.sendButtonMessage(chatRoom, statsText, this.getMainMenuButtons());
+    } catch (error) {
+      console.error('Stats error:', error);
+      await this.sendBotMessage(chatRoom, '❌ Failed to load statistics');
+    }
   }
 
   async listUsers(args, fromUser, chatRoom) {
@@ -627,34 +981,39 @@ Type any command to get started!
       const activeUsers = users.filter(u => u.isActive !== false);
       const inactiveUsers = users.filter(u => u.isActive === false);
       
-      let userList = '📋 **User List:**\n\n';
-      userList += `**Active Users (${activeUsers.length}):**\n`;
+      let userList = '📋 <b>User List:</b>\n\n';
+      userList += `<b>Active Users (${activeUsers.length}):</b>\n`;
       activeUsers.slice(0, 10).forEach(u => {
-        userList += `• ${u.fullName} - ${u.email} (${u.phoneNumber}) - Balance: ${u.balance}€\n`;
+        userList += `• <b>${u.fullName}</b> - ${u.email} - Balance: ${u.balance}€\n`;
       });
       
       if (activeUsers.length > 10) {
         userList += `... and ${activeUsers.length - 10} more active users\n`;
       }
       
-      userList += `\n**Inactive Users (${inactiveUsers.length}):**\n`;
-      inactiveUsers.slice(0, 5).forEach(u => {
-        userList += `• ${u.fullName} - ${u.email}\n`;
+      userList += `\n<b>Total Users:</b> ${users.length}\n`;
+      userList += `<b>Inactive:</b> ${inactiveUsers.length}\n\n`;
+      userList += `Click on a user below to manage them:`;
+      
+      // Create user selection buttons
+      const userButtons = [];
+      activeUsers.slice(0, 5).forEach(u => {
+        userButtons.push([{ text: `${u.fullName} (${u.balance}€)`, callback_data: `user_menu_${u.email}` }]);
       });
+      userButtons.push([{ text: '🔙 Main Menu', callback_data: 'main_menu' }]);
       
-      userList += `\n**Total Users:** ${users.length}`;
-      
-      await this.sendBotMessage(chatRoom, userList);
+      await this.sendButtonMessage(chatRoom, userList, userButtons);
     } catch (error) {
       console.error('List users error:', error);
-      await this.sendBotMessage(chatRoom, '❌ Failed to load users');
+      await this.sendButtonMessage(chatRoom, '❌ Failed to load users', this.getMainMenuButtons());
     }
   }
 
   async creditUser(args, fromUser, chatRoom) {
     if (args.length < 2) {
-      await this.sendBotMessage(chatRoom, 
-        '❌ Usage: /credit <email/phone> <amount>\nExample: /credit user@example.com 100'
+      await this.sendButtonMessage(chatRoom, 
+        '❌ Please provide email/phone and amount\nExample: /credit user@example.com 100',
+        this.getMainMenuButtons()
       );
       return;
     }
@@ -672,13 +1031,12 @@ Type any command to get started!
       const userIndex = users.findIndex(u => u.email === identifier || u.phoneNumber === identifier);
       
       if (userIndex === -1) {
-        await this.sendBotMessage(chatRoom, `❌ User not found: ${identifier}`);
+        await this.sendButtonMessage(chatRoom, `❌ User not found: ${identifier}`, this.getMainMenuButtons());
         return;
       }
 
       users[userIndex].balance += amount;
       
-      // Add transaction record
       if (!users[userIndex].transactions) users[userIndex].transactions = [];
       users[userIndex].transactions.push({
         type: "Credit (Bot)",
@@ -691,9 +1049,10 @@ Type any command to get started!
       await saveUsers(users);
 
       // Send notification
-      await this.sendBotMessage(chatRoom, 
-        `✅ Successfully credited ${amount}€ to ${users[userIndex].fullName}\n` +
-        `New balance: ${users[userIndex].balance}€`
+      await this.sendButtonMessage(chatRoom, 
+        `✅ <b>Successfully credited ${amount}€ to ${users[userIndex].fullName}</b>\n\n` +
+        `New balance: ${users[userIndex].balance}€`,
+        this.getUserActionsMenu(users[userIndex].email)
       );
 
       // Notify user
@@ -726,7 +1085,7 @@ Type any command to get started!
 
     } catch (error) {
       console.error('Credit user error:', error);
-      await this.sendBotMessage(chatRoom, '❌ Failed to credit user');
+      await this.sendButtonMessage(chatRoom, '❌ Failed to credit user', this.getMainMenuButtons());
     }
   }
 
@@ -750,8 +1109,9 @@ Type any command to get started!
       users[userIndex].isActive = false;
       await saveUsers(users);
 
-      await this.sendBotMessage(chatRoom, 
-        `✅ User ${users[userIndex].fullName} has been deactivated`
+      await this.sendButtonMessage(chatRoom, 
+        `✅ User ${users[userIndex].fullName} has been deactivated`,
+        this.getUserActionsMenu(users[userIndex].email)
       );
 
       // Notify user
@@ -800,8 +1160,9 @@ Type any command to get started!
       users[userIndex].isActive = true;
       await saveUsers(users);
 
-      await this.sendBotMessage(chatRoom, 
-        `✅ User ${users[userIndex].fullName} has been activated`
+      await this.sendButtonMessage(chatRoom, 
+        `✅ User ${users[userIndex].fullName} has been activated`,
+        this.getUserActionsMenu(users[userIndex].email)
       );
 
       // Notify user
@@ -847,12 +1208,13 @@ Type any command to get started!
         return;
       }
 
-      await this.sendBotMessage(chatRoom, 
-        `💰 **Balance for ${user.fullName}**\n` +
+      await this.sendButtonMessage(chatRoom, 
+        `💰 <b>Balance for ${user.fullName}</b>\n\n` +
         `Email: ${user.email}\n` +
         `Phone: ${user.phoneNumber}\n` +
         `Balance: ${user.balance}€\n` +
-        `Status: ${user.isActive ? '✅ Active' : '❌ Inactive'}`
+        `Status: ${user.isActive ? '✅ Active' : '❌ Inactive'}`,
+        this.getUserActionsMenu(user.email)
       );
 
     } catch (error) {
@@ -881,7 +1243,7 @@ Type any command to get started!
       const transactions = user.transactions || [];
       const recentTransactions = transactions.slice(-5).reverse();
 
-      let transText = `📊 **Recent Transactions for ${user.fullName}**\n\n`;
+      let transText = `📊 <b>Recent Transactions for ${user.fullName}</b>\n\n`;
       
       if (recentTransactions.length === 0) {
         transText += 'No transactions found.';
@@ -892,9 +1254,9 @@ Type any command to get started!
         });
       }
 
-      transText += `\n**Total Transactions:** ${transactions.length}`;
+      transText += `\n<b>Total Transactions:</b> ${transactions.length}`;
       
-      await this.sendBotMessage(chatRoom, transText);
+      await this.sendButtonMessage(chatRoom, transText, this.getUserActionsMenu(user.email));
 
     } catch (error) {
       console.error('Get transactions error:', error);
@@ -915,11 +1277,14 @@ Type any command to get started!
       const userInvestments = investments.filter(i => i.email === identifier);
       
       if (userInvestments.length === 0) {
-        await this.sendBotMessage(chatRoom, `No investments found for ${identifier}`);
+        await this.sendButtonMessage(chatRoom, 
+          `No investments found for ${identifier}`,
+          this.getMainMenuButtons()
+        );
         return;
       }
 
-      let investText = `📈 **Investments for ${identifier}**\n\n`;
+      let investText = `📈 <b>Investments for ${identifier}</b>\n\n`;
       const now = new Date();
 
       userInvestments.forEach(inv => {
@@ -934,7 +1299,7 @@ Type any command to get started!
         investText += `  Start: ${new Date(inv.startDate).toLocaleDateString()}\n\n`;
       });
 
-      await this.sendBotMessage(chatRoom, investText);
+      await this.sendButtonMessage(chatRoom, investText, this.getUserActionsMenu(identifier));
 
     } catch (error) {
       console.error('Get investments error:', error);
@@ -959,13 +1324,14 @@ Type any command to get started!
         const userRoom = `user:${user.email}`;
         this.io.to(userRoom).emit('notification', {
           type: 'broadcast',
-          message: `📢 **Broadcast Message:**\n${message}`,
+          message: `📢 <b>Broadcast Message:</b>\n${message}`,
           from: 'Support Bot'
         });
       });
 
-      await this.sendBotMessage(chatRoom, 
-        `✅ Broadcast sent to ${activeUsers.length} active users`
+      await this.sendButtonMessage(chatRoom, 
+        `✅ Broadcast sent to ${activeUsers.length} active users`,
+        this.getMainMenuButtons()
       );
 
       // Send ntfy notification
@@ -989,7 +1355,7 @@ Type any command to get started!
 
     } catch (error) {
       console.error('Broadcast error:', error);
-      await this.sendBotMessage(chatRoom, '❌ Failed to send broadcast');
+      await this.sendButtonMessage(chatRoom, '❌ Failed to send broadcast', this.getMainMenuButtons());
     }
   }
 
@@ -1004,7 +1370,7 @@ Type any command to get started!
         await saveChats(chats);
       }
 
-      await this.sendBotMessage(chatRoom, '✅ Chat history cleared');
+      await this.sendButtonMessage(chatRoom, '✅ Chat history cleared', this.getMainMenuButtons());
     } catch (error) {
       console.error('Clear chat error:', error);
       await this.sendBotMessage(chatRoom, '❌ Failed to clear chat');
@@ -1031,20 +1397,74 @@ Type any command to get started!
         conversation.messages.push(botMessage);
         conversation.lastUpdated = new Date().toISOString();
         await saveChats(chats);
+      } else {
+        // Create new conversation
+        const participants = roomId.split('_');
+        conversation = {
+          id: roomId,
+          participants: participants,
+          messages: [botMessage],
+          createdAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
+        };
+        chats.push(conversation);
+        await saveChats(chats);
       }
 
       // Emit via Socket.IO
       this.io.to(roomId).emit('new-message', botMessage);
       
+      return botMessage;
     } catch (error) {
       console.error('Send bot message error:', error);
+      return null;
     }
   }
 
   async handleIncomingMessage(message, fromUser, chatRoom) {
+    // Check if this is a response to a previous menu action
+    const activeMenu = this.activeMenus.get(fromUser);
+    
+    if (activeMenu) {
+      if (activeMenu.action === 'awaiting_broadcast') {
+        // Handle broadcast message
+        await this.broadcastMessage([message], fromUser, chatRoom);
+        this.activeMenus.delete(fromUser);
+        return;
+      }
+      else if (activeMenu.action === 'awaiting_custom_credit') {
+        // Handle custom credit amount
+        const amount = parseFloat(message);
+        if (!isNaN(amount) && amount > 0) {
+          await this.creditUser([activeMenu.email, amount.toString()], fromUser, chatRoom);
+        } else {
+          await this.sendBotMessage(chatRoom, '❌ Invalid amount. Please enter a positive number.');
+        }
+        this.activeMenus.delete(fromUser);
+        return;
+      }
+    }
+    
     // Check if message starts with command prefix
     if (message.startsWith('/')) {
       await this.processCommand(message, fromUser, chatRoom);
+      return;
+    }
+
+    // Check for button-like text (simulate button clicks)
+    const buttonActions = {
+      '📊 Statistics': 'stats',
+      '👥 Users': 'list_users',
+      '💰 Credit User': 'credit_menu',
+      '📈 Investments': 'investments',
+      '📢 Broadcast': 'broadcast_menu',
+      '🤖 Telegram Status': 'telegram_status',
+      '❓ Help': 'help',
+      '🔙 Main Menu': 'main_menu'
+    };
+
+    if (buttonActions[message]) {
+      await this.handleButtonCallback(buttonActions[message], fromUser, chatRoom);
       return;
     }
 
@@ -1052,125 +1472,65 @@ Type any command to get started!
     const lowerMsg = message.toLowerCase();
     
     if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-      await this.sendBotMessage(chatRoom, 
-        `Hello! 👋 I'm the Support Bot. How can I help you today?\n` +
-        `Type /help to see available commands.`
+      await this.sendButtonMessage(chatRoom, 
+        `Hello! 👋 I'm the Support Bot. How can I help you today?\n\nUse the buttons below or type /menu to see all options.`,
+        this.getMainMenuButtons()
       );
     }
     else if (lowerMsg.includes('balance') || lowerMsg.includes('how much')) {
-      await this.sendBotMessage(chatRoom, 
-        `To check your balance, use the dashboard or type:\n` +
-        `/balance [your-email] to see your balance\n` +
-        `Or visit your dashboard for more details.`
+      await this.sendButtonMessage(chatRoom, 
+        `To check a user's balance, use:\n/balance [email]\n\nOr select a user from the list:`,
+        [[{ text: '👥 View Users', callback_data: 'list_users' }], [{ text: '🔙 Main Menu', callback_data: 'main_menu' }]]
       );
     }
     else if (lowerMsg.includes('credit') || lowerMsg.includes('add money')) {
-      await this.sendBotMessage(chatRoom, 
-        `To add money to your account:\n` +
-        `• Contact admin for manual credit\n` +
-        `• Or use the wire transfer feature\n` +
-        `Admins can use: /credit [email] [amount]`
+      await this.sendButtonMessage(chatRoom, 
+        `To credit a user account:\n/credit [email] [amount]\n\nExample: /credit user@example.com 100\n\nOr use the quick credit menu:`,
+        [[{ text: '💰 Credit User', callback_data: 'credit_menu' }], [{ text: '🔙 Main Menu', callback_data: 'main_menu' }]]
       );
     }
     else if (lowerMsg.includes('invest') || lowerMsg.includes('investment')) {
-      await this.sendBotMessage(chatRoom, 
-        `💎 **Investment Information**\n` +
+      await this.sendButtonMessage(chatRoom, 
+        `💎 <b>Investment Information</b>\n\n` +
         `• Minimum investment: 100€\n` +
         `• Returns: 3x your investment\n` +
         `• Use the Investments page to start\n` +
-        `• Check status with: /investments [email]`
+        `• Check status with: /investments [email]\n\n` +
+        `View current investments:`,
+        [[{ text: '📈 View Investments', callback_data: 'investments' }], [{ text: '🔙 Main Menu', callback_data: 'main_menu' }]]
       );
     }
     else if (lowerMsg.includes('card') || lowerMsg.includes('withdraw')) {
-      await this.sendBotMessage(chatRoom, 
-        `💳 **Card & Withdrawal Info**\n` +
+      await this.sendButtonMessage(chatRoom, 
+        `💳 <b>Card & Withdrawal Info</b>\n\n` +
         `• Add cards in the Cards section\n` +
         `• Minimum withdrawal: 100€\n` +
         `• Withdraw to card or bank\n` +
-        `• Check balance first with /balance`
+        `• Check balance first with /balance`,
+        this.getMainMenuButtons()
       );
     }
     else if (lowerMsg.includes('thank')) {
-      await this.sendBotMessage(chatRoom, 
-        `You're welcome! 😊 Let me know if you need anything else.`
+      await this.sendButtonMessage(chatRoom, 
+        `You're welcome! 😊 Let me know if you need anything else.`,
+        this.getMainMenuButtons()
       );
     }
     else if (lowerMsg.includes('help')) {
       await this.showHelp([], fromUser, chatRoom);
+    }
+    else {
+      // Default response with menu
+      await this.sendButtonMessage(chatRoom, 
+        `I'm not sure how to help with that. Please use the buttons below or type /menu to see available options.`,
+        this.getMainMenuButtons()
+      );
     }
   }
 }
 
 // Create bot instance
 let adminBot;
-
-// Helper function for stats
-async function showStats(args, fromUser, chatRoom) {
-  try {
-    const users = await readUsers();
-    const investments = await readInvestments();
-    const chats = await readChats();
-    
-    const activeUsers = users.filter(u => u.isActive !== false).length;
-    const totalBalance = users.reduce((sum, u) => sum + (u.balance || 0), 0);
-    const totalInvestments = investments.reduce((sum, i) => sum + (i.amount || 0), 0);
-    
-    const today = new Date().toDateString();
-    const todayReg = users.filter(u => new Date(u.createdAt).toDateString() === today).length;
-    
-    const unreadMessages = chats.reduce((sum, chat) => {
-      return sum + chat.messages.filter(m => !m.read).length;
-    }, 0);
-
-    const runningInvestments = investments.filter(i => i.status === 'running').length;
-    const completedInvestments = investments.filter(i => i.status === 'completed').length;
-
-    const statsText = `
-📊 **System Statistics**
-
-👥 **Users:**
-• Total Users: ${users.length}
-• Active Users: ${activeUsers}
-• New Today: ${todayReg}
-• Total Balance: ${totalBalance.toFixed(2)}€
-
-💰 **Investments:**
-• Total Invested: ${totalInvestments.toFixed(2)}€
-• Running: ${runningInvestments}
-• Completed: ${completedInvestments}
-
-💬 **Messages:**
-• Unread Messages: ${unreadMessages}
-• Total Chats: ${chats.length}
-
-📱 **System Status:**
-• Bot Active: ✅
-• Socket.IO: ✅
-• JSONBin: ✅
-• Ntfy: ✅
-• Telegram: ${telegramEnabled ? '✅' : '❌'}
-
-Type /help for available commands.
-    `;
-    
-    await adminBot.sendBotMessage(chatRoom, statsText);
-    
-    // Also send to Telegram if this is a major event
-    if (telegramEnabled && fromUser === 'system') {
-      sendTelegramNotification(`
-📊 <b>System Statistics Requested</b>
-
-👥 Users: ${users.length}
-💰 Total Balance: ${totalBalance.toFixed(2)}€
-💎 Active Investments: ${runningInvestments}
-💬 Unread Messages: ${unreadMessages}
-      `).catch(err => console.error('Telegram stats notification error:', err));
-    }
-  } catch (error) {
-    console.error('Stats error:', error);
-    await adminBot.sendBotMessage(chatRoom, '❌ Failed to load statistics');
-  }
-}
 
 // ==================== SOCKET.IO WITH SESSION ====================
 // Wrap session middleware for Socket.IO
@@ -1209,12 +1569,12 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     console.log(`🚪 User ${socket.userId} joined room ${roomId}`);
     
-    // If joining bot chat, send welcome message
+    // If joining bot chat, send welcome message with buttons
     if (otherUserId === adminBot.botUserId) {
       setTimeout(() => {
-        adminBot.sendBotMessage(roomId, 
-          `👋 Hello! I'm the Support Bot. I'm here to help!\n` +
-          `Type /help to see what I can do.`
+        adminBot.sendButtonMessage(roomId, 
+          `👋 Hello! I'm the Support Bot. I'm here to help!\n\nUse the buttons below to navigate:`,
+          adminBot.getMainMenuButtons()
         );
       }, 500);
     }
@@ -1325,7 +1685,7 @@ io.on('connection', (socket) => {
         ).catch(err => console.error('Background chat notification error:', err));
       }
 
-      // If message is to bot, process it
+      // If message is to bot, process it with button interface
       if (to === adminBot.botUserId) {
         await adminBot.handleIncomingMessage(message, from, roomId);
       }
@@ -1336,6 +1696,20 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('Send message error:', error);
       socket.emit('error', { message: 'Failed to send message' });
+    }
+  });
+
+  // Handle button clicks (simulated via special messages)
+  socket.on('bot-button-click', async (data) => {
+    try {
+      const { callbackData, roomId } = data;
+      const fromUser = socket.userId;
+      
+      if (adminBot) {
+        await adminBot.handleButtonCallback(callbackData, fromUser, roomId);
+      }
+    } catch (error) {
+      console.error('Bot button click error:', error);
     }
   });
 
@@ -1646,7 +2020,7 @@ app.post('/register', async (req, res) => {
       4
     ).catch(err => console.error('Background notification error:', err));
 
-    // Send bot welcome message
+    // Send bot welcome message with buttons
     setTimeout(async () => {
       try {
         const chatId = [email, adminBot.botUserId].sort().join('_');
@@ -1676,7 +2050,7 @@ app.post('/register', async (req, res) => {
                   `• Add a card in the Cards section\n` +
                   `• Start investing with 3x returns\n` +
                   `• Chat with me anytime for help\n\n` +
-                  `Type /help to see available commands or just ask me anything!`,
+                  `Use the buttons below to navigate:`,
           timestamp: new Date().toISOString(),
           read: false,
           isBot: true
@@ -1687,6 +2061,14 @@ app.post('/register', async (req, res) => {
         await saveChats(chats);
 
         io.to(`user:${email}`).emit('new-message', welcomeMessage);
+        
+        // Send main menu
+        setTimeout(() => {
+          adminBot.sendButtonMessage(chatId, 
+            `What would you like to do?`,
+            adminBot.getMainMenuButtons()
+          );
+        }, 1000);
       } catch (error) {
         console.error('Bot welcome message error:', error);
       }
@@ -1699,7 +2081,7 @@ app.post('/register', async (req, res) => {
     res.send(`<h2>Registration Successful!</h2> 
               <p>Welcome ${fullName}!</p>
               <p>Your account has been created with a welcome bonus of 1800€.</p>
-              <p>The Support Bot will help you get started.</p>
+              <p>The Support Bot will help you get started with buttons.</p>
               <p>Redirecting to dashboard...</p> 
               <script>
                 setTimeout(() => window.location.href = '/dashboard.html', 3000);
@@ -1727,7 +2109,7 @@ app.post('/login', async (req, res) => {
       
       return res.send(`<h2>Support Bot Login Successful!</h2> 
                       <p>Welcome, ${adminBot.botUserName}!</p>
-                      <p>Bot is now active and monitoring all chats.</p>
+                      <p>Bot is now active with button interface.</p>
                       <p>Telegram integration: ${telegramEnabled ? '✅ Active' : '❌ Not configured'}</p>
                       <p>Redirecting to admin dashboard...</p> 
                       <script>
@@ -1753,7 +2135,7 @@ app.post('/login', async (req, res) => {
       
       return res.send(`<h2>Admin Login Successful!</h2> 
                       <p>Welcome back, ${admin.fullName}!</p>
-                      <p>The Support Bot is active and ready to help.</p>
+                      <p>The Support Bot is active with button interface.</p>
                       <p>Telegram integration: ${telegramEnabled ? '✅ Active' : '❌ Not configured'}</p>
                       <p>Redirecting to admin dashboard...</p> 
                       <script>
@@ -1788,7 +2170,7 @@ app.post('/login', async (req, res) => {
       2
     ).catch(err => console.error('Login notification error:', err));
 
-    // Send bot greeting
+    // Send bot greeting with menu
     setTimeout(async () => {
       try {
         const chatId = [user.email, adminBot.botUserId].sort().join('_');
@@ -1800,8 +2182,8 @@ app.post('/login', async (req, res) => {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 8),
             from: adminBot.botUserId,
             to: user.email,
-            message: `👋 Welcome back, ${user.fullName}! Good to see you again.\n` +
-                    `Need help? Just type /help or ask me anything!`,
+            message: `👋 Welcome back, ${user.fullName}! Good to see you again.\n\n` +
+                    `What would you like to do today?`,
             timestamp: new Date().toISOString(),
             read: false,
             isBot: true
@@ -1812,6 +2194,14 @@ app.post('/login', async (req, res) => {
           await saveChats(chats);
 
           io.to(`user:${user.email}`).emit('new-message', greeting);
+          
+          // Send main menu
+          setTimeout(() => {
+            adminBot.sendButtonMessage(chatId, 
+              `Use the buttons below to navigate:`,
+              adminBot.getMainMenuButtons()
+            );
+          }, 1000);
         }
       } catch (error) {
         console.error('Bot greeting error:', error);
@@ -1821,7 +2211,7 @@ app.post('/login', async (req, res) => {
     res.send(`<h2>Login Successful!</h2> 
               <p>Welcome back, ${user.fullName}!</p>
               <p>Your current balance: ${user.balance}€</p>
-              <p>The Support Bot is here to help.</p>
+              <p>The Support Bot is here to help with buttons.</p>
               <p>Redirecting to dashboard...</p> 
               <script>
                 setTimeout(() => window.location.href = '/dashboard.html', 2000);
@@ -2407,9 +2797,9 @@ app.post('/invest', async (req, res) => {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 8),
             from: adminBot.botUserId,
             to: user.email,
-            message: `💰 **Investment Confirmed!**\n\n` +
+            message: `💰 <b>Investment Confirmed!</b>\n\n` +
                     `You have successfully invested ${investAmount}€ for ${investDays} days.\n\n` +
-                    `**Details:**\n` +
+                    `<b>Details:</b>\n` +
                     `• Amount: ${investAmount}€\n` +
                     `• Duration: ${investDays} days\n` +
                     `• Expected Return: ${returnAmount}€\n` +
@@ -2525,9 +2915,9 @@ app.get('/process-investments', async (req, res) => {
                   id: Date.now().toString() + Math.random().toString(36).substr(2, 8),
                   from: adminBot.botUserId,
                   to: user.email,
-                  message: `🎉 **Investment Matured!**\n\n` +
+                  message: `🎉 <b>Investment Matured!</b>\n\n` +
                           `Your investment of ${invest.amount}€ has matured!\n\n` +
-                          `**Returns:**\n` +
+                          `<b>Returns:</b>\n` +
                           `• Original Investment: ${invest.amount}€\n` +
                           `• Return Amount: ${invest.returnAmount}€\n` +
                           `• Total: ${invest.returnAmount}€ added to your balance\n\n` +
@@ -2683,6 +3073,7 @@ app.get('/api/chat/users', async (req, res) => {
         displayName: 'Support Bot',
         picture: 'bot_avatar.png',
         isBot: true,
+        hasButtons: true,
         lastMessage: botLastMessage,
         lastMessageTime: botLastMessageTime,
         unreadCount: botUnreadCount
@@ -2820,7 +3211,7 @@ app.post('/api/admin/user/update', async (req, res) => {
               id: Date.now().toString() + Math.random().toString(36).substr(2, 8),
               from: adminBot.botUserId,
               to: users[userIndex].email,
-              message: `ℹ️ **Account Update**\n\nYour account has been ${action} by an administrator.`,
+              message: `ℹ️ <b>Account Update</b>\n\nYour account has been ${action} by an administrator.`,
               timestamp: new Date().toISOString(),
               read: false,
               isBot: true
@@ -2919,7 +3310,7 @@ app.post('/api/admin/user/credit', async (req, res) => {
       id: Date.now().toString() + Math.random().toString(36).substr(2, 8),
       from: adminBot.botUserId,
       to: users[userIndex].email,
-      message: `💰 **Account Credited!**\n\nYour account has been credited with ${creditAmount}€.\n\nNew balance: ${users[userIndex].balance}€`,
+      message: `💰 <b>Account Credited!</b>\n\nYour account has been credited with ${creditAmount}€.\n\nNew balance: ${users[userIndex].balance}€`,
       timestamp: new Date().toISOString(),
       read: false,
       isBot: true
@@ -2985,7 +3376,8 @@ app.get('/api/admin/stats', async (req, res) => {
       totalInvestments,
       todayReg,
       unreadMessages,
-      telegramEnabled
+      telegramEnabled,
+      botActive: adminBot ? adminBot.connected : false
     });
   } catch (error) {
     console.error('Get stats error:', error);
@@ -3012,8 +3404,28 @@ app.get('/api/bot/status', (req, res) => {
     botId: adminBot.botUserId,
     botName: adminBot.botUserName,
     commands: Object.keys(adminBot.commandHandlers),
+    menus: ['Main Menu', 'User Actions', 'Credit Menu', 'Broadcast Menu'],
     uptime: process.uptime()
   });
+});
+
+// ==================== BOT BUTTON INTERFACE ROUTE ====================
+
+app.post('/api/bot/button-click', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not logged in" });
+  }
+
+  const { callbackData, roomId } = req.body;
+  
+  if (!callbackData || !roomId) {
+    return res.status(400).json({ error: "Missing callback data or room ID" });
+  }
+
+  // Emit to socket for processing
+  io.emit('bot-button-click', { callbackData, roomId, userId: req.session.user });
+
+  res.json({ success: true });
 });
 
 // ==================== TEST ROUTE ====================
@@ -3021,7 +3433,7 @@ app.get('/api/bot/status', (req, res) => {
 app.get('/test', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Delux Euro Wallet API with Bot, Telegram and Socket.IO is running',
+    message: 'Delux Euro Wallet API with Bot Buttons, Telegram and Socket.IO is running',
     bot: adminBot.connected ? 'active' : 'inactive',
     telegram: telegramEnabled ? 'active' : 'inactive',
     timestamp: new Date().toISOString()
@@ -3031,7 +3443,7 @@ app.get('/test', (req, res) => {
 // ==================== SERVER INITIALIZATION ====================
 
 async function initializeServer() {
-  console.log('Starting Delux Euro Wallet Server with Bot, Telegram and Socket.IO...');
+  console.log('Starting Delux Euro Wallet Server with Bot Buttons, Telegram and Socket.IO...');
   console.log(`Port: ${PORT}`);
   console.log('Testing JSONBin connection...');
   
@@ -3109,6 +3521,7 @@ async function initializeServer() {
     console.log('   ├─────────────────────────────────────┤');
     console.log('   │ GET  /api/bot/status                  │');
     console.log('   │ GET  /api/telegram/status             │');
+    console.log('   │ POST /api/bot/button-click            │');
     console.log('   └─────────────────────────────────────┘');
     
     console.log('\n🔌 Socket.IO Events:');
@@ -3117,10 +3530,12 @@ async function initializeServer() {
     console.log('   • send-message');
     console.log('   • typing');
     console.log('   • mark-read');
+    console.log('   • bot-button-click');
     console.log('   • disconnect');
     
     console.log('\n🤖 Bot Commands (in-app chat):');
     console.log('   • /help     - Show help menu');
+    console.log('   • /menu     - Show main menu with buttons');
     console.log('   • /users    - List all users');
     console.log('   • /stats    - Show system statistics');
     console.log('   • /balance  - Get user balance');
@@ -3131,6 +3546,14 @@ async function initializeServer() {
     console.log('   • /investments - Get user investments');
     console.log('   • /broadcast - Broadcast message');
     console.log('   • /clear    - Clear chat history');
+    console.log('   • /telegram - Show Telegram status');
+    
+    console.log('\n🖱️ Bot Buttons:');
+    console.log('   • Main Menu with all actions');
+    console.log('   • User-specific action menus');
+    console.log('   • Quick credit amounts');
+    console.log('   • Broadcast options');
+    console.log('   • Status toggles');
     
     console.log('\n📱 Telegram Bot Commands:');
     console.log('   • /start    - Start bot');
@@ -3139,6 +3562,7 @@ async function initializeServer() {
     console.log('   • /balance  - Check user balance');
     console.log('   • /credit   - Credit user');
     console.log('   • /investments - View investments');
+    console.log('   • /broadcast - Send broadcast');
     console.log('   • /help     - Show help');
     
     console.log('\n📱 Ntfy Notifications:');
@@ -3164,7 +3588,9 @@ async function initializeServer() {
     
     console.log('\n🚀 Server is running and ready to accept connections!');
     console.log(`🔗 URL: http://localhost:${PORT}`);
-    console.log(`🔌 WebSocket: ws://localhost:${PORT}\n`);
+    console.log(`🔌 WebSocket: ws://localhost:${PORT}`);
+    console.log(`🤖 Bot with Buttons: Active`);
+    console.log(`📱 Telegram Integration: ${telegramEnabled ? 'Active' : 'Inactive'}\n`);
   } else {
     console.log('\n❌ JSONBin connection failed. Please check your API key and bin IDs.');
     console.log('❌ The server will start but may not function correctly.\n');
@@ -3174,10 +3600,11 @@ async function initializeServer() {
 // Start server with Socket.IO
 server.listen(PORT, async () => {
   console.log(`\n${'='.repeat(50)}`);
-  console.log(`   Delux Euro Wallet Server with Bot & Telegram`);
+  console.log(`   Delux Euro Wallet Server with Bot Buttons & Telegram`);
   console.log(`${'='.repeat(50)}`);
   console.log(`   Server URL: http://localhost:${PORT}`);
   console.log(`   WebSocket: ws://localhost:${PORT}`);
+  console.log(`   Bot Interface: Buttons & Commands`);
   console.log(`${'='.repeat(50)}\n`);
   
   await initializeServer();
