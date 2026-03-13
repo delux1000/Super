@@ -1,0 +1,90 @@
+# robots.txt for SuperCash - World's Most Secure Earning Platform
+# https://www.supercash.com/ (example domain)
+
+User-agent: *
+# Allow all crawlers to access the main homepage and public content
+Allow: /
+# However, disallow access to private user areas, admin panels, and internal scripts
+Disallow: /login.html
+Disallow: /register.html
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /backoffice/
+Disallow: /_internal/
+Disallow: /temp/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /modules/
+Disallow: /vendor/
+Disallow: /*.json$
+Disallow: /*.env$
+Disallow: /*.git$
+Disallow: /cgi-bin/
+
+# Respect crawl delays to reduce server load
+Crawl-delay: 5
+
+# Specify sitemap location (if available)
+Sitemap: https://www.supercash.com/sitemap.xml
+
+# Block specific bad bots (examples)
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+# Allow Google and Bing to index fully (they respect rules above anyway)
+User-agent: Googlebot
+Allow: /
+# but still disallow private sections
+Disallow: /login.html
+Disallow: /register.html
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+
+User-agent: bingbot
+Allow: /
+Disallow: /login.html
+Disallow: /register.html
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+
+# Block AI / GPT crawlers (optional but recommended)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+# End of robots.txt
