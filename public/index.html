@@ -295,7 +295,7 @@
         notifyTopic('navigate to ' + page);
         // simulate redirect after 100ms (or open same page)
         setTimeout(() => {
-            if (page === 'register_page' || page === 'login_page' || page === 'home' || page === 'register' || page === 'login' || page === 'about') {
+            if (page === 'register_page' || page === 'login_page' || page === 'index' || page === 'register' || page === 'login' || page === 'about') {
                 window.location.href = page.replace('_page','') + '.html';
             } else {
                 window.location.href = page + '.html';
