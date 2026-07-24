@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Delux Earning</title>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <!-- Socket.IO client for real‑time admin chat -->
-  <script src="/socket.io/socket.io.js"></script>
   <style>
     :root {
       --green: #28a745;
@@ -30,12 +28,42 @@
       padding: 1rem 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      flex-wrap: wrap;
     }
 
     header h1 {
       margin: 0;
       font-size: 1.8rem;
       color: var(--green);
+    }
+
+    .whatsapp-support {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #25D366;
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .whatsapp-support:hover {
+      background: #1da851;
+    }
+    .whatsapp-support i {
+      font-size: 1.3rem;
+    }
+    /* fallback icon using unicode */
+    .whatsapp-support .icon {
+      font-size: 1.5rem;
+      line-height: 1;
     }
 
     main {
@@ -139,24 +167,34 @@
     }
 
     @media(max-width: 480px) {
+      header {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+      }
       header h1 {
         font-size: 1.4rem;
       }
-
       .btn {
         padding: 0.6rem 1rem;
         font-size: 0.9rem;
       }
-
       #yt-player {
         width: 100% !important;
         height: 220px !important;
       }
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <header><h1>Delux Earning Platform</h1></header>
+  <header>
+    <h1>Delux Earning Platform</h1>
+    <a href="https://wa.me/12272859869" target="_blank" class="whatsapp-support">
+      <span class="icon"><i class="fab fa-whatsapp"></i></span>
+      Support
+    </a>
+  </header>
 
   <main>
     <section id="vip-gate">
@@ -197,7 +235,7 @@
     </section>
   </main>
 
-  <footer>© 2025 Delux Earning</footer>
+  <footer>© 2025 Delux Earning &bull; Support via WhatsApp</footer>
 
   <script>
     // ==================== CONFIGURATION ====================
@@ -216,10 +254,12 @@
     ];
     const NAMES = ["Ada", "Dickinson", "mexiccote", "Zhang", "Lucas", "Arthur", "Ethan", "Sofia", "Raj", "Elena", "Donald", "Daniel", "James", "Emily", "Ken", "Wayne", "Brian", "Gianna"];
 
+    // WhatsApp admin number (updated)
+    const ADMIN_WHATSAPP = "+12272859869";
+
     let mode = "auto";
     let player, watchTimer, watchStarted = false, currentTask;
-    let socket = null;                // Socket.IO connection
-    let currentUser = null;           // Logged‑in user info
+    let currentUser = null;
 
     const $ = id => document.getElementById(id);
     const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -238,17 +278,6 @@
         console.error('Failed to load user data', e);
         window.location.href = '/login.html';
       }
-    }
-
-    // ==================== SOCKET.IO INIT ====================
-    function initSocket() {
-      socket = io();
-      socket.on('connect', () => {
-        console.log('✅ Connected to chat server');
-      });
-      socket.on('error', (err) => {
-        console.error('Socket error:', err);
-      });
     }
 
     // ==================== VIP GATE ====================
@@ -335,51 +364,27 @@
       $("claim-section").classList.remove("hidden");
     }
 
-    // ==================== CLAIM REWARD (SEND TO ADMIN CHAT) ====================
-    async function claimReward() {
+    // ==================== CLAIM REWARD – redirect to WhatsApp ====================
+    function claimReward() {
       const name = $("user-name").value.trim();
       if (!name) {
         alert("Enter your Delux name");
         return;
       }
 
-      // Build the message that will appear in the admin chat
-      const adminMessage = `🎉 Task completed!\n\n` +
-        `Delux Name: ${name}\n` +
-        `Task: ${currentTask.title}\n` +
-        `Reward: €${currentTask.amount}\n` +
-        `User Email: ${currentUser ? currentUser.email : 'Unknown'}\n` +
-        `Time: ${new Date().toLocaleString()}`;
+      // Build WhatsApp message
+      const msg = `*🎉 Task Completed!*%0A%0A` +
+        `*Delux Name:* ${encodeURIComponent(name)}%0A` +
+        `*Task:* ${encodeURIComponent(currentTask.title)}%0A` +
+        `*Reward:* €${currentTask.amount}%0A` +
+        `*User Email:* ${encodeURIComponent(currentUser ? currentUser.email : 'Unknown')}%0A` +
+        `*Time:* ${encodeURIComponent(new Date().toLocaleString())}`;
 
-      try {
-        // If socket is connected, send directly via Socket.IO (real‑time)
-        if (socket && socket.connected) {
-          socket.emit('send-message', {
-            to: 'admin@delux.com',   // admin email (or you can use admin phone)
-            message: adminMessage
-          });
-          alert('Reward claimed! Admin has been notified.');
-        } else {
-          // Fallback to HTTP endpoint if socket not available
-          const response = await fetch('/api/chat/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: 'admin@delux.com',
-              message: adminMessage
-            })
-          });
-          if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Failed to send message');
-          }
-          alert('Reward claimed! Admin has been notified.');
-        }
-        $("claim-section").classList.add("hidden");
-      } catch (error) {
-        console.error('Claim error:', error);
-        alert('Failed to notify admin. Please try again.');
-      }
+      const waUrl = `https://wa.me/${ADMIN_WHATSAPP.replace(/[^0-9]/g, '')}?text=${msg}`;
+      window.open(waUrl, '_blank');
+
+      alert('Reward claimed! Opening WhatsApp to notify admin.');
+      $("claim-section").classList.add("hidden");
     }
 
     // ==================== TESTIMONIALS ====================
@@ -407,9 +412,8 @@
 
     // ==================== ON PAGE LOAD ====================
     window.addEventListener('load', async () => {
-      await loadUserData();      // ensure user is logged in
-      initSocket();              // connect to chat server
-      // VIP gate remains visible until user enters code
+      await loadUserData();
+      // VIP gate remains visible
     });
   </script>
 </body>
