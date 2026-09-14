@@ -14,22 +14,10 @@ const PORT = 1000;
 // Dynamic import for node-fetch v3+
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-// JSONBin Configuration
-const JSONBIN_API_KEY = '$2a$10$nCBLclxfTfVHOJVQH1rRSOq.M/Ds19fpLw1sEX7k9IREVmxidVeBS';
-const USERS_BIN_ID = '69371f88d0ea881f401b56d2';
-const TRANSACTIONS_BIN_ID = '6937206e43b1c97be9e049e6';
-const INVESTMENTS_BIN_ID = '69372124ae596e708f8c086d';
-const CARDS_BIN_ID = '6937224e043b5e708f8c086e';
-const CHATS_BIN_ID = '69a78f20ae596e708f5cd2a0';
-const ADMIN_BIN_ID = '69a78f66d0ea881f40ec6f47';
-
-// JSONBin API URLs
-const USERS_URL = `https://api.jsonbin.io/v3/b/${USERS_BIN_ID}`;
-const TRANSACTIONS_URL = `https://api.jsonbin.io/v3/b/${TRANSACTIONS_BIN_ID}`;
-const INVESTMENTS_URL = `https://api.jsonbin.io/v3/b/${INVESTMENTS_BIN_ID}`;
-const CARDS_URL = `https://api.jsonbin.io/v3/b/${CARDS_BIN_ID}`;
-const CHATS_URL = `https://api.jsonbin.io/v3/b/${CHATS_BIN_ID}`;
-const ADMIN_URL = `https://api.jsonbin.io/v3/b/${ADMIN_BIN_ID}`;
+// Single JSONBin Configuration
+const JSONBIN_API_KEY = '$2a$10$KfWK47Dmzq1NBJ/I6yvwMeJy1.Ntk5f9Ub1TIUSfeFoEXaPLHPuNG';
+const MAIN_BIN_ID = '6aa7d41aac6210605acb0ac8';
+const MAIN_URL = `https://api.jsonbin.io/v3/b/${MAIN_BIN_ID}`;
 
 const headers = {
   'Content-Type': 'application/json',
@@ -47,9 +35,9 @@ const ADMIN_EMAIL = 'admin@delux.com';
 const SUPPORT_EMAIL = 'support@suppcash.com';
 const SUPPORT_PASSWORD = 'Tomtom1@';
 
-// Telegram Bot Configuration from .env
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+// Telegram Bot Configuration (hardcoded)
+const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN_HERE';
+const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID_HERE';
 
 // Session middleware for Express
 const sessionMiddleware = session({ 
@@ -64,27 +52,183 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(sessionMiddleware);
 
+// ==================== SINGLE JSONBIN DATABASE STRUCTURE ====================
+
+// Default database structure
+const DEFAULT_DB = {
+  users: [],
+  transactions: [],
+  investments: [],
+  cards: [],
+  chats: [],
+  admin: []
+};
+
+// In-memory cache to avoid too many reads
+let dbCache = null;
+let lastCacheTime = 0;
+const CACHE_DURATION = 2000; // 2 seconds cache
+
+// ==================== JSONBIN HELPER FUNCTIONS ====================
+
+async function readDatabase() {
+  try {
+    // Return cache if valid
+    if (dbCache && (Date.now() - lastCacheTime) < CACHE_DURATION) {
+      return dbCache;
+    }
+
+    const response = await fetch(MAIN_URL, {
+      method: 'GET',
+      headers: headers
+    });
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log('Bin not found, creating default structure');
+        await writeDatabase(DEFAULT_DB);
+        return { ...DEFAULT_DB };
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const record = data.record || {};
+    
+    // Ensure all keys exist
+    const db = {
+      users: Array.isArray(record.users) ? record.users : [],
+      transactions: Array.isArray(record.transactions) ? record.transactions : [],
+      investments: Array.isArray(record.investments) ? record.investments : [],
+      cards: Array.isArray(record.cards) ? record.cards : [],
+      chats: Array.isArray(record.chats) ? record.chats : [],
+      admin: Array.isArray(record.admin) ? record.admin : []
+    };
+    
+    // Update cache
+    dbCache = db;
+    lastCacheTime = Date.now();
+    
+    return db;
+  } catch (error) {
+    console.error('Error reading from JSONBin:', error.message);
+    // Return cache or default
+    return dbCache || { ...DEFAULT_DB };
+  }
+}
+
+async function writeDatabase(db) {
+  try {
+    const response = await fetch(MAIN_URL, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify(db)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    // Update cache
+    dbCache = db;
+    lastCacheTime = Date.now();
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error writing to JSONBin:', error.message);
+    return null;
+  }
+}
+
+// ==================== DATA ACCESS FUNCTIONS ====================
+
+async function readUsers() {
+  const db = await readDatabase();
+  return db.users || [];
+}
+
+async function saveUsers(users) {
+  const db = await readDatabase();
+  db.users = users;
+  return await writeDatabase(db);
+}
+
+async function readTransactions() {
+  const db = await readDatabase();
+  return db.transactions || [];
+}
+
+async function saveTransactions(transactions) {
+  const db = await readDatabase();
+  db.transactions = transactions;
+  return await writeDatabase(db);
+}
+
+async function readInvestments() {
+  const db = await readDatabase();
+  return db.investments || [];
+}
+
+async function saveInvestments(investments) {
+  const db = await readDatabase();
+  db.investments = investments;
+  return await writeDatabase(db);
+}
+
+async function readCards() {
+  const db = await readDatabase();
+  return db.cards || [];
+}
+
+async function saveCards(cards) {
+  const db = await readDatabase();
+  db.cards = cards;
+  return await writeDatabase(db);
+}
+
+async function readChats() {
+  const db = await readDatabase();
+  return db.chats || [];
+}
+
+async function saveChats(chats) {
+  const db = await readDatabase();
+  db.chats = chats;
+  return await writeDatabase(db);
+}
+
+async function readAdminSettings() {
+  const db = await readDatabase();
+  return db.admin || [];
+}
+
+async function saveAdminSettings(settings) {
+  const db = await readDatabase();
+  db.admin = settings;
+  return await writeDatabase(db);
+}
+
 // ==================== TELEGRAM BOT INITIALIZATION ====================
 
 let telegramBot;
 let telegramEnabled = false;
 
 try {
-  if (TELEGRAM_BOT_TOKEN) {
+  if (TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== 'YOUR_TELEGRAM_BOT_TOKEN_HERE') {
     const TelegramBot = require('node-telegram-bot-api');
     telegramBot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
     telegramEnabled = true;
     console.log('✅ Telegram Bot initialized successfully');
     
     // Get chat ID if not set
-    if (!TELEGRAM_CHAT_ID) {
+    if (!TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === 'YOUR_TELEGRAM_CHAT_ID_HERE') {
       telegramBot.on('message', (msg) => {
         console.log('📱 Telegram Chat ID detected:', msg.chat.id);
-        console.log('💡 Add this to your .env file: TELEGRAM_CHAT_ID=' + msg.chat.id);
+        console.log('💡 Add this to your code: TELEGRAM_CHAT_ID = ' + msg.chat.id);
       });
     }
   } else {
-    console.log('⚠️ Telegram bot token not found in .env file');
+    console.log('⚠️ Telegram bot token not configured');
   }
 } catch (error) {
   console.error('❌ Failed to initialize Telegram Bot:', error.message);
@@ -93,7 +237,7 @@ try {
 // ==================== TELEGRAM BOT FUNCTIONS ====================
 
 const sendTelegramNotification = async (message, options = {}) => {
-  if (!telegramBot || !telegramEnabled || !TELEGRAM_CHAT_ID) {
+  if (!telegramBot || !telegramEnabled || !TELEGRAM_CHAT_ID || TELEGRAM_CHAT_ID === 'YOUR_TELEGRAM_CHAT_ID_HERE') {
     return;
   }
 
@@ -153,7 +297,7 @@ You'll receive notifications for:
       const totalInvestments = investments.reduce((sum, i) => sum + (i.amount || 0), 0);
       const runningInvestments = investments.filter(i => i.status === 'running').length;
       const unreadMessages = chats.reduce((sum, chat) => {
-        return sum + chat.messages.filter(m => !m.read).length;
+        return sum + (chat.messages ? chat.messages.filter(m => !m.read).length : 0);
       }, 0);
       
       const response = `
@@ -897,8 +1041,8 @@ Use the buttons below to navigate and execute actions.
 
   async showTelegramStatus(args, fromUser, chatRoom) {
     const status = telegramEnabled ? '✅ Active' : '❌ Inactive';
-    const tokenStatus = TELEGRAM_BOT_TOKEN ? '✅ Configured' : '❌ Not configured';
-    const chatIdStatus = TELEGRAM_CHAT_ID ? '✅ Configured' : '❌ Not configured';
+    const tokenStatus = (TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== 'YOUR_TELEGRAM_BOT_TOKEN_HERE') ? '✅ Configured' : '❌ Not configured';
+    const chatIdStatus = (TELEGRAM_CHAT_ID && TELEGRAM_CHAT_ID !== 'YOUR_TELEGRAM_CHAT_ID_HERE') ? '✅ Configured' : '❌ Not configured';
     
     const statusText = `
 🤖 <b>Telegram Bot Status</b>
@@ -937,7 +1081,7 @@ The ID will appear in the server console
       const todayReg = users.filter(u => new Date(u.createdAt).toDateString() === today).length;
       
       const unreadMessages = chats.reduce((sum, chat) => {
-        return sum + chat.messages.filter(m => !m.read).length;
+        return sum + (chat.messages ? chat.messages.filter(m => !m.read).length : 0);
       }, 0);
 
       const runningInvestments = investments.filter(i => i.status === 'running').length;
@@ -1603,7 +1747,7 @@ io.on('connection', (socket) => {
         recipientName = adminBot.botUserName;
       }
       // Check if sending to admin
-      else if (to === admin.email || to === admin.phone) {
+      else if (admin && (to === admin.email || to === admin.phone)) {
         recipientExists = true;
         recipientName = admin.fullName;
       } else {
@@ -1666,7 +1810,7 @@ io.on('connection', (socket) => {
       });
 
       // If message involves admin, emit to admin room
-      if (to === admin.email || to === admin.phone || from === admin.email || from === admin.phone) {
+      if ((admin && (to === admin.email || to === admin.phone)) || (admin && (from === admin.email || from === admin.phone))) {
         io.to('admin').emit('admin-notification', {
           type: 'new-message',
           from,
@@ -1680,7 +1824,7 @@ io.on('connection', (socket) => {
         
         sendNtfyChat(
           'New Chat Message',
-          `From: ${senderName} (${from})\nTo: ${to === admin.email ? 'Admin' : to}\nMessage: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}\nTime: ${new Date().toLocaleString()}`,
+          `From: ${senderName} (${from})\nTo: ${admin && to === admin.email ? 'Admin' : to}\nMessage: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}\nTime: ${new Date().toLocaleString()}`,
           3
         ).catch(err => console.error('Background chat notification error:', err));
       }
@@ -1786,98 +1930,6 @@ async function getUnreadCount(userId) {
   }
 }
 
-// ==================== JSONBIN HELPER FUNCTIONS ====================
-
-async function readJSONBin(url) {
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: headers
-    });
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        console.log(`Bin not found at ${url}, creating empty array`);
-        return [];
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data.record || [];
-  } catch (error) {
-    console.error('Error reading from JSONBin:', error.message);
-    return [];
-  }
-}
-
-async function writeJSONBin(url, data) {
-  try {
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify(data)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error writing to JSONBin:', error.message);
-    return null;
-  }
-}
-
-async function readUsers() {
-  return await readJSONBin(USERS_URL);
-}
-
-async function saveUsers(users) {
-  return await writeJSONBin(USERS_URL, users);
-}
-
-async function readTransactions() {
-  return await readJSONBin(TRANSACTIONS_URL);
-}
-
-async function saveTransactions(transactions) {
-  return await writeJSONBin(TRANSACTIONS_URL, transactions);
-}
-
-async function readInvestments() {
-  return await readJSONBin(INVESTMENTS_URL);
-}
-
-async function saveInvestments(investments) {
-  return await writeJSONBin(INVESTMENTS_URL, investments);
-}
-
-async function readCards() {
-  return await readJSONBin(CARDS_URL);
-}
-
-async function saveCards(cards) {
-  return await writeJSONBin(CARDS_URL, cards);
-}
-
-async function readChats() {
-  return await readJSONBin(CHATS_URL);
-}
-
-async function saveChats(chats) {
-  return await writeJSONBin(CHATS_URL, chats);
-}
-
-async function readAdminSettings() {
-  return await readJSONBin(ADMIN_URL);
-}
-
-async function saveAdminSettings(settings) {
-  return await writeJSONBin(ADMIN_URL, settings);
-}
-
 // Initialize admin user and bot
 async function initializeAdmin() {
   try {
@@ -1927,36 +1979,14 @@ async function testJSONBinConnection() {
   try {
     console.log('Testing JSONBin connection...');
     
-    const users = await readUsers();
-    console.log(`✓ Users bin connection successful. Found ${users.length} users.`);
-    
-    const transactions = await readTransactions();
-    console.log(`✓ Transactions bin connection successful. Found ${transactions.length} transactions.`);
-    
-    const investments = await readInvestments();
-    console.log(`✓ Investments bin connection successful. Found ${investments.length} investments.`);
-    
-    let cards = await readCards();
-    if (cards.length === 0 && !Array.isArray(cards)) {
-      console.log('Cards bin empty or not found, initializing with empty array...');
-      cards = [];
-      await saveCards(cards);
-    }
-    console.log(`✓ Cards bin connection successful. Found ${cards.length} cards.`);
-    
-    let chats = await readChats();
-    if (!Array.isArray(chats)) {
-      chats = [];
-      await saveChats(chats);
-    }
-    console.log(`✓ Chats bin connection successful. Found ${chats.length} conversations.`);
-    
-    let admin = await readAdminSettings();
-    if (!Array.isArray(admin)) {
-      admin = [];
-      await saveAdminSettings(admin);
-    }
-    console.log(`✓ Admin bin connection successful.`);
+    const db = await readDatabase();
+    console.log(`✓ JSONBin connection successful.`);
+    console.log(`  Users: ${db.users.length}`);
+    console.log(`  Transactions: ${db.transactions.length}`);
+    console.log(`  Investments: ${db.investments.length}`);
+    console.log(`  Cards: ${db.cards.length}`);
+    console.log(`  Chats: ${db.chats.length}`);
+    console.log(`  Admin entries: ${db.admin.length}`);
     
     return true;
   } catch (error) {
@@ -3036,8 +3066,8 @@ app.get('/api/chat/users', async (req, res) => {
       const botConversation = chats.find(c => c.id === botChatId);
       
       // Get unread count for admin chat
-      const adminChatId = [currentUser, admin.email].sort().join('_');
-      const adminConversation = chats.find(c => c.id === adminChatId);
+      const adminChatId = admin ? [currentUser, admin.email].sort().join('_') : null;
+      const adminConversation = adminChatId ? chats.find(c => c.id === adminChatId) : null;
       
       let botUnreadCount = 0;
       let botLastMessage = '';
@@ -3079,7 +3109,7 @@ app.get('/api/chat/users', async (req, res) => {
         unreadCount: botUnreadCount
       };
       
-      const adminUser = {
+      const adminUser = admin ? {
         id: 'admin',
         phone: admin.phone,
         email: admin.email,
@@ -3090,10 +3120,12 @@ app.get('/api/chat/users', async (req, res) => {
         lastMessage: adminLastMessage,
         lastMessageTime: adminLastMessageTime,
         unreadCount: adminUnreadCount
-      };
+      } : null;
       
       // Return bot first, then admin
-      return res.json([botUser, adminUser]);
+      const result = [botUser];
+      if (adminUser) result.push(adminUser);
+      return res.json(result);
     }
     
     // For admin, show all active users with bot also included
@@ -3366,7 +3398,7 @@ app.get('/api/admin/stats', async (req, res) => {
     const todayReg = users.filter(u => new Date(u.createdAt).toDateString() === today).length;
     
     const unreadMessages = chats.reduce((sum, chat) => {
-      return sum + chat.messages.filter(m => !m.read).length;
+      return sum + (chat.messages ? chat.messages.filter(m => !m.read).length : 0);
     }, 0);
 
     res.json({
@@ -3390,8 +3422,8 @@ app.get('/api/admin/stats', async (req, res) => {
 app.get('/api/telegram/status', (req, res) => {
   res.json({
     enabled: telegramEnabled,
-    token: TELEGRAM_BOT_TOKEN ? '✅ Configured' : '❌ Not configured',
-    chatId: TELEGRAM_CHAT_ID ? '✅ Configured' : '❌ Not configured',
+    token: (TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== 'YOUR_TELEGRAM_BOT_TOKEN_HERE') ? '✅ Configured' : '❌ Not configured',
+    chatId: (TELEGRAM_CHAT_ID && TELEGRAM_CHAT_ID !== 'YOUR_TELEGRAM_CHAT_ID_HERE') ? '✅ Configured' : '❌ Not configured',
     status: telegramEnabled ? 'online' : 'offline'
   });
 });
@@ -3436,6 +3468,7 @@ app.get('/test', (req, res) => {
     message: 'Delux Euro Wallet API with Bot Buttons, Telegram and Socket.IO is running',
     bot: adminBot.connected ? 'active' : 'inactive',
     telegram: telegramEnabled ? 'active' : 'inactive',
+    database: 'single JSONBin',
     timestamp: new Date().toISOString()
   });
 });
@@ -3455,7 +3488,7 @@ async function initializeServer() {
   await adminBot.initialize();
   
   if (connectionSuccess) {
-    console.log('\n✅ Server is ready and connected to JSONBin');
+    console.log('\n✅ Server is ready and connected to JSONBin (single bin)');
     console.log('\n📱 Available Endpoints:');
     console.log('   ┌─────────────────────────────────────┐');
     console.log('   │ AUTHENTICATION                       │');
@@ -3582,9 +3615,13 @@ async function initializeServer() {
     console.log('\n🤖 Telegram Bot:');
     console.log(`   • Status: ${telegramEnabled ? '✅ Active' : '❌ Not configured'}`);
     if (telegramEnabled) {
-      console.log(`   • Token: ${TELEGRAM_BOT_TOKEN ? '✅ Set' : '❌ Missing'}`);
-      console.log(`   • Chat ID: ${TELEGRAM_CHAT_ID ? '✅ Set' : '❌ Missing (send /start to bot to get it)'}`);
+      console.log(`   • Token: ${(TELEGRAM_BOT_TOKEN && TELEGRAM_BOT_TOKEN !== 'YOUR_TELEGRAM_BOT_TOKEN_HERE') ? '✅ Set' : '❌ Missing'}`);
+      console.log(`   • Chat ID: ${(TELEGRAM_CHAT_ID && TELEGRAM_CHAT_ID !== 'YOUR_TELEGRAM_CHAT_ID_HERE') ? '✅ Set' : '❌ Missing (send /start to bot to get it)'}`);
     }
+    
+    console.log('\n💾 Database: Single JSONBin');
+    console.log(`   • Bin ID: ${MAIN_BIN_ID}`);
+    console.log(`   • URL: ${MAIN_URL}`);
     
     console.log('\n🚀 Server is running and ready to accept connections!');
     console.log(`🔗 URL: http://localhost:${PORT}`);
@@ -3592,7 +3629,7 @@ async function initializeServer() {
     console.log(`🤖 Bot with Buttons: Active`);
     console.log(`📱 Telegram Integration: ${telegramEnabled ? 'Active' : 'Inactive'}\n`);
   } else {
-    console.log('\n❌ JSONBin connection failed. Please check your API key and bin IDs.');
+    console.log('\n❌ JSONBin connection failed. Please check your API key and bin ID.');
     console.log('❌ The server will start but may not function correctly.\n');
   }
 }
@@ -3605,6 +3642,7 @@ server.listen(PORT, async () => {
   console.log(`   Server URL: http://localhost:${PORT}`);
   console.log(`   WebSocket: ws://localhost:${PORT}`);
   console.log(`   Bot Interface: Buttons & Commands`);
+  console.log(`   Database: Single JSONBin`);
   console.log(`${'='.repeat(50)}\n`);
   
   await initializeServer();
